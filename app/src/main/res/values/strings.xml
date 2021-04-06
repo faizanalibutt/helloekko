@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Ekko Tag</string>
+    <string name="notification_desc">Nfc tag successfully read.</string>
+    <string name="channel_description">channel desc is random.</string>
+    <string name="channel_name">high channel</string>
+    <string name="dialog_nfc_title">Nfc Turned Off</string>
+    <string name="dialog_nfc_desc">Please, turn on NFC to scan.</string>
+    <string name="txt_go_to_settings">go to Settings</string>
+    <string name="txt_dim_title">Dim Display</string>
+    <string name="txt_dim_desc">Please dim the display doing so increase battery life. Please go to settings for this to be happened.</string>
+    <string name="notification_desc_unses">Can\'t find anything please try again.</string>
+    <string name="dialog_phone_title">Device Info</string>
+    <string name="dialog_phone_desc">To make sure device is unique please provide this permission.</string>
+    <string name="okay">Ok</string>
+</resources>
