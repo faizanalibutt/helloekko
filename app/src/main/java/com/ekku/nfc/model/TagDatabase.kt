@@ -5,8 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.ekku.nfc.utils.AppUtils.STRING_GUID
-import com.ekku.nfc.utils.TimeUtils
+import com.ekku.nfc.util.AppUtils.STRING_GUID
+import com.ekku.nfc.util.TimeUtils
 import kotlinx.coroutines.CoroutineScope
 import timber.log.Timber
 

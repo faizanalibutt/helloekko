@@ -1,4 +1,4 @@
-package com.ekku.nfc.utils;
+package com.ekku.nfc.util;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

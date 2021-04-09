@@ -1,6 +1,6 @@
 package com.ekku.nfc.model
 
-import com.ekku.nfc.utils.Status
+import com.ekku.nfc.util.Status
 
 data class Resource<out T>(val status: Status, val data: T?, val message: String?) {
     companion object {

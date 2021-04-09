@@ -1,14 +1,9 @@
 package com.ekku.nfc.ui.activity
 
 import android.Manifest
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
-import android.nfc.NfcAdapter
 import android.nfc.NfcAdapter.ReaderCallback
 import android.nfc.Tag
 import android.os.Build
@@ -29,17 +24,20 @@ import com.ekku.nfc.model.TagAPI
 import com.ekku.nfc.model.TagDao
 import com.ekku.nfc.ui.adapter.TagListAdapter
 import com.ekku.nfc.ui.viewmodel.TAGViewModel
-import com.ekku.nfc.utils.*
-import com.ekku.nfc.utils.AppUtils.allowWritePermission
-import com.ekku.nfc.utils.AppUtils.canWrite
-import com.ekku.nfc.utils.AppUtils.createConfirmationAlert
-import com.ekku.nfc.utils.AppUtils.isOreo
-import com.ekku.nfc.utils.AppUtils.setBrightness
-import com.ekku.nfc.utils.NetworkUtils.getDeviceIMEI
-import com.ekku.nfc.utils.NfcUitls.getNfcAdapter
-import com.ekku.nfc.utils.NfcUitls.showNFCSettings
-import com.ekku.nfc.utils.NotifyUtils.playNotification
-import com.ekku.nfc.work.TagAlarmReceiver
+import com.ekku.nfc.util.*
+import com.ekku.nfc.util.AppUtils.allowWritePermission
+import com.ekku.nfc.util.AppUtils.canWrite
+import com.ekku.nfc.util.AppUtils.createConfirmationAlert
+import com.ekku.nfc.util.AppUtils.setBrightness
+import com.ekku.nfc.util.NetworkUtils.getDeviceIMEI
+import com.ekku.nfc.util.NfcUtils.addNfcCallback
+import com.ekku.nfc.util.NfcUtils.getNfcAdapter
+import com.ekku.nfc.util.NfcUtils.isNFCOnline
+import com.ekku.nfc.util.NfcUtils.removeNfcCallback
+import com.ekku.nfc.util.NfcUtils.showNFCSettings
+import com.ekku.nfc.util.NotifyUtils.playNotification
+import com.ekku.nfc.util.NotifyUtils.setIntervalWork
+import com.ekku.nfc.util.NotifyUtils.setMidNightWork
 import com.google.common.io.BaseEncoding
 import kotlinx.coroutines.*
 import timber.log.Timber
@@ -49,7 +47,6 @@ import com.ekku.nfc.model.Tag as TagEntity
 
 class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.LocationResultListener {
 
-    private var nfcAdapter: NfcAdapter? = null
     private var dialog: AlertDialog? = null
     private val tagViewMadel: TAGViewModel by viewModels {
         TAGViewModel.TagViewModelFactory((application as AppDelegate).repository)
@@ -60,7 +57,6 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        nfcAdapter = getNfcAdapter()
 
         val recyclerView = findViewById<RecyclerView>(R.id.tagListView)
         val adapter = TagListAdapter()
@@ -74,7 +70,7 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
         // tag data syncing to google sheet of every scan.
         Thread {
             while (!isFinishing) {
-                Thread.sleep(3000)
+                Thread.sleep(10000)
                 runOnUiThread {
                     syncData(tagViewMadel.allTags.value)
                 }
@@ -101,93 +97,6 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
             setIntervalWork()
         }
 
-    }
-
-    private fun setIntervalWork() {
-        val alarmIntent = Intent(this@MainActivity, TagAlarmReceiver::class.java)
-        val pendingIntent: PendingIntent? = PendingIntent.getBroadcast(
-            this@MainActivity, 0, alarmIntent, 0
-        )
-        val manager = getSystemService(ALARM_SERVICE) as AlarmManager
-
-        val firstInterval: Calendar = Calendar.getInstance().apply {
-            timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 10)
-            set(Calendar.MINUTE, 0)
-        }
-        val secondInterval: Calendar = Calendar.getInstance().apply {
-            timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 17)
-            set(Calendar.MINUTE, 0)
-        }
-        val thirdInterval: Calendar = Calendar.getInstance().apply {
-            timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 22)
-            set(Calendar.MINUTE, 0)
-        }
-        val fourInterval: Calendar = Calendar.getInstance().apply {
-            timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 5)
-            set(Calendar.MINUTE, 0)
-        }
-        var desiredInterval: Long
-        var currentInterval = System.currentTimeMillis()
-        val intervalsList = arrayOf(
-            firstInterval.timeInMillis, secondInterval.timeInMillis, thirdInterval.timeInMillis,
-            fourInterval.timeInMillis
-        )
-
-        for (interval in intervalsList) {
-            when {
-                currentInterval < interval -> {
-                    // 22:00 = 22:00 - 20:48 -> 80
-                    desiredInterval = interval - currentInterval
-                    currentInterval += desiredInterval
-                }
-                currentInterval == interval -> {
-                    desiredInterval = interval - currentInterval
-                    currentInterval += desiredInterval
-                }
-            }
-        }
-
-        manager.setRepeating(
-            AlarmManager.RTC_WAKEUP,
-            currentInterval,
-            AppUtils.ALARM_INTERVAL_TIME,
-            pendingIntent
-        )
-        Timber.d(
-            "Alarm set successfully for intervals: ${
-                TimeUtils.getFormatDateTime(
-                    currentInterval
-                )
-            }"
-        )
-    }
-
-    private fun setMidNightWork() {
-        val alarmIntent = Intent(
-            this@MainActivity, TagAlarmReceiver::class.java
-        ).setAction("MIDNIGHT")
-        val pendingIntent: PendingIntent? = PendingIntent.getBroadcast(
-            this@MainActivity, 0, alarmIntent, 0
-        )
-        val manager = getSystemService(ALARM_SERVICE) as AlarmManager
-        val calendar: Calendar = Calendar.getInstance().apply {
-            timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        manager.setInexactRepeating(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            AlarmManager.INTERVAL_DAY,
-            pendingIntent
-        )
-        Timber.d("Alarm set successfully for midnight")
     }
 
     private fun syncData(tagList: List<TagAPI>?) {
@@ -224,17 +133,8 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
 
     override fun onResume() {
         super.onResume()
-        if (nfcAdapter?.isEnabled == true) {
-            nfcAdapter?.enableReaderMode(
-                this, this,
-                NfcAdapter.FLAG_READER_NFC_A or
-                        NfcAdapter.FLAG_READER_NFC_B or
-                        NfcAdapter.FLAG_READER_NFC_F or
-                        NfcAdapter.FLAG_READER_NFC_V or
-                        NfcAdapter.FLAG_READER_NFC_BARCODE or
-                        NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS, null
-            )
-
+        if (isNFCOnline()) {
+            addNfcCallback(this, this)
             if (!canWrite) {
                 dialog = createConfirmationAlert(
                     getString(R.string.txt_dim_title),
@@ -249,21 +149,17 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
                                 allowWritePermission()
                         }
                     })
-
                 if (!isFinishing)
                     dialog?.show()
             } else {
                 setBrightness(
-                    -1F,
-                    20,
-                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
-                    this@MainActivity
+                    -1F, 20,
+                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, this@MainActivity
                 )
                 if (!preventDialogs) {
                     preventDialogs = true
                     if (ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
+                            this, Manifest.permission.ACCESS_COARSE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED && AppUtils.isAPI23
                     ) {
                         currentLocation?.getLocation(this)
@@ -288,7 +184,7 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
                 }
             }
         } else
-            nfcAdapter?.let {
+            getNfcAdapter()?.let {
                 val isShowing = dialog?.isShowing ?: false
                 if (isShowing)
                     return
@@ -312,7 +208,7 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
 
     override fun onPause() {
         super.onPause()
-        nfcAdapter?.disableReaderMode(this)
+        removeNfcCallback(this@MainActivity)
     }
 
     override fun onTagDiscovered(tag: Tag?) {
@@ -341,36 +237,26 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
                             Status.SUCCESS -> {
                                 resource.data?.let {
                                     Timber.d("tag data uploaded successfully ${tagEntity.tag_sync}")
-                                    tagViewMadel.insert(
-                                        tagEntity
-                                    )
+                                    tagViewMadel.insert(tagEntity)
                                 }
                             }
                             Status.ERROR -> {
                                 tagEntity.tag_sync = 0
                                 Timber.d("tag data not uploaded. ${tagEntity.tag_sync}")
-                                tagViewMadel.insert(
-                                    tagEntity
-                                )
+                                tagViewMadel.insert(tagEntity)
                             }
                             Status.LOADING -> {
-
                             }
                         }
-
                     }
                 })
             }
             playNotification(
-                getString(R.string.notification_desc),
-                AppUtils.NOTIFICATION_ID,
-                "loved_it"
+                getString(R.string.notification_desc), AppUtils.NOTIFICATION_ID, "loved_it"
             )
         } else
             playNotification(
-                getString(R.string.notification_desc_unses),
-                AppUtils.NOTIFICATION_ID,
-                "loved_it"
+                getString(R.string.notification_desc_unses), AppUtils.NOTIFICATION_ID, "loved_it"
             )
     }
 
@@ -378,10 +264,8 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
         super.onDestroy()
         if (canWrite)
             setBrightness(
-                .0F,
-                0,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC,
-                this@MainActivity
+                .0F, 0,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, this@MainActivity
             )
     }
 

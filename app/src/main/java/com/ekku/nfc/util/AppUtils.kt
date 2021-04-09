@@ -1,15 +1,13 @@
-package com.ekku.nfc.utils
+package com.ekku.nfc.util
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AlertDialog
-import java.util.*
 
 object AppUtils {
 
@@ -102,6 +100,10 @@ object AppUtils {
         val lp = window.attributes
         lp.screenBrightness = level
         window.attributes = lp
+    }
+
+    inline fun <reified T : Activity> Context.startActivity(block: Intent.() -> Unit = {}) {
+        startActivity(Intent(this, T::class.java).apply(block))
     }
 
 }

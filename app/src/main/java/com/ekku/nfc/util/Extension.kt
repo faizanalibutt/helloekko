@@ -1,4 +1,4 @@
-package com.ekku.nfc.utils
+package com.ekku.nfc.util
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE

@@ -12,4 +12,7 @@
     <string name="dialog_phone_title">Device Info</string>
     <string name="dialog_phone_desc">To make sure device is unique please provide this permission.</string>
     <string name="okay">Ok</string>
+    <string name="text_app_select">Select App Type</string>
+    <string name="text_consumer">Consumer</string>
+    <string name="text_restaurant">Restaurant</string>
 </resources>

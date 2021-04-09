@@ -1,7 +1,7 @@
 package com.ekku.nfc.model
 
 import androidx.annotation.WorkerThread
-import com.ekku.nfc.utils.TimeUtils
+import com.ekku.nfc.util.TimeUtils
 import kotlinx.coroutines.flow.Flow
 
 class TagRepository(private val tagDao: TagDao) {
