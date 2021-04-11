@@ -24,5 +24,8 @@ data class TagAPI(
     val tag_phone_uid: String,
     @Expose
     @SerializedName("tag_sync")
-    var tag_sync: Int
+    var tag_sync: Int,
+    @Expose
+    @SerializedName("tag_order_id")
+    val tag_orderId: String
 ) : Parcelable

@@ -15,4 +15,12 @@
     <string name="text_app_select">Select App Type</string>
     <string name="text_consumer">Consumer</string>
     <string name="text_restaurant">Restaurant</string>
+    <string name="text_order">Order Number</string>
+    <string name="text_hint_customer_order_number">Customer Order Number</string>
+    <string name="text_customer_order_default">Enter Customer Order #</string>
+    <string name="text_scan">scan</string>
+    <string name="text_no_of_containers">Number of Containers</string>
+    <string name="text_clear_containers">CLEAR CONTAINERS</string>
+    <string name="text_submit">submit</string>
+    <string name="text_edit_customer_order">Tap to edit Customer order #</string>
 </resources>

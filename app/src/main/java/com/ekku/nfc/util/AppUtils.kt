@@ -48,10 +48,10 @@ object AppUtils {
             .setMessage(message)
             .setCancelable(true)
             .setNegativeButton(left) { dialogInterface, _ ->
-                listener?.onClick(dialogInterface, AlertButtonListener.ButtonType.LEFT)
+                listener?.onClick(dialogInterface, ButtonType.LEFT)
             }
             .setPositiveButton(right) { dialogInterface, _ ->
-                listener?.onClick(dialogInterface, AlertButtonListener.ButtonType.RIGHT)
+                listener?.onClick(dialogInterface, ButtonType.RIGHT)
             }.create()
     }
 

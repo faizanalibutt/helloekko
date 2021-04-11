@@ -15,7 +15,8 @@ interface ApiService {
         @Field("entry.709515950") tag_uid: String,
         @Field("entry.1816688302") time: String,
         @Field("entry.487588514") phone_uid: String,
-        @Field("entry.94249200") sync: String
+        @Field("entry.94249200") sync: String,
+        @Field("entry.225872179") orderId: String
     ) : String
 
     @POST(UPLOAD_MIDNIGHT)
@@ -25,7 +26,8 @@ interface ApiService {
         @Field("entry.2000132953") tag_uid: String,
         @Field("entry.650306471") time: String,
         @Field("entry.993409874") phone_uid: String,
-        @Field("entry.521009648") sync: String
+        @Field("entry.521009648") sync: String,
+        @Field("entry.392715999") orderId: String
     ) : Call<String>
 
     @POST(UPLOAD_DEVICE)

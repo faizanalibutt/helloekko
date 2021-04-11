@@ -35,7 +35,8 @@ class TAGViewModel(private val tagRepository: TagRepository) : ViewModel() {
                         tagData.tag_uid,
                         tagData.tag_date_time,
                         tagData.tag_phone_uid,
-                        tagData.tag_sync.toString()
+                        tagData.tag_sync.toString(),
+                        tagData.tag_orderId
                     )
                 )
             )

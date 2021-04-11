@@ -6,10 +6,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TagDao {
 
-    @Query("SELECT id, tag_uid, tag_date_time, tag_phone_uid, tag_sync FROM tag_table ORDER BY Id ASC")
+    @Query("SELECT id, tag_uid, tag_date_time, tag_phone_uid, tag_sync, tag_orderId FROM tag_table ORDER BY id ASC")
     fun getTagList(): Flow<List<TagAPI>>
 
-    @Query("SELECT id, tag_uid, tag_date_time, tag_phone_uid, tag_sync FROM tag_table where tag_date = :endDate ORDER BY Id ASC")
+    @Query("SELECT id, tag_uid, tag_date_time, tag_phone_uid, tag_sync, tag_orderId FROM tag_table where tag_date = :endDate ORDER BY id ASC")
     fun getTodayTagList(endDate: String): Flow<List<TagAPI>>
 
     @Insert(onConflict = OnConflictStrategy.ABORT)

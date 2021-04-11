@@ -12,5 +12,6 @@ data class Tag(
     val tag_date: String,
     val tag_date_time: String,
     val tag_phone_uid: String,
-    var tag_sync: Int
+    var tag_sync: Int,
+    var tag_orderId: String = "random_order_id"
 )

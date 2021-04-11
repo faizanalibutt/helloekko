@@ -143,9 +143,9 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
                     listener = object : AlertButtonListener {
                         override fun onClick(
                             dialog: DialogInterface,
-                            type: AlertButtonListener.ButtonType
+                            type: ButtonType
                         ) {
-                            if (type == AlertButtonListener.ButtonType.RIGHT)
+                            if (type == ButtonType.RIGHT)
                                 allowWritePermission()
                         }
                     })
@@ -194,9 +194,9 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
                     right = getString(R.string.txt_go_to_settings),
                     listener = object : AlertButtonListener {
                         override fun onClick(
-                            dialog: DialogInterface, type: AlertButtonListener.ButtonType
+                            dialog: DialogInterface, type: ButtonType
                         ) {
-                            if (type == AlertButtonListener.ButtonType.RIGHT)
+                            if (type == ButtonType.RIGHT)
                                 showNFCSettings()
                         }
                     })
@@ -220,6 +220,7 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
                     tag_date_time = TimeUtils.getFormatDateTime(TimeUtils.getToday()),
                     tag_phone_uid = AppUtils.STRING_GUID,
                     tag_sync = 1,
+                    tag_orderId = ""
                 )
                 val tagEntity = TagEntity(
                     tag_uid = BaseEncoding.base16().encode(tag.id),
@@ -228,6 +229,7 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
                     tag_date_time = TimeUtils.getFormatDateTime(TimeUtils.getToday()),
                     tag_phone_uid = AppUtils.STRING_GUID,
                     tag_sync = 1,
+                    tag_orderId = ""
                 )
                 tagViewMadel.postTag(
                     tagAPI
@@ -308,9 +310,9 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
                 right = getString(R.string.okay),
                 listener = object : AlertButtonListener {
                     override fun onClick(
-                        dialog: DialogInterface, type: AlertButtonListener.ButtonType
+                        dialog: DialogInterface, type: ButtonType
                     ) {
-                        if (type == AlertButtonListener.ButtonType.RIGHT)
+                        if (type == ButtonType.RIGHT)
                             ActivityCompat.requestPermissions(
                                 this@MainActivity, arrayOf(
                                     Manifest.permission.ACCESS_COARSE_LOCATION,

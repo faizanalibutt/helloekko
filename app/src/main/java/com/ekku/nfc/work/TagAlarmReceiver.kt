@@ -55,7 +55,8 @@ class TagAlarmReceiver : BroadcastReceiver() {
                             tagData.tag_uid,
                             tagData.tag_date_time,
                             tagData.tag_phone_uid,
-                            tagData.tag_sync.toString()
+                            tagData.tag_sync.toString(),
+                            tagData.tag_orderId
                         ).enqueue(object : Callback<String> {
                             override fun onFailure(call: Call<String>?, t: Throwable?) {
                                 Timber.d("Sending daily logs failed")
