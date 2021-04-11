@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.media.MediaPlayer
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +18,7 @@ import com.ekku.nfc.R
 import com.ekku.nfc.work.TagAlarmReceiver
 import timber.log.Timber
 import java.util.*
+
 
 object NotifyUtils {
     // custom sound provided by client.
@@ -48,7 +51,7 @@ object NotifyUtils {
                 .setContentText(tagDesc)
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-        else
+        else {
             notificationBuilder = NotificationCompat.Builder(this, channelName)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(getString(R.string.app_name))
@@ -57,6 +60,8 @@ object NotifyUtils {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setLights(Color.GREEN, 1000, 500)
                 .setVibrate(longArrayOf(0, 500))
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+        }
         val notificationManager: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         createNotificationChannel(notificationManager, channelName)
@@ -66,7 +71,10 @@ object NotifyUtils {
     }
 
     // create notification channel for oreo and above to give importance to notification.
-    private fun Context.createNotificationChannel(notificationManager: NotificationManager, channelName: String) {
+    private fun Context.createNotificationChannel(
+        notificationManager: NotificationManager,
+        channelName: String
+    ) {
         if (AppUtils.isOreo) {
             val name = getString(R.string.channel_name)
             val descriptionText = getString(R.string.channel_description)

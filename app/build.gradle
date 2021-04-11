@@ -81,7 +81,7 @@ dependencies {
 
     // Timber log library
     implementation 'com.jakewharton.timber:timber:4.7.1'
-    implementation "com.google.guava:guava:24.1-jre"
+    implementation "com.google.guava:guava:29.0-jre"
 
     // Analytics
     implementation platform('com.google.firebase:firebase-bom:26.8.0')
@@ -94,5 +94,6 @@ dependencies {
     // Work Manger
     //def work_version = "2.5.0"
     //implementation "androidx.work:work-runtime-ktx:$work_version"
+
 
 }

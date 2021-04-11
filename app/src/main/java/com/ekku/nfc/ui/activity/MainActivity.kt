@@ -39,6 +39,7 @@ import com.ekku.nfc.util.NotifyUtils.playNotification
 import com.ekku.nfc.util.NotifyUtils.setIntervalWork
 import com.ekku.nfc.util.NotifyUtils.setMidNightWork
 import com.google.common.io.BaseEncoding
+
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.util.*

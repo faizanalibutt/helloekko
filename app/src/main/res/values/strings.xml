@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Ekko Tag</string>
     <string name="notification_desc">Nfc tag successfully read.</string>
     <string name="channel_description">channel desc is random.</string>
@@ -20,7 +20,7 @@
     <string name="text_customer_order_default">Enter Customer Order #</string>
     <string name="text_scan">scan</string>
     <string name="text_no_of_containers">Number of Containers</string>
-    <string name="text_clear_containers">CLEAR CONTAINERS</string>
+    <string name="text_clear_containers" tools:ignore="ButtonCase">CANCEL</string>
     <string name="text_submit">submit</string>
     <string name="text_edit_customer_order">Tap to edit Customer order #</string>
 </resources>

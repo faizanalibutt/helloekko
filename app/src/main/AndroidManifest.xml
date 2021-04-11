@@ -17,6 +17,7 @@
     <uses-feature
         android:name="android.hardware.nfc"
         android:required="false" />
+    <uses-feature android:name="android.hardware.camera.any" />
 
     <application
         android:name=".AppDelegate"
@@ -27,6 +28,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EkkoTag.NoBar"
         tools:ignore="AllowBackup">
+
         <activity android:name=".ui.activity.ConsumerActivity"
             android:windowSoftInputMode="adjustPan">
         </activity>
@@ -87,6 +89,7 @@
             android:name=".work.TagAlarmReceiver"
             android:enabled="true"
             android:exported="false" />
+
     </application>
 
 </manifest>

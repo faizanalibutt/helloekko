@@ -29,7 +29,7 @@ object AppUtils {
     val Context.canWrite: Boolean
         get() {
             return if (
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                isAPI23
             ) Settings.System.canWrite(this) else true
         }
 
@@ -57,7 +57,7 @@ object AppUtils {
 
     // Allow write system settings
     fun Context.allowWritePermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (isAPI23) {
             val intent = Intent(
                 Settings.ACTION_MANAGE_WRITE_SETTINGS,
                 Uri.parse("package:$packageName")

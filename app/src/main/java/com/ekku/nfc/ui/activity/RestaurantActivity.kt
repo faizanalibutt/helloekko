@@ -1,8 +1,11 @@
 package com.ekku.nfc.ui.activity
 
 import android.Manifest
+import android.content.Context
 import android.content.DialogInterface
 import android.content.pm.PackageManager
+import android.hardware.Camera
+import android.hardware.camera2.CameraManager
 import android.location.Location
 import android.nfc.NfcAdapter
 import android.nfc.Tag
@@ -14,6 +17,7 @@ import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -29,6 +33,7 @@ import com.ekku.nfc.util.*
 import com.ekku.nfc.util.AppUtils.allowWritePermission
 import com.ekku.nfc.util.AppUtils.canWrite
 import com.ekku.nfc.util.AppUtils.createConfirmationAlert
+import com.ekku.nfc.util.AppUtils.isAPI23
 import com.ekku.nfc.util.AppUtils.setBrightness
 import com.ekku.nfc.util.NetworkUtils.getDeviceIMEI
 import com.ekku.nfc.util.NfcUtils.addNfcCallback
@@ -43,6 +48,7 @@ import com.google.common.io.BaseEncoding
 import timber.log.Timber
 import com.ekku.nfc.model.Tag as TagEntity
 
+
 class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
     CurrentLocation.LocationResultListener {
 
@@ -54,9 +60,13 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
     private val tagViewMadel: TAGViewModel by viewModels {
         TAGViewModel.TagViewModelFactory((application as AppDelegate).repository)
     }
-    private lateinit var nfcTagScanListLocal: MutableList<TagEntity>
-    private lateinit var nfcTagScanList: MutableList<TagAPI>
+    private lateinit var nfcTagScanList: MutableList<TagEntity>
     val TAG_SYNC_TIME = 1000 * 5L
+
+    /**
+     * check no duplication happened tags must be unique.
+     * */
+    private var isIdAvailable = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,6 +103,13 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
         }
 
         restaurantBinding.btnScan.setOnClickListener {
+            if (restaurantBinding.orderField.text.isEmpty()) {
+                Toast.makeText(
+                    this@RestaurantActivity,
+                    "Please enter order number first.", Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
             scanBtnClicked = true
             hideSystemKeyboard(this@RestaurantActivity)
             restaurantBinding.orderField.clearFocus()
@@ -102,9 +119,8 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
             // initialize list for scans against orderID
             // enable NFC scanning
             setUpNfc()
-            //setUpTorch(true)
+            setUpTorch(true)
             nfcTagScanList = mutableListOf()
-            nfcTagScanListLocal = mutableListOf()
         }
 
         restaurantBinding.clearContainers.setOnClickListener {
@@ -114,6 +130,13 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
 
         restaurantBinding.btnSubmit.setOnClickListener {
             // user is ready to upload data to server and save in local db.
+            if (restaurantBinding.containersNumber.text.isEmpty()) {
+                Toast.makeText(
+                    this@RestaurantActivity,
+                    "Please first scan container.", Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
             submitTagData()
             reset()
         }
@@ -138,7 +161,6 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
                 */
             }
         })
-
     }
 
     override fun onResume() {
@@ -170,7 +192,8 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
         if (grantResults[2] == PackageManager.PERMISSION_GRANTED) {
             AppUtils.STRING_GUID = getDeviceIMEI()
         }
-        if (grantResults[2] == PackageManager.PERMISSION_DENIED) {
+        if (grantResults[2] == PackageManager.PERMISSION_DENIED
+        ) {
             // its compulsory for uniqueness of a device. must grant it.
             // show dialog to the user.
             showDialog(
@@ -181,10 +204,6 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
         }
     }
 
-    /**
-     * check no duplication happened tags must be unique.
-     * */
-    private var checkUniqueId = "random_uid"
     override fun onTagDiscovered(tag: Tag?) {
         if (tag != null) {
             Timber.d("Tag Id is: ${BaseEncoding.base16().encode(tag.id)}")
@@ -198,13 +217,24 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
                     tag_sync = 1,
                     tag_orderId = restaurantBinding.orderField.text.toString()
                 )
-                if (tagEntity.tag_uid != checkUniqueId) {
-                    checkUniqueId = tagEntity.tag_uid
-                    nfcTagScanListLocal.add(tagEntity)
-                    //nfcTagScanList.add(tagAPI)
-                    restaurantBinding.containersNumber.text = nfcTagScanListLocal.size.toString()
+                if (nfcTagScanList.isNotEmpty()) {
+                    for (checkId in nfcTagScanList) {
+                        if (checkId.tag_uid == tagEntity.tag_uid) {
+                            isIdAvailable = false
+                            break
+                        } else
+                            isIdAvailable = true
+                    }
+                }
+                if (isIdAvailable) {
+                    nfcTagScanList.add(tagEntity)
+                    restaurantBinding.containersNumber.text = nfcTagScanList.size.toString()
                 }
             }
+            setUpTorch(false)
+            Handler(Looper.getMainLooper()).postDelayed({
+                setUpTorch(true)
+            }, 700)
             playNotification(
                 getString(R.string.notification_desc), AppUtils.NOTIFICATION_ID, "loved_it"
             )
@@ -237,8 +267,7 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
         // remove list created for scans against orderID
         // disable nfc scanning
         nfcTagScanList.clear()
-        nfcTagScanListLocal.clear()
-        //setUpTorch(false)
+        setUpTorch(false)
         removeNfcCallback(this@RestaurantActivity)
         scanBtnClicked = false
     }
@@ -282,6 +311,45 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
             }
     }
 
+    private fun setUpTorch(torchSwitch: Boolean) {
+        val camera: Camera
+        val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+            if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+                try {
+                    if (isAPI23)
+                        cameraManager.setTorchMode("0", torchSwitch)
+                    else {
+                        if (torchSwitch){
+                            camera = Camera.open()
+                            val parameters = camera.parameters
+                            parameters.flashMode = Camera.Parameters.FLASH_MODE_TORCH
+                            camera.parameters = parameters
+                            camera.startPreview()
+                        } else {
+                            camera = Camera.open()
+                            val parameters = camera.parameters
+                            parameters.flashMode = Camera.Parameters.FLASH_MODE_OFF
+                            camera.parameters = parameters
+                            camera.stopPreview()
+                            camera.release()
+                        }
+                    }
+                } catch (ignored: Exception) {}
+            } else {
+                Toast.makeText(
+                    this,
+                    "This device has no flash", Toast.LENGTH_SHORT
+                ).show()
+            }
+        } else {
+            Toast.makeText(
+                this,
+                "This device has no camera", Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     private fun syncData(tagList: List<TagAPI>?) {
         tagList?.let {
             if (it.isEmpty())
@@ -315,7 +383,7 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
     }
 
     private fun submitTagData() {
-        for (tag in nfcTagScanListLocal) {
+        for (tag in nfcTagScanList) {
             val tagAPI = TagAPI(
                 tag_uid = tag.tag_uid,
                 tag_date_time = tag.tag_date_time,
@@ -339,7 +407,8 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
                             Timber.d("tag data not uploaded. ${tag.tag_sync}")
                             tagViewMadel.insert(tag)
                         }
-                        Status.LOADING -> {}
+                        Status.LOADING -> {
+                        }
                     }
                 }
             })
@@ -378,7 +447,8 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
             this, arrayOf(
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.CAMERA
             ), 1001
         )
     }
