@@ -40,7 +40,7 @@ class TagAlarmReceiver : BroadcastReceiver() {
                 context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             // Deliver the notification.
-            context.playNotification("Daily Logs", 1004, "logs_channel")
+            //context.playNotification("Daily Logs", 1004, "logs_channel")
 
             // call database object here.
             GlobalScope.launch {
@@ -67,7 +67,7 @@ class TagAlarmReceiver : BroadcastReceiver() {
                 }
             }
         } else {
-            context?.playNotification("Device Logs", 1005, "device_channel")
+            //context?.playNotification("Device Logs", 1005, "device_channel")
             Timber.d("I'm sending logs to DeviceSheet.")
             val currentTime = TimeUtils.getFormatDateTime(System.currentTimeMillis())
             val appUid = context?.getDeviceIMEI()

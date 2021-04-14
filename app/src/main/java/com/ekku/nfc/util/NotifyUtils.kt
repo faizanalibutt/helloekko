@@ -133,6 +133,7 @@ object NotifyUtils {
                     // 22:00 = 22:00 - 20:48 -> 80
                     desiredInterval = interval - currentInterval
                     currentInterval += desiredInterval
+                    break
                 }
                 currentInterval == interval -> {
                     desiredInterval = interval - currentInterval

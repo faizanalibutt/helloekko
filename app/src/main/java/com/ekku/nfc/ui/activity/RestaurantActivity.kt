@@ -44,6 +44,7 @@ import com.ekku.nfc.util.NfcUtils.showNFCSettings
 import com.ekku.nfc.util.NotifyUtils.playNotification
 import com.ekku.nfc.util.NotifyUtils.setIntervalWork
 import com.ekku.nfc.util.NotifyUtils.setMidNightWork
+import com.google.android.material.snackbar.Snackbar
 import com.google.common.io.BaseEncoding
 import timber.log.Timber
 import com.ekku.nfc.model.Tag as TagEntity
@@ -270,6 +271,7 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
         setUpTorch(false)
         removeNfcCallback(this@RestaurantActivity)
         scanBtnClicked = false
+        isIdAvailable = true
     }
 
     private fun setUpNfc() {
@@ -290,7 +292,7 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
                     preventDialogs = true
                     if (ContextCompat.checkSelfPermission(
                             this, Manifest.permission.ACCESS_COARSE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED && AppUtils.isAPI23
+                        ) == PackageManager.PERMISSION_GRANTED && isAPI23
                     ) {
                         currentLocation?.getLocation(this)
                         askForPermission()
@@ -311,8 +313,8 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
             }
     }
 
+    private var camera: Camera? = null
     private fun setUpTorch(torchSwitch: Boolean) {
-        val camera: Camera
         val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
@@ -320,33 +322,31 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
                     if (isAPI23)
                         cameraManager.setTorchMode("0", torchSwitch)
                     else {
-                        if (torchSwitch){
+                        if (camera == null) {
                             camera = Camera.open()
-                            val parameters = camera.parameters
-                            parameters.flashMode = Camera.Parameters.FLASH_MODE_TORCH
-                            camera.parameters = parameters
-                            camera.startPreview()
+                        }
+                        if (torchSwitch) {
+                            val parameters = camera?.parameters
+                            parameters?.flashMode = Camera.Parameters.FLASH_MODE_TORCH
+                            camera?.parameters = parameters
+                            camera?.startPreview()
                         } else {
-                            camera = Camera.open()
-                            val parameters = camera.parameters
-                            parameters.flashMode = Camera.Parameters.FLASH_MODE_OFF
-                            camera.parameters = parameters
-                            camera.stopPreview()
-                            camera.release()
+                            val parameters = camera?.parameters
+                            parameters?.flashMode = Camera.Parameters.FLASH_MODE_OFF
+                            camera?.parameters = parameters
+                            camera?.stopPreview()
+                            camera?.release()
+                            camera = null
                         }
                     }
-                } catch (ignored: Exception) {}
+                } catch (ignored: Exception) {
+                    Timber.d("flash got error: ${ignored.message}")
+                }
             } else {
-                Toast.makeText(
-                    this,
-                    "This device has no flash", Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this, "This device has no flash", Toast.LENGTH_SHORT).show()
             }
         } else {
-            Toast.makeText(
-                this,
-                "This device has no camera", Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "This device has no camera", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -413,6 +413,11 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
                 }
             })
         }
+        Snackbar.make(
+            restaurantBinding.root,
+            "Order and containers submitted!",
+            Snackbar.LENGTH_LONG
+        ).show()
     }
 
     private fun showDialog(
@@ -447,8 +452,7 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
             this, arrayOf(
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.CAMERA
+                Manifest.permission.READ_PHONE_STATE
             ), 1001
         )
     }
