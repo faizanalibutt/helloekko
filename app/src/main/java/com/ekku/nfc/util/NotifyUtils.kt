@@ -102,22 +102,22 @@ object NotifyUtils {
 
         val firstInterval: Calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 10)
+            set(Calendar.HOUR_OF_DAY, 5)
             set(Calendar.MINUTE, 0)
         }
         val secondInterval: Calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 17)
+            set(Calendar.HOUR_OF_DAY, 10)
             set(Calendar.MINUTE, 0)
         }
         val thirdInterval: Calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 22)
+            set(Calendar.HOUR_OF_DAY, 17)
             set(Calendar.MINUTE, 0)
         }
         val fourInterval: Calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 5)
+            set(Calendar.HOUR_OF_DAY, 22)
             set(Calendar.MINUTE, 0)
         }
         var desiredInterval: Long

@@ -12,7 +12,7 @@ import androidx.appcompat.app.AlertDialog
 object AppUtils {
 
     const val TAG_ALARM_KEY: String = "tag_alarm_key"
-    const val ALARM_INTERVAL_TIME = 1000 * 60 * 60 * 5L
+    const val ALARM_INTERVAL_TIME = 1000 * 60 * 60 * 7L
 
     // guid to separate app instance.
     var STRING_GUID = ""

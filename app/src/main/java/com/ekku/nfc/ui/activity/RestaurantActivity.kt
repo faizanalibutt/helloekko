@@ -371,7 +371,7 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
                                     )
                                 }
                                 Status.ERROR -> {
-                                    Timber.d("data is not synced as expected")
+                                    Timber.d("data is not synced as expected ${resource.message}")
                                 }
                                 Status.LOADING -> {
                                 }

@@ -11,38 +11,38 @@ interface ApiService {
     @POST(UPLOAD)
     @FormUrlEncoded
     suspend fun addTagData(
-        @Field("entry.1034948794") id: String,
-        @Field("entry.709515950") tag_uid: String,
-        @Field("entry.1816688302") time: String,
-        @Field("entry.487588514") phone_uid: String,
-        @Field("entry.94249200") sync: String,
-        @Field("entry.225872179") orderId: String
+        @Field("entry.84444851") id: String,
+        @Field("entry.2070776725") tag_uid: String,
+        @Field("entry.645920834") time: String,
+        @Field("entry.2073481602") phone_uid: String,
+        @Field("entry.1002271193") sync: String,
+        @Field("entry.1359494710") orderId: String
     ) : String
 
     @POST(UPLOAD_MIDNIGHT)
     @FormUrlEncoded
     fun sendDailyLogs(
-        @Field("entry.2050290841") id: String,
-        @Field("entry.2000132953") tag_uid: String,
-        @Field("entry.650306471") time: String,
-        @Field("entry.993409874") phone_uid: String,
-        @Field("entry.521009648") sync: String,
-        @Field("entry.392715999") orderId: String
+        @Field("entry.595285169") id: String,
+        @Field("entry.1441080511") tag_uid: String,
+        @Field("entry.1330180435") time: String,
+        @Field("entry.1694076907") phone_uid: String,
+        @Field("entry.1227786594") sync: String,
+        @Field("entry.59441528") orderId: String
     ) : Call<String>
 
     @POST(UPLOAD_DEVICE)
     @FormUrlEncoded
     fun sendDeviceInfo(
-        @Field("entry.27789299") phone_guid: String,
-        @Field("entry.525546522") time: String?,
-        @Field("entry.1439954571") battery: String,
-        @Field("entry.1478527647") location: String,
-        @Field("entry.1687984879") network: String,
+        @Field("entry.1547847935") phone_guid: String?,
+        @Field("entry.2011914284") time: String,
+        @Field("entry.798199591") battery: String,
+        @Field("entry.780089548") location: String,
+        @Field("entry.1733715185") network: String,
     ) : Call<String>
 
     companion object {
-        const val UPLOAD = "1FAIpQLSfxztJxtyUSYWInI8s9qyLTv7PegtEhW3Hjw5VxyfzAmOmVkg/formResponse"
-        const val UPLOAD_MIDNIGHT = "1FAIpQLSfjCrPKauMMS6M9wutJ6BEEdDGMZdV0HCoohKHRmSabGaYFkw/formResponse"
-        const val UPLOAD_DEVICE = "1FAIpQLSdGd0ZqwD2OtyPNU5RPZzXV-1HJkyJVxiNk4sEUeq0Ife9zWg/formResponse"
+        const val UPLOAD = "1FAIpQLSfOisc3AeD_Zo8uUqa_7pJW1MwaGRqyLGda8jafoXzFaO3HSg/formResponse"
+        const val UPLOAD_MIDNIGHT = "1FAIpQLScFRWXUCXgswy7KTs7q1PsZ3N84wPDYjwvXq6-kfCLEWB2ESw/formResponse"
+        const val UPLOAD_DEVICE = "1FAIpQLSeoCootOf6W3knjC4scF0h-j_U0fs4gRQeBO-2235nM0Zi0AQ/formResponse"
     }
 }

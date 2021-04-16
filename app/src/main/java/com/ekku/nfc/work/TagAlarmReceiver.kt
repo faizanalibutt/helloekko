@@ -77,8 +77,8 @@ class TagAlarmReceiver : BroadcastReceiver() {
             Timber.d("time: $currentTime, uid: $appUid, battery: $batteryStatus, location: $location, carrieName: $carrierName")
             // finally call the API, make sheet first
             apiService.sendDeviceInfo(
-                currentTime,
                 appUid,
+                currentTime,
                 batteryStatus,
                 location ?: "didn't find location",
                 carrierName
