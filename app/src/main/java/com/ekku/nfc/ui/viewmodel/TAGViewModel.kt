@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 class TAGViewModel(private val tagRepository: TagRepository) : ViewModel() {
 
     val allTags: LiveData<List<TagAPI>> = tagRepository.allTags.asLiveData()
+    val syncTags: LiveData<List<TagAPI>> = tagRepository.syncTags.asLiveData()
 
     private val apiService: ApiService by lazy { ApiClient.apiClient().create(ApiService::class.java) }
 

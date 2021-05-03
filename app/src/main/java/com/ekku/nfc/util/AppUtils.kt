@@ -13,6 +13,8 @@ object AppUtils {
 
     const val TAG_ALARM_KEY: String = "tag_alarm_key"
     const val ALARM_INTERVAL_TIME = 1000 * 60 * 60 * 7L
+    const val TAG_SYNC_TIME = 1000 * 60 * 1L
+    const val CONSUMER_TIME_OUT: Long = 1000 * 60 * 60 * 5L
 
     // guid to separate app instance.
     var STRING_GUID = ""

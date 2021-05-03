@@ -62,7 +62,7 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
         TAGViewModel.TagViewModelFactory((application as AppDelegate).repository)
     }
     private lateinit var nfcTagScanList: MutableList<TagEntity>
-    val TAG_SYNC_TIME = 1000 * 5L
+
 
     /**
      * check no duplication happened tags must be unique.
@@ -75,15 +75,15 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
         val view = restaurantBinding.root
         setContentView(view)
 
-        tagViewMadel.allTags.observe(this, { tags ->
-            tags?.let { Timber.d("Tag list to be synced: $it") }
+        tagViewMadel.syncTags.observe(this, { tags ->
+            tags?.let { Timber.d("Synced Tag List: $it") }
         })
         // tag data syncing to google sheet of every scan.
         Thread {
             while (!isFinishing) {
-                Thread.sleep(TAG_SYNC_TIME)
+                Thread.sleep(AppUtils.TAG_SYNC_TIME)
                 runOnUiThread {
-                    syncData(tagViewMadel.allTags.value)
+                    syncData(tagViewMadel.syncTags.value)
                 }
             }
         }.start()

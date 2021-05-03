@@ -13,6 +13,7 @@ class TagRepository(private val tagDao: TagDao) {
     }
 
     val allTags: Flow<List<TagAPI>> = tagDao.getTagList()
+    val syncTags: Flow<List<TagAPI>> = tagDao.getSyncedTagList()
     val todayTags: Flow<List<TagAPI>> = tagDao.getTodayTagList(
         TimeUtils.getFormatDate(TimeUtils.getPreviousDay())
     )

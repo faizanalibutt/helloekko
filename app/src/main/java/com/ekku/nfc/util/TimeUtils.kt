@@ -6,7 +6,7 @@ import java.util.*
 object TimeUtils {
 
     fun getFormatDateTime(millis: Long): String {
-        return SimpleDateFormat("yyyy:M:dd:hh:mm:ss", Locale.getDefault()).format(Date(millis))
+        return SimpleDateFormat("yyyy:M:dd:HH:mm:ss", Locale.getDefault()).format(Date(millis))
     }
 
     fun getFormatDate(millis: Long): String {

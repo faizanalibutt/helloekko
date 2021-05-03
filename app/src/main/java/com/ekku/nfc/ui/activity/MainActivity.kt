@@ -1,9 +1,15 @@
 package com.ekku.nfc.ui.activity
 
 import android.Manifest
+import android.content.ComponentName
+import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.Camera
+import android.hardware.camera2.CameraManager
 import android.location.Location
+import android.media.AudioManager
 import android.nfc.NfcAdapter.ReaderCallback
 import android.nfc.Tag
 import android.os.Build
@@ -11,6 +17,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +33,7 @@ import com.ekku.nfc.model.TagDao
 import com.ekku.nfc.ui.adapter.TagListAdapter
 import com.ekku.nfc.ui.viewmodel.TAGViewModel
 import com.ekku.nfc.util.*
+import com.ekku.nfc.util.AppUtils.CONSUMER_TIME_OUT
 import com.ekku.nfc.util.AppUtils.allowWritePermission
 import com.ekku.nfc.util.AppUtils.canWrite
 import com.ekku.nfc.util.AppUtils.createConfirmationAlert
@@ -38,8 +47,8 @@ import com.ekku.nfc.util.NfcUtils.showNFCSettings
 import com.ekku.nfc.util.NotifyUtils.playNotification
 import com.ekku.nfc.util.NotifyUtils.setIntervalWork
 import com.ekku.nfc.util.NotifyUtils.setMidNightWork
+import com.ekku.nfc.work.MediaButtonEventReceiver
 import com.google.common.io.BaseEncoding
-
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.util.*
@@ -54,26 +63,50 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
     }
     private var currentLocation: CurrentLocation? = null
     private var preventDialogs = false
+    private lateinit var nfcTagScanList: MutableList<TagEntity>
+
+    /**
+     * check no duplication happened tags must be unique.
+     * */
+    private var isIdAvailable = true
+    private var isNfcStarted = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        if (getDefaultPreferences().getBoolean("HEAD_JACK_RESPONSE", false)) {
+            isNfcStarted = true
+        } else {
+            isNfcStarted = false
+            window.clearFlags(
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                        or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+                        or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                        or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            )
+        }
+
         val recyclerView = findViewById<RecyclerView>(R.id.tagListView)
         val adapter = TagListAdapter()
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
+        nfcTagScanList = mutableListOf()
 
         tagViewMadel.allTags.observe(this, { tags ->
             tags?.let { adapter.submitList(it) }
         })
 
+        tagViewMadel.syncTags.observe(this, { tags ->
+            tags?.let { Timber.d("Synced Tag List: $it") }
+        })
+
         // tag data syncing to google sheet of every scan.
         Thread {
             while (!isFinishing) {
-                Thread.sleep(10000)
+                Thread.sleep(AppUtils.TAG_SYNC_TIME)
                 runOnUiThread {
-                    syncData(tagViewMadel.allTags.value)
+                    syncData(tagViewMadel.syncTags.value)
                 }
             }
         }.start()
@@ -81,10 +114,9 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
         /**
          * save IMEI to global guid. if permission is allowed.
          */
-        if (ContextCompat
-                .checkSelfPermission(
-                    this, Manifest.permission.READ_PHONE_STATE
-                ) == PackageManager.PERMISSION_GRANTED
+        if (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.READ_PHONE_STATE
+            ) == PackageManager.PERMISSION_GRANTED
         )
             AppUtils.STRING_GUID = getDeviceIMEI()
 
@@ -98,118 +130,183 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
             setIntervalWork()
         }
 
+        (getSystemService(Context.AUDIO_SERVICE) as AudioManager).registerMediaButtonEventReceiver(
+            ComponentName(
+                packageName,
+                MediaButtonEventReceiver::class.java.name
+            )
+        )
+
     }
+
+    override fun onResume() {
+        super.onResume()
+        if(isNfcStarted) {
+            setUpTorch(true)
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                        or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+                        or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                        or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            )
+            if (isNFCOnline()) {
+                addNfcCallback(this, this)
+                if (!canWrite) {
+                    dialog = createConfirmationAlert(
+                        getString(R.string.txt_dim_title),
+                        getString(R.string.txt_dim_desc),
+                        right = getString(R.string.txt_go_to_settings),
+                        listener = object : AlertButtonListener {
+                            override fun onClick(
+                                dialog: DialogInterface,
+                                type: ButtonType
+                            ) {
+                                if (type == ButtonType.RIGHT)
+                                    allowWritePermission()
+                            }
+                        })
+                    if (!isFinishing)
+                        dialog?.show()
+                } else {
+                    setBrightness(
+                        -1F, 20,
+                        Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, this@MainActivity
+                    )
+                    if (!preventDialogs) {
+                        preventDialogs = true
+                        if (ContextCompat.checkSelfPermission(
+                                this, Manifest.permission.ACCESS_COARSE_LOCATION
+                            ) == PackageManager.PERMISSION_GRANTED && AppUtils.isAPI23
+                        ) {
+                            currentLocation?.getLocation(this)
+                            ActivityCompat.requestPermissions(
+                                this, arrayOf(
+                                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.READ_PHONE_STATE
+                                ), 1001
+                            )
+                        } else if (Build.VERSION.SDK_INT < 23) {
+                            currentLocation?.getLocation(this)
+                        } else {
+                            ActivityCompat.requestPermissions(
+                                this, arrayOf(
+                                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.READ_PHONE_STATE
+                                ), 1001
+                            )
+                        }
+                    }
+                }
+                Handler(Looper.getMainLooper()).postDelayed({
+                    setUpTorch(false)
+                    window.clearFlags(
+                        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                                or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+                                or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                                or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                    )
+                    removeNfcCallback(this@MainActivity)
+                }, CONSUMER_TIME_OUT)
+
+            } else
+                getNfcAdapter()?.let {
+                    val isShowing = dialog?.isShowing ?: false
+                    if (isShowing)
+                        return
+                    dialog = createConfirmationAlert(
+                        getString(R.string.dialog_nfc_title),
+                        getString(R.string.dialog_nfc_desc),
+                        right = getString(R.string.txt_go_to_settings),
+                        listener = object : AlertButtonListener {
+                            override fun onClick(
+                                dialog: DialogInterface, type: ButtonType
+                            ) {
+                                if (type == ButtonType.RIGHT)
+                                    showNFCSettings()
+                            }
+                        })
+
+                    if (!isFinishing)
+                        dialog?.show()
+                }
+        }
+    }
+
+    /*override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if ("ACTION_HEAD_PHONE_JACK_CLICK" == intent?.action) {
+
+        }
+    }*/
 
     private fun syncData(tagList: List<TagAPI>?) {
         tagList?.let {
             if (it.isEmpty())
                 return
             for (tag in it) {
-                if (tag.tag_sync == 0)
-                    tagViewMadel.postTag(tag).observe(this, { result ->
-                        result?.let { resource ->
-                            when (resource.status) {
-                                Status.SUCCESS -> {
-                                    Timber.d("${tag.id} tag data is synced successfully.")
-                                    // update the status
-                                    tag.tag_sync = 1
-                                    tagViewMadel.update(
-                                        tagUpdate = TagDao.TagUpdate(
-                                            tag.id,
-                                            tag.tag_sync
-                                        )
+                tagViewMadel.postTag(tag).observe(this, { result ->
+                    result?.let { resource ->
+                        when (resource.status) {
+                            Status.SUCCESS -> {
+                                Timber.d("${tag.id} tag data is synced successfully.")
+                                // update the status
+                                tag.tag_sync = 1
+                                tagViewMadel.update(
+                                    tagUpdate = TagDao.TagUpdate(
+                                        tag.id,
+                                        tag.tag_sync
                                     )
-                                }
-                                Status.ERROR -> {
-                                    Timber.d("data is not synced as expected")
-                                }
-                                Status.LOADING -> {
-                                }
+                                )
+                            }
+                            Status.ERROR -> {
+                                Timber.d("data is not synced as expected")
+                            }
+                            Status.LOADING -> {
                             }
                         }
-                    })
+                    }
+                })
             }
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (isNFCOnline()) {
-            addNfcCallback(this, this)
-            if (!canWrite) {
-                dialog = createConfirmationAlert(
-                    getString(R.string.txt_dim_title),
-                    getString(R.string.txt_dim_desc),
-                    right = getString(R.string.txt_go_to_settings),
-                    listener = object : AlertButtonListener {
-                        override fun onClick(
-                            dialog: DialogInterface,
-                            type: ButtonType
-                        ) {
-                            if (type == ButtonType.RIGHT)
-                                allowWritePermission()
+    private var camera: Camera? = null
+    private fun setUpTorch(torchSwitch: Boolean) {
+        val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+            if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+                try {
+                    if (AppUtils.isAPI23)
+                        cameraManager.setTorchMode("0", torchSwitch)
+                    else {
+                        if (camera == null) {
+                            camera = Camera.open()
                         }
-                    })
-                if (!isFinishing)
-                    dialog?.show()
-            } else {
-                setBrightness(
-                    -1F, 20,
-                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, this@MainActivity
-                )
-                if (!preventDialogs) {
-                    preventDialogs = true
-                    if (ContextCompat.checkSelfPermission(
-                            this, Manifest.permission.ACCESS_COARSE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED && AppUtils.isAPI23
-                    ) {
-                        currentLocation?.getLocation(this)
-                        ActivityCompat.requestPermissions(
-                            this, arrayOf(
-                                Manifest.permission.ACCESS_COARSE_LOCATION,
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.READ_PHONE_STATE
-                            ), 1001
-                        )
-                    } else if (Build.VERSION.SDK_INT < 23) {
-                        currentLocation?.getLocation(this)
-                    } else {
-                        ActivityCompat.requestPermissions(
-                            this, arrayOf(
-                                Manifest.permission.ACCESS_COARSE_LOCATION,
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.READ_PHONE_STATE
-                            ), 1001
-                        )
+                        if (torchSwitch) {
+                            val parameters = camera?.parameters
+                            parameters?.flashMode = Camera.Parameters.FLASH_MODE_TORCH
+                            camera?.parameters = parameters
+                            camera?.startPreview()
+                        } else {
+                            val parameters = camera?.parameters
+                            parameters?.flashMode = Camera.Parameters.FLASH_MODE_OFF
+                            camera?.parameters = parameters
+                            camera?.stopPreview()
+                            camera?.release()
+                            camera = null
+                        }
                     }
+                } catch (ignored: Exception) {
+                    Timber.d("flash got error: ${ignored.message}")
                 }
+            } else {
+                Toast.makeText(this, "This device has no flash", Toast.LENGTH_SHORT).show()
             }
-        } else
-            getNfcAdapter()?.let {
-                val isShowing = dialog?.isShowing ?: false
-                if (isShowing)
-                    return
-                dialog = createConfirmationAlert(
-                    getString(R.string.dialog_nfc_title),
-                    getString(R.string.dialog_nfc_desc),
-                    right = getString(R.string.txt_go_to_settings),
-                    listener = object : AlertButtonListener {
-                        override fun onClick(
-                            dialog: DialogInterface, type: ButtonType
-                        ) {
-                            if (type == ButtonType.RIGHT)
-                                showNFCSettings()
-                        }
-                    })
-
-                if (!isFinishing)
-                    dialog?.show()
-            }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        removeNfcCallback(this@MainActivity)
+        } else {
+            Toast.makeText(this, "This device has no camera", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onTagDiscovered(tag: Tag?) {
@@ -221,7 +318,7 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
                     tag_date_time = TimeUtils.getFormatDateTime(TimeUtils.getToday()),
                     tag_phone_uid = AppUtils.STRING_GUID,
                     tag_sync = 1,
-                    tag_orderId = ""
+                    tag_orderId = "consumer"
                 )
                 val tagEntity = TagEntity(
                     tag_uid = BaseEncoding.base16().encode(tag.id),
@@ -230,8 +327,21 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
                     tag_date_time = TimeUtils.getFormatDateTime(TimeUtils.getToday()),
                     tag_phone_uid = AppUtils.STRING_GUID,
                     tag_sync = 1,
-                    tag_orderId = ""
+                    tag_orderId = "consumer"
                 )
+                if (nfcTagScanList.isNotEmpty()) {
+                    for (checkId in nfcTagScanList) {
+                        if (checkId.tag_uid == tagEntity.tag_uid) {
+                            isIdAvailable = false
+                            break
+                        } else
+                            isIdAvailable = true
+                    }
+                }
+                if (!isIdAvailable)
+                    return@post
+
+                nfcTagScanList.add(tagEntity)
                 tagViewMadel.postTag(
                     tagAPI
                 ).observe(this, { it1 ->
@@ -254,6 +364,10 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
                     }
                 })
             }
+            setUpTorch(false)
+            Handler(Looper.getMainLooper()).postDelayed({
+                setUpTorch(true)
+            }, 700)
             playNotification(
                 getString(R.string.notification_desc), AppUtils.NOTIFICATION_ID, "loved_it"
             )
@@ -265,6 +379,7 @@ class MainActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Locati
 
     override fun onDestroy() {
         super.onDestroy()
+        setUpTorch(false)
         if (canWrite)
             setBrightness(
                 .0F, 0,

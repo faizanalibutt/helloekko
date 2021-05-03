@@ -9,6 +9,9 @@ interface TagDao {
     @Query("SELECT id, tag_uid, tag_date_time, tag_phone_uid, tag_sync, tag_orderId FROM tag_table ORDER BY id ASC")
     fun getTagList(): Flow<List<TagAPI>>
 
+    @Query("SELECT id, tag_uid, tag_date_time, tag_phone_uid, tag_sync, tag_orderId FROM tag_table where tag_sync = 0 ORDER BY id ASC LIMIT 10")
+    fun getSyncedTagList(): Flow<List<TagAPI>>
+
     @Query("SELECT id, tag_uid, tag_date_time, tag_phone_uid, tag_sync, tag_orderId FROM tag_table where tag_date = :endDate ORDER BY id ASC")
     fun getTodayTagList(endDate: String): Flow<List<TagAPI>>
 

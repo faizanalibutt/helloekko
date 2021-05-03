@@ -72,7 +72,7 @@ class TagAlarmReceiver : BroadcastReceiver() {
             val currentTime = TimeUtils.getFormatDateTime(System.currentTimeMillis())
             val appUid = context?.getDeviceIMEI()
             val batteryStatus = isConnected(context)
-            val location = context?.getDefaultPreferences()?.getString("GPS_DATA", "")
+            val location = context?.getDefaultPreferences()?.getString("GPS_DATA", "location permission not allowed")
             val carrierName = NetworkUtils.getCarrierName(context)
             Timber.d("time: $currentTime, uid: $appUid, battery: $batteryStatus, location: $location, carrieName: $carrierName")
             // finally call the API, make sheet first
@@ -80,7 +80,7 @@ class TagAlarmReceiver : BroadcastReceiver() {
                 appUid,
                 currentTime,
                 batteryStatus,
-                location ?: "didn't find location",
+                location ?: "location permission not allowed",
                 carrierName
             ).enqueue(object : Callback<String> {
                 override fun onFailure(call: Call<String>?, t: Throwable?) {

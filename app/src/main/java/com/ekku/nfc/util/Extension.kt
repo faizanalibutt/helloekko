@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 
 
 const val TAG_PREF = "tag_prefs"
@@ -19,4 +20,8 @@ fun Context.hideSystemKeyboard(activity: Activity?) {
     inputManager?.hideSoftInputFromWindow(
         activity?.currentFocus?.windowToken, InputMethodManager.HIDE_NOT_ALWAYS
     )
+}
+
+fun Context.myToast(message: String) {
+    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 }

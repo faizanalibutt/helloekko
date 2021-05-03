@@ -27,7 +27,7 @@ class TagBootReceiver : BroadcastReceiver() {
                 Intent(
                     context, when (context.getDefaultPreferences().getInt("APP_TYPE", -1)) {
                         0 -> RestaurantActivity::class.java
-                        1 -> ConsumerActivity::class.java
+                        1 -> MainActivity::class.java
                         else -> WelcomeActivity::class.java
                     }
                 ).addFlags(FLAG_ACTIVITY_NEW_TASK)

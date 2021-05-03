@@ -2,6 +2,7 @@ package com.ekku.nfc.app
 
 import androidx.appcompat.app.AppCompatActivity
 import com.ekku.nfc.ui.activity.ConsumerActivity
+import com.ekku.nfc.ui.activity.MainActivity
 import com.ekku.nfc.ui.activity.RestaurantActivity
 import com.ekku.nfc.util.AppUtils.startActivity
 import com.ekku.nfc.util.getDefaultPreferences
@@ -24,7 +25,7 @@ open class BaseActivity : AppCompatActivity() {
                 finish()
             }
             appType == 1 -> {
-                startActivity<ConsumerActivity>()
+                startActivity<MainActivity>()
                 finish()
             }
         }
