@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:autofillHints="Order Number"
         android:hint="@string/text_hint_customer_order_number"
-        android:inputType="text"
+        android:inputType="number"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
         android:textColor="@color/black"
