@@ -13,6 +13,8 @@ import com.ekku.nfc.ui.activity.RestaurantActivity
 import com.ekku.nfc.ui.activity.WelcomeActivity
 import com.ekku.nfc.util.AppUtils
 import com.ekku.nfc.util.NotifyUtils.playNotification
+import com.ekku.nfc.util.NotifyUtils.setIntervalWork
+import com.ekku.nfc.util.NotifyUtils.setMidNightWork
 import com.ekku.nfc.util.getDefaultPreferences
 import timber.log.Timber
 import java.util.*
@@ -32,6 +34,9 @@ class TagBootReceiver : BroadcastReceiver() {
                     }
                 ).addFlags(FLAG_ACTIVITY_NEW_TASK)
             )
+
+            context?.setMidNightWork()
+            context?.setIntervalWork()
         }
     }
 
