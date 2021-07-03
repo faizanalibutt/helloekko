@@ -11,6 +11,8 @@ class TAGViewModel(private val tagRepository: TagRepository) : ViewModel() {
 
     val allTags: LiveData<List<TagAPI>> = tagRepository.allTags.asLiveData()
     val syncTags: LiveData<List<TagAPI>> = tagRepository.syncTags.asLiveData()
+    var switchControls = MutableLiveData(false)
+    var updateTagScanList = MutableLiveData<MutableList<Tag>>(mutableListOf())
 
     private val apiService: ApiService by lazy { ApiClient.apiClient().create(ApiService::class.java) }
 

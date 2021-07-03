@@ -63,7 +63,6 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
     }
     private lateinit var nfcTagScanList: MutableList<TagEntity>
 
-
     /**
      * check no duplication happened tags must be unique.
      * */
@@ -103,6 +102,28 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
             setIntervalWork()
         }
 
+        // use liveData and handle tag scan data
+        tagViewMadel.updateTagScanList.observe(this, {
+            nfcTagScanList = it
+            restaurantBinding.containersNumber.text = nfcTagScanList.size.toString()
+        })
+
+        // use liveData and handle this simple scenario first.
+        tagViewMadel.switchControls.observe(this, {
+            if(it) {
+                scanBtnClicked = true
+                hideSystemKeyboard(this@RestaurantActivity)
+                restaurantBinding.orderField.clearFocus()
+                restaurantBinding.scansGroup.visibility = View.GONE
+                restaurantBinding.containersGroup.visibility = View.VISIBLE
+                restaurantBinding.orderField.isEnabled = false
+                // initialize list for scans against orderID
+                // enable NFC scanning
+                setUpNfc()
+                //setUpTorch(true)
+            }
+        })
+
         restaurantBinding.btnScan.setOnClickListener {
             if (restaurantBinding.orderField.text.isEmpty()) {
                 Toast.makeText(
@@ -111,17 +132,7 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
                 ).show()
                 return@setOnClickListener
             }
-            scanBtnClicked = true
-            hideSystemKeyboard(this@RestaurantActivity)
-            restaurantBinding.orderField.clearFocus()
-            restaurantBinding.scansGroup.visibility = View.GONE
-            restaurantBinding.containersGroup.visibility = View.VISIBLE
-            restaurantBinding.orderField.isEnabled = false
-            // initialize list for scans against orderID
-            // enable NFC scanning
-            setUpNfc()
-            setUpTorch(true)
-            nfcTagScanList = mutableListOf()
+            tagViewMadel.switchControls.value = true
         }
 
         restaurantBinding.clearContainers.setOnClickListener {
@@ -170,8 +181,8 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
             setUpNfc()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onBackPressed() {
+        super.onBackPressed()
         if (canWrite)
             setBrightness(
                 .0F, 0,
@@ -229,13 +240,13 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
                 }
                 if (isIdAvailable) {
                     nfcTagScanList.add(tagEntity)
-                    restaurantBinding.containersNumber.text = nfcTagScanList.size.toString()
+                    tagViewMadel.updateTagScanList.value = nfcTagScanList
                 }
             }
-            setUpTorch(false)
+            /*setUpTorch(false)
             Handler(Looper.getMainLooper()).postDelayed({
                 setUpTorch(true)
-            }, 700)
+            }, 700)*/
             playNotification(
                 getString(R.string.notification_desc), AppUtils.NOTIFICATION_ID, "loved_it"
             )
@@ -268,10 +279,11 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
         // remove list created for scans against orderID
         // disable nfc scanning
         nfcTagScanList.clear()
-        setUpTorch(false)
+        //setUpTorch(false)
         removeNfcCallback(this@RestaurantActivity)
         scanBtnClicked = false
         isIdAvailable = true
+        tagViewMadel.switchControls.value = false
     }
 
     private fun setUpNfc() {
@@ -456,5 +468,7 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
             ), 1001
         )
     }
+
+    
 
 }
