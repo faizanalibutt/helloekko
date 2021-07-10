@@ -9,22 +9,27 @@ import com.ekku.nfc.util.getDefaultPreferences
 
 class WelcomeActivity : BaseActivity() {
 
-    private var welcomeBinding: ActivityWelcomeBinding? = null
+    private lateinit var welcomeBinding: ActivityWelcomeBinding
     private val welcomeViewModel: WelcomeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         welcomeBinding = ActivityWelcomeBinding.inflate(layoutInflater)
-        val view = welcomeBinding?.root
+        val view = welcomeBinding.root
         setContentView(view)
-        welcomeBinding?.btnRestaurant?.setOnClickListener {
+        welcomeBinding.btnRestaurant.setOnClickListener {
             getDefaultPreferences().edit().putBoolean("FIRST_TIME", true).apply()
             getDefaultPreferences().edit().putInt("APP_TYPE", 0).apply()
             welcomeViewModel.handleButtonAction(this@WelcomeActivity)
         }
-        welcomeBinding?.btnConsumer?.setOnClickListener {
+        welcomeBinding.btnConsumer.setOnClickListener {
             getDefaultPreferences().edit().putBoolean("FIRST_TIME", true).apply()
             getDefaultPreferences().edit().putInt("APP_TYPE", 1).apply()
+            welcomeViewModel.handleButtonAction(this@WelcomeActivity)
+        }
+        welcomeBinding.btnAdmin.setOnClickListener {
+            getDefaultPreferences().edit().putBoolean("FIRST_TIME", true).apply()
+            getDefaultPreferences().edit().putInt("APP_TYPE", 2).apply()
             welcomeViewModel.handleButtonAction(this@WelcomeActivity)
         }
     }

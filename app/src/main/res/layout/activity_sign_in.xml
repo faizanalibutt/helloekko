@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.activity.SignInActivity">
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="bottom|center"
+        android:paddingVertical="16dp"
+        android:text="@string/text_sign_in"
+        android:textColor="@color/purple_500"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@id/signchaing"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/signchaing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".2" />
+
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/text_username"
+        android:textColor="@color/purple_500"
+        app:layout_constraintBottom_toTopOf="@id/username_field"
+        app:layout_constraintTop_toBottomOf="@id/signchaing" />
+
+    <EditText
+        android:id="@+id/username_field"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="8dp"
+        android:autofillHints="@string/text_username"
+        android:background="@drawable/background_order_text_field"
+        android:hint="@string/text_name_detail"
+        android:inputType="text"
+        app:layout_constraintTop_toBottomOf="@id/username" />
+
+    <TextView
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/text_password"
+        app:layout_constraintBottom_toTopOf="@id/password_field"
+        app:layout_constraintTop_toBottomOf="@id/username_field"
+        android:textColor="@color/purple_500" />
+
+    <EditText
+        android:id="@+id/password_field"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="8dp"
+        android:hint="@string/text_password_detail"
+        android:autofillHints="@string/text_password"
+        app:layout_constraintTop_toBottomOf="@id/password"
+        android:background="@drawable/background_order_text_field"
+        android:inputType="textPassword" />
+
+    <Spinner
+        android:id="@+id/spinner_mode"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        app:layout_constraintTop_toBottomOf="@id/password_field"
+        app:layout_constraintBottom_toTopOf="@id/login_button"
+        android:layout_marginHorizontal="32dp" />
+
+    <Button
+        android:id="@+id/login_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginVertical="16dp"
+        android:text="@string/text_login"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_mode" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

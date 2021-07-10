@@ -2,7 +2,8 @@ package com.ekku.nfc.ui.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import com.ekku.nfc.ui.activity.MainActivity
+import com.ekku.nfc.ui.activity.AdminActivity
+import com.ekku.nfc.ui.activity.ConsumerActivity
 import com.ekku.nfc.ui.activity.RestaurantActivity
 import com.ekku.nfc.util.AppUtils.startActivity
 import com.ekku.nfc.util.getDefaultPreferences
@@ -14,7 +15,8 @@ class WelcomeViewModel : ViewModel() {
     fun handleButtonAction(activity: Context?) {
         when(activity?.getDefaultPreferences()?.getInt("APP_TYPE", -1)) {
             0 -> activity.startActivity<RestaurantActivity>()
-            1 -> activity.startActivity<MainActivity>()
+            1 -> activity.startActivity<ConsumerActivity>()
+            2 -> activity.startActivity<AdminActivity>()
             else -> Timber.d("nothing is selected, i will not come here.")
         }
     }

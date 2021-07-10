@@ -11,7 +11,7 @@
     <string name="notification_desc_unses">Can\'t find anything please try again.</string>
     <string name="dialog_phone_title">Device Info</string>
     <string name="dialog_phone_desc">To make sure device is unique please provide this permission.</string>
-    <string name="okay">Ok</string>
+    <string name="okay">OK</string>
     <string name="text_app_select">Select App Type</string>
     <string name="text_consumer">Consumer</string>
     <string name="text_restaurant">Restaurant</string>
@@ -23,4 +23,13 @@
     <string name="text_clear_containers" tools:ignore="ButtonCase">CANCEL</string>
     <string name="text_submit">submit</string>
     <string name="text_edit_customer_order">Tap to edit Customer order #</string>
+    <string name="text_admin">Admin</string>
+    <string name="text_sign_in">Sign In</string>
+    <string name="text_username">Username</string>
+    <string name="text_name_detail">Enter your Name</string>
+    <string name="text_password">Password</string>
+    <string name="text_password_detail">Enter your Password</string>
+    <string name="text_login">Login</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
