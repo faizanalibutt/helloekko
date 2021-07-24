@@ -5,7 +5,8 @@ import androidx.activity.viewModels
 import com.ekku.nfc.app.BaseActivity
 import com.ekku.nfc.databinding.ActivityWelcomeBinding
 import com.ekku.nfc.ui.viewmodel.WelcomeViewModel
-import com.ekku.nfc.util.getDefaultPreferences
+import com.ekku.nfc.util.AppUtils.startActivity
+import com.ekku.nfc.util.savePrefs
 
 class WelcomeActivity : BaseActivity() {
 
@@ -18,19 +19,29 @@ class WelcomeActivity : BaseActivity() {
         val view = welcomeBinding.root
         setContentView(view)
         welcomeBinding.btnRestaurant.setOnClickListener {
-            getDefaultPreferences().edit().putBoolean("FIRST_TIME", true).apply()
-            getDefaultPreferences().edit().putInt("APP_TYPE", 0).apply()
-            welcomeViewModel.handleButtonAction(this@WelcomeActivity)
+            handleButtonAction()
+            savePrefs( RESTAURANT, true)
         }
         welcomeBinding.btnConsumer.setOnClickListener {
-            getDefaultPreferences().edit().putBoolean("FIRST_TIME", true).apply()
-            getDefaultPreferences().edit().putInt("APP_TYPE", 1).apply()
-            welcomeViewModel.handleButtonAction(this@WelcomeActivity)
+            handleButtonAction()
+            savePrefs(CONSUMER, true)
         }
         welcomeBinding.btnAdmin.setOnClickListener {
-            getDefaultPreferences().edit().putBoolean("FIRST_TIME", true).apply()
-            getDefaultPreferences().edit().putInt("APP_TYPE", 2).apply()
-            welcomeViewModel.handleButtonAction(this@WelcomeActivity)
+            handleButtonAction()
+            savePrefs(ADMIN, true)
         }
+    }
+
+    private fun handleButtonAction() {
+        startActivity<AccountActivity>()
+        finish()
+    }
+
+    companion object {
+        const val RESTAURANT = 0
+        const val CONSUMER = 1
+        const val ADMIN = 2
+        const val APP_MODE = "app_mode"
+        const val FIRST_TIME = "first_time"
     }
 }

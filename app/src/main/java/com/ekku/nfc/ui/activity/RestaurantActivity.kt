@@ -63,7 +63,6 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
     }
     private lateinit var nfcTagScanList: MutableList<TagEntity>
 
-
     /**
      * check no duplication happened tags must be unique.
      * */
@@ -149,7 +148,7 @@ class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 restaurantBinding.textOrderDesc.setTextColor(
-                    ContextCompat.getColor(this@RestaurantActivity, R.color.purple_500)
+                    ContextCompat.getColor(this@RestaurantActivity, R.color.green_500)
                 )
             }
 

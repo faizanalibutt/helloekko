@@ -1,6 +1,9 @@
-package com.ekku.nfc.model
+package com.ekku.nfc.repository
 
 import androidx.annotation.WorkerThread
+import com.ekku.nfc.model.Tag
+import com.ekku.nfc.model.TagAPI
+import com.ekku.nfc.model.TagDao
 import com.ekku.nfc.util.TimeUtils
 import kotlinx.coroutines.flow.Flow
 

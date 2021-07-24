@@ -32,17 +32,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EkkoTag.NoBar"
         tools:ignore="AllowBackup">
-        <activity android:name=".ui.activity.SignInActivity"
-            android:screenOrientation="fullSensor"/>
-        <activity
-            android:name=".ui.activity.AdminActivity"
+
+        <activity android:name=".ui.activity.AccountActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".ui.activity.RestaurantActivity"
-            android:label="Ekko"
+            android:name=".ui.activity.AdminActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.EkkoTag"
+            android:label="@string/text_activity_title"
+            android:theme="@style/Theme.EkkoTag.White"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".ui.activity.RestaurantActivity"
+            android:label="@string/text_activity_title"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.EkkoTag.White"
             android:windowSoftInputMode="adjustPan">
 
             <!-- multiple types of nfc tag data is available -->
@@ -89,9 +93,9 @@
         </activity>
         <activity
             android:name=".ui.activity.ConsumerActivity"
-            android:label="Ekko"
+            android:label="@string/text_activity_title"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.EkkoTag">
+            android:theme="@style/Theme.EkkoTag.White">
 
             <!-- multiple types of nfc tag data is available -->
             <intent-filter>

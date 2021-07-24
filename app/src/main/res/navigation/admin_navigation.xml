@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/fleetFragment">
+    <fragment
+        android:id="@+id/fleetFragment"
+        android:name="com.ekku.nfc.ui.fragment.FleetFragment"
+        android:label="Fleet Mode"
+        tools:layout="@layout/fragment_fleet" >
+        <!--<action
+            android:id="@+id/action_fleetFragment_to_scanFragment"
+            app:destination="@+id/scanFragment" />-->
+        <action
+            android:id="@+id/action_fleetFragment_to_scanFragment"
+            app:destination="@id/scanFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/assignFragment"
+        android:name="com.ekku.nfc.ui.fragment.AssignFragment"
+        android:label="Assign Mode"
+        tools:layout="@layout/fragment_assign" >
+        <action
+            android:id="@+id/action_assignFragment_to_scanFragment"
+            app:destination="@id/scanFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/checkInFragment"
+        android:name="com.ekku.nfc.ui.fragment.CheckInFragment"
+        android:label="CheckIn Mode"
+        tools:layout="@layout/fragment_check_in" >
+        <action
+            android:id="@+id/action_checkInFragment_to_scanFragment"
+            app:destination="@id/scanFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/emptyFragment"
+        android:name="com.ekku.nfc.ui.fragment.EmptyFragment"
+        android:label="Empty Mode"
+        tools:layout="@layout/fragment_empty" >
+        <action
+            android:id="@+id/action_emptyFragment_to_scanFragment"
+            app:destination="@id/scanFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/retiredFragment"
+        android:name="com.ekku.nfc.ui.fragment.RetiredFragment"
+        android:label="Retired Mode"
+        tools:layout="@layout/fragment_retired" >
+        <action
+            android:id="@+id/action_retiredFragment_to_scanFragment"
+            app:destination="@id/scanFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/scanFragment"
+        android:name="com.ekku.nfc.ui.fragment.ScanFragment"
+        android:label="Scan Mode"
+        tools:layout="@layout/fragment_scan">
+        <action
+            android:id="@+id/fleet_action"
+            app:popUpTo="@id/fleetFragment" />
+        <action
+            android:id="@+id/assign_action"
+            app:popUpTo="@id/assignFragment" />
+        <action
+            android:id="@+id/check_in_action"
+            app:popUpTo="@id/checkInFragment" />
+        <action
+            android:id="@+id/empty_action"
+            app:popUpTo="@id/emptyFragment" />
+        <action
+            android:id="@+id/retired_action"
+            app:popUpTo="@id/retiredFragment" />
+    </fragment>
+</navigation>

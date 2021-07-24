@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activity.SignInActivity">
+    tools:context=".ui.activity.AccountActivity">
 
     <TextView
         android:id="@+id/textView2"
@@ -13,7 +13,7 @@
         android:gravity="bottom|center"
         android:paddingVertical="16dp"
         android:text="@string/text_sign_in"
-        android:textColor="@color/purple_500"
+        android:textColor="@color/green_500"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@id/signchaing"
         app:layout_constraintTop_toTopOf="parent" />
@@ -32,9 +32,11 @@
         android:layout_marginHorizontal="32dp"
         android:layout_marginTop="16dp"
         android:text="@string/text_username"
-        android:textColor="@color/purple_500"
+        android:textColor="@color/green_500"
         app:layout_constraintBottom_toTopOf="@id/username_field"
-        app:layout_constraintTop_toBottomOf="@id/signchaing" />
+        app:layout_constraintTop_toBottomOf="@id/signchaing"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <EditText
         android:id="@+id/username_field"
@@ -46,6 +48,7 @@
         android:background="@drawable/background_order_text_field"
         android:hint="@string/text_name_detail"
         android:inputType="text"
+        app:layout_constraintBottom_toTopOf="@id/password"
         app:layout_constraintTop_toBottomOf="@id/username" />
 
     <TextView
@@ -55,9 +58,9 @@
         android:layout_marginHorizontal="32dp"
         android:layout_marginTop="16dp"
         android:text="@string/text_password"
+        android:textColor="@color/green_500"
         app:layout_constraintBottom_toTopOf="@id/password_field"
-        app:layout_constraintTop_toBottomOf="@id/username_field"
-        android:textColor="@color/purple_500" />
+        app:layout_constraintTop_toBottomOf="@id/username_field" />
 
     <EditText
         android:id="@+id/password_field"
@@ -65,29 +68,79 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
         android:layout_marginTop="8dp"
-        android:hint="@string/text_password_detail"
         android:autofillHints="@string/text_password"
-        app:layout_constraintTop_toBottomOf="@id/password"
         android:background="@drawable/background_order_text_field"
-        android:inputType="textPassword" />
+        android:hint="@string/text_password_detail"
+        android:inputType="textPassword"
+        app:layout_constraintBottom_toTopOf="@id/spinner_mode"
+        app:layout_constraintTop_toBottomOf="@id/password"
+        app:layout_goneMarginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/admin_mode"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:text="@string/text_admin_mode"
+        android:textColor="@color/green_500"
+        app:layout_constraintBottom_toBottomOf="@id/spinner_mode"
+        app:layout_constraintEnd_toStartOf="@id/spinner_mode"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/spinner_mode" />
+
 
     <Spinner
         android:id="@+id/spinner_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
         android:layout_marginTop="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        app:layout_constraintTop_toBottomOf="@id/password_field"
         app:layout_constraintBottom_toTopOf="@id/login_button"
-        android:layout_marginHorizontal="32dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/admin_mode"
+        app:layout_constraintTop_toBottomOf="@id/password_field" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/admin_mode_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="spinner_mode, admin_mode" />
 
     <Button
         android:id="@+id/login_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginVertical="16dp"
+        android:layout_marginVertical="8dp"
         android:text="@string/text_login"
-        app:layout_constraintVertical_bias="0"
+        app:layout_constraintBottom_toTopOf="@id/app_mode"
         app:layout_constraintTop_toBottomOf="@+id/spinner_mode" />
+
+    <TextView
+        android:id="@+id/app_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingHorizontal="5dp"
+        android:paddingVertical="8dp"
+        android:text="@string/text_app_mode"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/login_button"
+        app:layout_constraintStart_toStartOf="@+id/login_button"
+        app:layout_constraintTop_toBottomOf="@+id/login_button" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

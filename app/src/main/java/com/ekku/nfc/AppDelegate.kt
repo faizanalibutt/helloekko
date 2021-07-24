@@ -1,7 +1,7 @@
 package com.ekku.nfc
 
 import android.app.Application
-import com.ekku.nfc.model.TagRepository
+import com.ekku.nfc.repository.TagRepository
 import com.ekku.nfc.model.TagRoomDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob

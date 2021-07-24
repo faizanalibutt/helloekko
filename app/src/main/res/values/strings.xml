@@ -30,6 +30,42 @@
     <string name="text_password">Password</string>
     <string name="text_password_detail">Enter your Password</string>
     <string name="text_login">Login</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="text_admin_mode">Select Mode</string>
+    <string name="text_app_mode">Change App Mode?</string>
+    <string name="text_sign_out">Sign Out</string>
+    <string name="text_assign">Assign</string>
+    <string name="text_empty">Empty</string>
+    <string name="text_fleet">Fleet</string>
+    <string name="text_check_in">CheckIn</string>
+    <string name="text_retired">Retired</string>
+    <string name="text_assign_mode">Assign Mode</string>
+    <string name="text_empty_mode">Empty Mode</string>
+    <string name="text_fleet_mode">Fleet Mode</string>
+    <string name="text_check_in_mode">Check In Mode</string>
+    <string name="text_retired_mode">Retired Mode</string>
+    <string name="text_container_type">Select Container Type</string>
+    <string name="text_container_size">Select Container Size</string>
+    <string name="text_region">Select Region</string>
+    <string name="text_partner_name">Select Partner Name</string>
+    <string name="text_check_in_desc">Please Click Scan button to start checking in containers.</string>
+    <string name="text_dropbox_desc">Select Drop Box</string>
+    <string name="text_clean">Clean</string>
+    <string name="text_retired_desc">Please click on scan button to remove container from fleet.</string>
+    <string name="text_activity_title">Ekko</string>
+    <string-array name="admin_modes_array">
+        <item>Fleet</item>
+        <item>Assign</item>
+        <item>CheckIn</item>
+        <item>Empty</item>
+        <item>Retired</item>
+    </string-array>
+    <string-array name="container_type_array">
+
+    </string-array>
+    <string-array name="container_size_array">
+
+    </string-array>
+    <string-array name="container__array">
+
+    </string-array>
 </resources>

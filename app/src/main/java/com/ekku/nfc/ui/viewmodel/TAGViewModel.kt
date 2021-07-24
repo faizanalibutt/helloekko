@@ -4,6 +4,7 @@ import androidx.lifecycle.*
 import com.ekku.nfc.model.*
 import com.ekku.nfc.network.ApiClient
 import com.ekku.nfc.network.ApiService
+import com.ekku.nfc.repository.TagRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

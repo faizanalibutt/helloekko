@@ -6,11 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".ui.activity.AdminActivity">
 
-    <TextView
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/admin_nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/text_admin"
-        android:textSize="40sp"
-        android:gravity="center" />
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/admin_navigation" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
