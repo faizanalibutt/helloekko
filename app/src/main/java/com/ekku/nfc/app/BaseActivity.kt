@@ -54,22 +54,4 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.user_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.sign_out -> {
-                finish()
-                startActivity<WelcomeActivity>()
-                savePrefs(-1, false)
-                savePrefs(false, -1, "put-your-login-token-here")
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
 }
