@@ -20,7 +20,6 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -55,7 +54,7 @@ import java.util.*
 import com.ekku.nfc.model.Tag as TagEntity
 
 
-class ConsumerActivity : UserActivity(), ReaderCallback, CurrentLocation.LocationResultListener {
+class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.LocationResultListener {
 
     private var dialog: AlertDialog? = null
     private val tagViewMadel: TAGViewModel by viewModels {
@@ -121,7 +120,7 @@ class ConsumerActivity : UserActivity(), ReaderCallback, CurrentLocation.Locatio
             AppUtils.STRING_GUID = getDeviceIMEI()
 
         // instantiate location object.
-        currentLocation = CurrentLocation(this@ConsumerActivity)
+        currentLocation = CurrentLocation(this@DropBoxActivity)
 
         // implement alarm manager at midnight, intervals.
         if (!getDefaultPreferences().getBoolean(AppUtils.TAG_ALARM_KEY, false)) {
@@ -170,7 +169,7 @@ class ConsumerActivity : UserActivity(), ReaderCallback, CurrentLocation.Locatio
                 } else {
                     setBrightness(
                         -1F, 20,
-                        Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, this@ConsumerActivity
+                        Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, this@DropBoxActivity
                     )
                     if (!preventDialogs) {
                         preventDialogs = true
@@ -207,7 +206,7 @@ class ConsumerActivity : UserActivity(), ReaderCallback, CurrentLocation.Locatio
                                 or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                                 or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
                     )
-                    removeNfcCallback(this@ConsumerActivity)
+                    removeNfcCallback(this@DropBoxActivity)
                 }, CONSUMER_TIME_OUT)
 
             } else
@@ -376,7 +375,7 @@ class ConsumerActivity : UserActivity(), ReaderCallback, CurrentLocation.Locatio
         if (canWrite)
             setBrightness(
                 .0F, 0,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, this@ConsumerActivity
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, this@DropBoxActivity
             )
     }
 
@@ -423,7 +422,7 @@ class ConsumerActivity : UserActivity(), ReaderCallback, CurrentLocation.Locatio
                     ) {
                         if (type == ButtonType.RIGHT)
                             ActivityCompat.requestPermissions(
-                                this@ConsumerActivity, arrayOf(
+                                this@DropBoxActivity, arrayOf(
                                     Manifest.permission.ACCESS_COARSE_LOCATION,
                                     Manifest.permission.ACCESS_FINE_LOCATION,
                                     Manifest.permission.READ_PHONE_STATE

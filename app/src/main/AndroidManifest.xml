@@ -42,7 +42,7 @@
             android:theme="@style/Theme.EkkoTag.White"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".ui.activity.RestaurantActivity"
+            android:name=".ui.activity.PartnerActivity"
             android:label="@string/text_activity_title"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.EkkoTag.White"
@@ -91,7 +91,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.activity.ConsumerActivity"
+            android:name=".ui.activity.DropBoxActivity"
             android:label="@string/text_activity_title"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.EkkoTag.White">

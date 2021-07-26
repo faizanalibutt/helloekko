@@ -4,8 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import com.ekku.nfc.ui.activity.ConsumerActivity
-import com.ekku.nfc.ui.activity.RestaurantActivity
+import com.ekku.nfc.ui.activity.DropBoxActivity
+import com.ekku.nfc.ui.activity.PartnerActivity
 import com.ekku.nfc.ui.activity.WelcomeActivity
 import com.ekku.nfc.util.NotifyUtils.setIntervalWork
 import com.ekku.nfc.util.NotifyUtils.setMidNightWork
@@ -21,8 +21,8 @@ class TagBootReceiver : BroadcastReceiver() {
             context?.startActivity(
                 Intent(
                     context, when (context.getDefaultPreferences().getInt("APP_TYPE", -1)) {
-                        0 -> RestaurantActivity::class.java
-                        1 -> ConsumerActivity::class.java
+                        0 -> PartnerActivity::class.java
+                        1 -> DropBoxActivity::class.java
                         else -> WelcomeActivity::class.java
                     }
                 ).addFlags(FLAG_ACTIVITY_NEW_TASK)

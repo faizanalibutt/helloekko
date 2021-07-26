@@ -11,7 +11,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 object ApiClient {
 
     //please use your own url
-    private var BASE_URL: String = "https://docs.google.com/forms/d/e/"
+    private var BASE_URL: String = "https://ekkocommunity.uc.r.appspot.com/api/user/"
 
     fun apiClient(): Retrofit {
 

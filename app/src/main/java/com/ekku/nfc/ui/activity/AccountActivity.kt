@@ -1,6 +1,5 @@
 package com.ekku.nfc.ui.activity
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -8,10 +7,10 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.viewModels
-import androidx.core.view.contains
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isEmpty
-import androidx.core.widget.doAfterTextChanged
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.Observer
 import com.ekku.nfc.R
 import com.ekku.nfc.databinding.ActivityAccountBinding
 import com.ekku.nfc.repository.AccountRepository
@@ -21,6 +20,7 @@ import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.DROPBOX
 import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.PARTNER
 import com.ekku.nfc.ui.viewmodel.AccountViewModel
 import com.ekku.nfc.util.AppUtils.startActivity
+import com.ekku.nfc.util.Status
 import com.ekku.nfc.util.getDefaultPreferences
 import com.ekku.nfc.util.savePrefs
 import timber.log.Timber
@@ -28,11 +28,15 @@ import timber.log.Timber
 class AccountActivity : AppCompatActivity() {
 
     private lateinit var accountBinding: ActivityAccountBinding
+
+    // for api members we will use view model and other things might come in future.
     private val accountViewModel: AccountViewModel by viewModels {
         AccountViewModel.AccountViewModelFactory(AccountRepository())
     }
+
     // set up view model for showing hiding admin mode...
     private val appMode by lazy { getDefaultPreferences().getInt(APP_MODE, -1) }
+
     // it will be replaced with live data but for now use it.
     private lateinit var adminMode: String
 
@@ -124,31 +128,64 @@ class AccountActivity : AppCompatActivity() {
             if (isReady)
                 when (appMode) {
                     ADMIN -> {
-                        accountBinding.progressBar.visibility = View.VISIBLE
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            accountBinding.progressBar.visibility = View.GONE
-                            getDefaultPreferences().edit().putString(ADMIN_MODE, adminMode).apply()
-                            savePrefs(true, ADMIN, "put-your-login-token-here")
-                            startActivity<AdminActivity>()
-                            finish()
-                        }, 3000)
+                        accountViewModel.postAdminCredentials(
+                            usernameField.editText?.text.toString(),
+                            passwordField.editText?.text.toString()
+                        ).observe(this, Observer {
+                            it?.let { result ->
+                                when (result.status)
+                                {
+                                    Status.SUCCESS -> {
+                                        accountBinding.progressBar.visibility = View.GONE
+                                        getDefaultPreferences().edit()
+                                            .putString(ADMIN_MODE, adminMode).apply()
+                                        savePrefs(true, ADMIN, "put-your-login-token-here")
+                                        startActivity<AdminActivity>()
+                                        finish()
+                                    }
+                                    Status.ERROR -> {
+                                        Timber.d("issue came ${result.message}")
+                                        accountBinding.progressBar.visibility = View.GONE
+                                    }
+                                    Status.LOADING -> {
+                                        accountBinding.progressBar.visibility = View.VISIBLE
+                                    }
+                                }
+                            }
+                        })
                     }
                     PARTNER -> {
-                        accountBinding.progressBar.visibility = View.VISIBLE
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            accountBinding.progressBar.visibility = View.GONE
-                            savePrefs(true, PARTNER, "put-your-login-token-here")
-                            startActivity<RestaurantActivity>()
-                            finish()
-                        }, 3000)
+                        accountViewModel.postAdminCredentials(
+                            usernameField.editText?.text.toString(),
+                            passwordField.editText?.text.toString()
+                        ).observe(this, Observer {
+                            it?.let { result ->
+                                when (result.status)
+                                {
+                                    Status.SUCCESS -> {
+                                        accountBinding.progressBar.visibility = View.GONE
+                                        savePrefs(true, PARTNER, "put-your-login-token-here")
+                                        startActivity<PartnerActivity>()
+                                        finish()
+                                    }
+                                    Status.ERROR -> {
+                                        Timber.d("issue came ${result.message}")
+                                        accountBinding.progressBar.visibility = View.GONE
+                                    }
+                                    Status.LOADING -> {
+                                        accountBinding.progressBar.visibility = View.VISIBLE
+                                    }
+                                }
+                            }
+                        })
                     }
                     DROPBOX -> {
                         Handler(Looper.getMainLooper()).postDelayed({
                             accountBinding.progressBar.visibility = View.GONE
                             savePrefs(true, DROPBOX, "put-your-login-token-here")
-                            startActivity<ConsumerActivity>()
+                            startActivity<DropBoxActivity>()
                             finish()
-                        }, 3000)
+                        }, 2000)
                     }
                 }
         }

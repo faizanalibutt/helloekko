@@ -1,5 +1,6 @@
 package com.ekku.nfc.network
 
+import com.ekku.nfc.network.ApiService.Companion.PARTNER_LOGIN
 import com.ekku.nfc.network.ApiService.Companion.UPLOAD_DEVICE
 import retrofit2.Call
 import retrofit2.http.Field
@@ -40,9 +41,19 @@ interface ApiService {
         @Field("entry.1733715185") network: String,
     ) : Call<String>
 
+    @POST(PARTNER_LOGIN)
+    @FormUrlEncoded
+    suspend fun adminCredentials(
+        @Field("email") email: String,
+        @Field("password") password: String,
+    ) : String
+
     companion object {
         const val UPLOAD = "1FAIpQLSfOisc3AeD_Zo8uUqa_7pJW1MwaGRqyLGda8jafoXzFaO3HSg/formResponse"
         const val UPLOAD_MIDNIGHT = "1FAIpQLScFRWXUCXgswy7KTs7q1PsZ3N84wPDYjwvXq6-kfCLEWB2ESw/formResponse"
         const val UPLOAD_DEVICE = "1FAIpQLSeoCootOf6W3knjC4scF0h-j_U0fs4gRQeBO-2235nM0Zi0AQ/formResponse"
+        const val PARTNER_LOGIN = "partner/signin"
+        const val DROPBOX_LOGIN = "dropbox/signin"
+        const val ADMIN_LOGIN = "admin/admin/signin"
     }
 }

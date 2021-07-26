@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.Intent.*
 import android.view.KeyEvent
-import com.ekku.nfc.ui.activity.ConsumerActivity
+import com.ekku.nfc.ui.activity.DropBoxActivity
 import com.ekku.nfc.util.AppUtils.startActivity
 import com.ekku.nfc.util.getDefaultPreferences
 import timber.log.Timber
@@ -27,7 +27,7 @@ class MediaButtonEventReceiver : BroadcastReceiver() {
                 context.getDefaultPreferences().edit()?.putBoolean("HEAD_JACK_RESPONSE", true)?.apply()
             else
                 context?.getDefaultPreferences()?.edit()?.putBoolean("HEAD_JACK_RESPONSE", false)?.apply()
-            context?.startActivity<ConsumerActivity> {
+            context?.startActivity<DropBoxActivity> {
                 this.addFlags(FLAG_ACTIVITY_CLEAR_TOP)
                 this.addFlags(FLAG_ACTIVITY_CLEAR_TASK)
                 //this.addFlags(FLAG_ACTIVITY_SINGLE_TOP)

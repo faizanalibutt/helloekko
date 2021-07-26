@@ -1,9 +1,6 @@
 package com.ekku.nfc.app
 
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import com.ekku.nfc.R
 import com.ekku.nfc.ui.activity.*
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_PREF
 import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.ADMIN
@@ -13,7 +10,6 @@ import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.FIRST_TIME
 import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.PARTNER
 import com.ekku.nfc.util.AppUtils.startActivity
 import com.ekku.nfc.util.getDefaultPreferences
-import com.ekku.nfc.util.savePrefs
 import timber.log.Timber
 
 open class BaseActivity : AppCompatActivity() {
@@ -32,14 +28,14 @@ open class BaseActivity : AppCompatActivity() {
             !isFirstLaunch -> Timber.d("it feels sad you haven't selected yet.")
             appType == PARTNER -> {
                 if (isLoggedIn)
-                    startActivity<RestaurantActivity>()
+                    startActivity<PartnerActivity>()
                 else
                     startActivity<AccountActivity>()
                 finish()
             }
             appType == DROPBOX -> {
                 if (isLoggedIn)
-                    startActivity<ConsumerActivity>()
+                    startActivity<DropBoxActivity>()
                 else
                     startActivity<AccountActivity>()
                 finish()

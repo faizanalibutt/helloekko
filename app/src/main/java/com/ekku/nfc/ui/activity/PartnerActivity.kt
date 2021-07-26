@@ -20,7 +20,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ekku.nfc.AppDelegate
@@ -51,7 +50,7 @@ import timber.log.Timber
 import com.ekku.nfc.model.Tag as TagEntity
 
 
-class RestaurantActivity : UserActivity(), NfcAdapter.ReaderCallback,
+class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
     CurrentLocation.LocationResultListener {
 
     private var scanBtnClicked: Boolean = false
@@ -88,7 +87,7 @@ class RestaurantActivity : UserActivity(), NfcAdapter.ReaderCallback,
             }
         }.start()
         // instantiate location object.
-        currentLocation = CurrentLocation(this@RestaurantActivity)
+        currentLocation = CurrentLocation(this@PartnerActivity)
         // save IMEI to global guid. if permission is allowed.
         if (ContextCompat.checkSelfPermission(
                 this, Manifest.permission.READ_PHONE_STATE
@@ -106,13 +105,13 @@ class RestaurantActivity : UserActivity(), NfcAdapter.ReaderCallback,
         restaurantBinding.btnScan.setOnClickListener {
             if (restaurantBinding.orderField.text.isEmpty()) {
                 Toast.makeText(
-                    this@RestaurantActivity,
+                    this@PartnerActivity,
                     "Please enter order number first.", Toast.LENGTH_SHORT
                 ).show()
                 return@setOnClickListener
             }
             scanBtnClicked = true
-            hideSystemKeyboard(this@RestaurantActivity)
+            hideSystemKeyboard(this@PartnerActivity)
             restaurantBinding.orderField.clearFocus()
             restaurantBinding.scansGroup.visibility = View.GONE
             restaurantBinding.containersGroup.visibility = View.VISIBLE
@@ -133,7 +132,7 @@ class RestaurantActivity : UserActivity(), NfcAdapter.ReaderCallback,
             // user is ready to upload data to server and save in local db.
             if (restaurantBinding.containersNumber.text.isEmpty()) {
                 Toast.makeText(
-                    this@RestaurantActivity,
+                    this@PartnerActivity,
                     "Please first scan container.", Toast.LENGTH_SHORT
                 ).show()
                 return@setOnClickListener
@@ -149,7 +148,7 @@ class RestaurantActivity : UserActivity(), NfcAdapter.ReaderCallback,
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 restaurantBinding.textOrderDesc.setTextColor(
-                    ContextCompat.getColor(this@RestaurantActivity, R.color.green_500)
+                    ContextCompat.getColor(this@PartnerActivity, R.color.green_500)
                 )
             }
 
@@ -175,7 +174,7 @@ class RestaurantActivity : UserActivity(), NfcAdapter.ReaderCallback,
         if (canWrite)
             setBrightness(
                 .0F, 0,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, this@RestaurantActivity
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, this@PartnerActivity
             )
     }
 
@@ -260,7 +259,7 @@ class RestaurantActivity : UserActivity(), NfcAdapter.ReaderCallback,
         restaurantBinding.containersNumber.text = ""
         restaurantBinding.orderField.setText("")
         restaurantBinding.textOrderDesc.setTextColor(
-            ContextCompat.getColor(this@RestaurantActivity, android.R.color.background_dark)
+            ContextCompat.getColor(this@PartnerActivity, android.R.color.background_dark)
         )
         restaurantBinding.scansGroup.visibility = View.VISIBLE
         restaurantBinding.containersGroup.visibility = View.GONE
@@ -269,14 +268,14 @@ class RestaurantActivity : UserActivity(), NfcAdapter.ReaderCallback,
         // disable nfc scanning
         nfcTagScanList.clear()
         setUpTorch(false)
-        removeNfcCallback(this@RestaurantActivity)
+        removeNfcCallback(this@PartnerActivity)
         scanBtnClicked = false
         isIdAvailable = true
     }
 
     private fun setUpNfc() {
         if (isNFCOnline()) {
-            addNfcCallback(this@RestaurantActivity, this)
+            addNfcCallback(this@PartnerActivity, this)
             if (!canWrite) {
                 showDialog(
                     getString(R.string.txt_dim_title),
@@ -286,7 +285,7 @@ class RestaurantActivity : UserActivity(), NfcAdapter.ReaderCallback,
             } else {
                 setBrightness(
                     -1F, 20,
-                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, this@RestaurantActivity
+                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, this@PartnerActivity
                 )
                 if (!preventDialogs) {
                     preventDialogs = true

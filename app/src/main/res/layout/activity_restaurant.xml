@@ -7,7 +7,7 @@
     android:keepScreenOn="true"
     android:focusable="false"
     android:focusableInTouchMode="true"
-    tools:context=".ui.activity.RestaurantActivity">
+    tools:context=".ui.activity.PartnerActivity">
 
     <TextView
         android:id="@+id/text_order_header"
