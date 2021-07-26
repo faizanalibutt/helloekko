@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ekku.nfc.AppDelegate
 import com.ekku.nfc.R
+import com.ekku.nfc.app.UserActivity
 import com.ekku.nfc.model.TagAPI
 import com.ekku.nfc.model.TagDao
 import com.ekku.nfc.ui.adapter.TagListAdapter
@@ -54,7 +55,7 @@ import java.util.*
 import com.ekku.nfc.model.Tag as TagEntity
 
 
-class ConsumerActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.LocationResultListener {
+class ConsumerActivity : UserActivity(), ReaderCallback, CurrentLocation.LocationResultListener {
 
     private var dialog: AlertDialog? = null
     private val tagViewMadel: TAGViewModel by viewModels {
@@ -232,13 +233,6 @@ class ConsumerActivity : AppCompatActivity(), ReaderCallback, CurrentLocation.Lo
                 }
         }
     }
-
-    /*override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        if ("ACTION_HEAD_PHONE_JACK_CLICK" == intent?.action) {
-
-        }
-    }*/
 
     private fun syncData(tagList: List<TagAPI>?) {
         tagList?.let {

@@ -20,11 +20,11 @@ class WelcomeActivity : BaseActivity() {
         setContentView(view)
         welcomeBinding.btnRestaurant.setOnClickListener {
             handleButtonAction()
-            savePrefs( RESTAURANT, true)
+            savePrefs(PARTNER, true)
         }
         welcomeBinding.btnConsumer.setOnClickListener {
             handleButtonAction()
-            savePrefs(CONSUMER, true)
+            savePrefs(DROPBOX, true)
         }
         welcomeBinding.btnAdmin.setOnClickListener {
             handleButtonAction()
@@ -38,8 +38,8 @@ class WelcomeActivity : BaseActivity() {
     }
 
     companion object {
-        const val RESTAURANT = 0
-        const val CONSUMER = 1
+        const val PARTNER = 0
+        const val DROPBOX = 1
         const val ADMIN = 2
         const val APP_MODE = "app_mode"
         const val FIRST_TIME = "first_time"

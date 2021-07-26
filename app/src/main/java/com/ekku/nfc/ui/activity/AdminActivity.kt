@@ -10,6 +10,8 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.ekku.nfc.R
+import com.ekku.nfc.app.BaseActivity
+import com.ekku.nfc.app.UserActivity
 import com.ekku.nfc.databinding.ActivityAdminBinding
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.ADMIN_MODE
 import com.ekku.nfc.ui.viewmodel.AdminViewModel
@@ -17,7 +19,7 @@ import com.ekku.nfc.util.AppUtils.startActivity
 import com.ekku.nfc.util.getDefaultPreferences
 import com.ekku.nfc.util.savePrefs
 
-class AdminActivity : AppCompatActivity() {
+class AdminActivity : UserActivity() {
 
     private lateinit var adminBinding: ActivityAdminBinding
     private val adminViewModel: AdminViewModel by viewModels()
@@ -32,24 +34,6 @@ class AdminActivity : AppCompatActivity() {
         adminBinding = ActivityAdminBinding.inflate(layoutInflater)
         setContentView(adminBinding.root)
         setNavigationGraph()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.user_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.sign_out -> {
-                finish()
-                startActivity<WelcomeActivity>()
-                savePrefs(-1, false)
-                savePrefs(false, -1, "coming-home")
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     private fun setNavigationGraph() {

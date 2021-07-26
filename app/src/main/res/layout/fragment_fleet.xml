@@ -7,14 +7,14 @@
     android:paddingHorizontal="24dp"
     tools:context=".ui.fragment.FleetFragment">
 
-    <TextView
+    <!--<TextView
         android:id="@+id/fleet_mode"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:gravity="center"
         android:text="@string/text_fleet_mode"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-        android:textColor="@color/green_500"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/fleet_line"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -23,25 +23,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent=".15" />
+        app:layout_constraintGuide_percent=".15" />-->
 
     <TextView
         android:id="@+id/container_type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/text_container_type"
-        android:textColor="@color/green_500"
+        android:textColor="@color/black"
         android:layout_marginTop="24dp"
         app:layout_constraintVertical_bias="0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
         app:layout_constraintBottom_toTopOf="@+id/spinner_type"
-        app:layout_constraintTop_toBottomOf="@+id/fleet_line" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
         android:id="@+id/spinner_type"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
+        android:layout_height="@dimen/spinner_size"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toTopOf="@+id/container_size"
         app:layout_constraintTop_toBottomOf="@+id/container_type" />
@@ -51,7 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/text_container_size"
-        android:textColor="@color/green_500"
+        android:textColor="@color/black"
         android:layout_marginTop="24dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/spinner_size"
@@ -60,7 +60,7 @@
     <Spinner
         android:id="@+id/spinner_size"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
+        android:layout_height="@dimen/spinner_size"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toTopOf="@+id/btn_scan"
         app:layout_constraintTop_toBottomOf="@+id/container_size" />

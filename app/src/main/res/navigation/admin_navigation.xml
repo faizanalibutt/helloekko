@@ -8,16 +8,14 @@
         android:name="com.ekku.nfc.ui.fragment.FleetFragment"
         android:label="Fleet Mode"
         tools:layout="@layout/fragment_fleet" >
-        <!--<action
-            android:id="@+id/action_fleetFragment_to_scanFragment"
-            app:destination="@+id/scanFragment" />-->
         <action
             android:id="@+id/action_fleetFragment_to_scanFragment"
             app:destination="@id/scanFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
+            app:popExitAnim="@anim/slide_out_right">
+        </action>
     </fragment>
     <fragment
         android:id="@+id/assignFragment"
@@ -31,6 +29,10 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <argument
+            android:name="arg_partner_name"
+            app:argType="string"
+            android:defaultValue="ekko" />
     </fragment>
     <fragment
         android:id="@+id/checkInFragment"
@@ -39,7 +41,11 @@
         tools:layout="@layout/fragment_check_in" >
         <action
             android:id="@+id/action_checkInFragment_to_scanFragment"
-            app:destination="@id/scanFragment" />
+            app:destination="@id/scanFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/emptyFragment"
@@ -48,7 +54,11 @@
         tools:layout="@layout/fragment_empty" >
         <action
             android:id="@+id/action_emptyFragment_to_scanFragment"
-            app:destination="@id/scanFragment" />
+            app:destination="@id/scanFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/retiredFragment"
@@ -57,13 +67,25 @@
         tools:layout="@layout/fragment_retired" >
         <action
             android:id="@+id/action_retiredFragment_to_scanFragment"
-            app:destination="@id/scanFragment" />
+            app:destination="@id/scanFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/scanFragment"
         android:name="com.ekku.nfc.ui.fragment.ScanFragment"
         android:label="Scan Mode"
         tools:layout="@layout/fragment_scan">
+        <argument
+            android:name="arg_container_type"
+            app:argType="string"
+            android:defaultValue="Food" />
+        <argument
+            android:name="arg_container_size"
+            app:argType="string"
+            android:defaultValue="Large" />
         <action
             android:id="@+id/fleet_action"
             app:popUpTo="@id/fleetFragment" />

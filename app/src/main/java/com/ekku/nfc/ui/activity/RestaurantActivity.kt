@@ -25,6 +25,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ekku.nfc.AppDelegate
 import com.ekku.nfc.R
+import com.ekku.nfc.app.UserActivity
 import com.ekku.nfc.databinding.ActivityRestaurantBinding
 import com.ekku.nfc.model.TagAPI
 import com.ekku.nfc.model.TagDao
@@ -50,7 +51,7 @@ import timber.log.Timber
 import com.ekku.nfc.model.Tag as TagEntity
 
 
-class RestaurantActivity : AppCompatActivity(), NfcAdapter.ReaderCallback,
+class RestaurantActivity : UserActivity(), NfcAdapter.ReaderCallback,
     CurrentLocation.LocationResultListener {
 
     private var scanBtnClicked: Boolean = false

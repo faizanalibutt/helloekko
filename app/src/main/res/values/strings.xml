@@ -13,8 +13,8 @@
     <string name="dialog_phone_desc">To make sure device is unique please provide this permission.</string>
     <string name="okay">OK</string>
     <string name="text_app_select">Select App Type</string>
-    <string name="text_consumer">Consumer</string>
-    <string name="text_restaurant">Restaurant</string>
+    <string name="text_consumer">Dropbox</string>
+    <string name="text_restaurant">Partner</string>
     <string name="text_order">Order Number</string>
     <string name="text_hint_customer_order_number">Customer Order Number</string>
     <string name="text_customer_order_default">Enter Customer Order #</string>
@@ -26,7 +26,7 @@
     <string name="text_admin">Admin</string>
     <string name="text_sign_in">Sign In</string>
     <string name="text_username">Username</string>
-    <string name="text_name_detail">Enter your Name</string>
+    <string name="text_name_detail">Enter your Email</string>
     <string name="text_password">Password</string>
     <string name="text_password_detail">Enter your Password</string>
     <string name="text_login">Login</string>
@@ -52,6 +52,11 @@
     <string name="text_clean">Clean</string>
     <string name="text_retired_desc">Please click on scan button to remove container from fleet.</string>
     <string name="text_activity_title">Ekko</string>
+    <string name="text_email">Email</string>
+    <string name="text_email_empty">please enter your email address</string>
+    <string name="text_invalid_email">invalid email</string>
+    <string name="text_pwd_empty">please enter a password</string>
+    <string name="text_pwd_limit">please enter a password with at least 6 characters</string>
     <string-array name="admin_modes_array">
         <item>Fleet</item>
         <item>Assign</item>
@@ -60,10 +65,13 @@
         <item>Retired</item>
     </string-array>
     <string-array name="container_type_array">
-
+        <item>Food</item>
+        <item>Beverage</item>
     </string-array>
     <string-array name="container_size_array">
-
+        <item>Large</item>
+        <item>Medium</item>
+        <item>Small</item>
     </string-array>
     <string-array name="container__array">
 
