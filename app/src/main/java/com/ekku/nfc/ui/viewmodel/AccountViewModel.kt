@@ -14,6 +14,7 @@ class AccountViewModel(repository: AccountRepository): ViewModel() {
     private val apiService: ApiService by lazy { ApiClient.apiClient().create(ApiService::class.java) }
 
     /**
+     * Admin API
      * @param username email provided by admin & partner
      * @param password must be at least 6 characters.
      */
@@ -31,7 +32,49 @@ class AccountViewModel(repository: AccountRepository): ViewModel() {
                 )
             )
         } catch (exception: Exception) {
-            emit(Resource.error(data = null, message = exception.message ?: "Eror message unknown"))
+            emit(Resource.error(data = null, message = exception.message ?: "Error message unknown"))
+        }
+    }
+
+    /**
+     * Partner API
+     * @param username email provided by admin & partner
+     * @param password must be at least 6 characters.
+     */
+    fun postPartnerCredentials(
+        username: String,
+        password: String
+    ) = liveData(Dispatchers.IO) {
+        try {
+            emit(
+                Resource.success(
+                    data = apiService.partnerCredentials(
+                        username,
+                        password
+                    )
+                )
+            )
+        } catch (exception: Exception) {
+            emit(Resource.error(data = null, message = exception.message ?: "Error message unknown"))
+        }
+    }
+
+    /**
+     * @param username only this is required for dropbox
+     */
+    fun postDropBoxCredentials(
+        username: String
+    ) = liveData(Dispatchers.IO) {
+        try {
+            emit(
+                Resource.success(
+                    data = apiService.dropBoxCredentials(
+                        username
+                    )
+                )
+            )
+        } catch (exception: Exception) {
+            emit(Resource.error(data = null, message = exception.message ?: "Error message unknown"))
         }
     }
 

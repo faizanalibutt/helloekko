@@ -16,8 +16,8 @@
     <string name="text_consumer">Dropbox</string>
     <string name="text_restaurant">Partner</string>
     <string name="text_order">Order Number</string>
-    <string name="text_hint_customer_order_number">Customer Order Number</string>
-    <string name="text_customer_order_default">Enter Customer Order #</string>
+    <string name="text_hint_customer_order_number">Customer EkkoID</string>
+    <string name="text_customer_order_default">Enter Customer EkkoID</string>
     <string name="text_scan">scan</string>
     <string name="text_no_of_containers">Number of Containers</string>
     <string name="text_clear_containers" tools:ignore="ButtonCase">CANCEL</string>
@@ -57,6 +57,8 @@
     <string name="text_invalid_email">invalid email</string>
     <string name="text_pwd_empty">please enter a password</string>
     <string name="text_pwd_limit">please enter a password with at least 6 characters</string>
+    <string name="text_customer_id">EkkoID</string>
+    <string name="text_no_wifi">No Internet Connection</string>
     <string-array name="admin_modes_array">
         <item>Fleet</item>
         <item>Assign</item>

@@ -1,5 +1,7 @@
 package com.ekku.nfc.network
 
+import com.ekku.nfc.model.Account
+import com.ekku.nfc.network.ApiService.Companion.DROPBOX_LOGIN
 import com.ekku.nfc.network.ApiService.Companion.PARTNER_LOGIN
 import com.ekku.nfc.network.ApiService.Companion.UPLOAD_DEVICE
 import retrofit2.Call
@@ -41,12 +43,109 @@ interface ApiService {
         @Field("entry.1733715185") network: String,
     ) : Call<String>
 
-    @POST(PARTNER_LOGIN)
+    /**
+     * partner & admin login are same
+     *
+     * partner token info
+     * {
+        "id": "Ny7ePTuliflJ8N14qDo2",
+        "created": "2021-07-13T13:54:59.223Z",
+        "pMenu": "https://react-icons.github.io/react-icons/search?q=container",
+        "city": "Glace Bay",
+        "user": "1mEECTbL7P4L9qWRCCso",
+        "lastUpdate": "2021-07-25T17:25:58.676Z",
+        "pURL": "https://react-icons.github.io/react-icons/search?q=container",
+        "partnerName": "Xufya",
+        "address": "Street No 1,Haji park",
+        "launchDate": "2021-07-13T13:53:56.763Z",
+        "state": "Nova Scotia",
+        "email": "xufyan.wbm@gmail.com",
+        "postalCode": "X1X1X1",
+        "contact": "xuyfan_partner",
+        "pLogo": "https://storage.googleapis.com/storage-ekkocommunity/download.png",
+        "phoneNo": "(321) 678-8787",
+        "archive": false,
+        "region": "ALBERTA",
+        "iat": 1627382819,
+        "exp": 1785170819
+     * }
+     *
+     * admin token info
+     *
+     * {
+        "id": "1mEECTbL7P4L9qWRCCso",
+        "image": "https://storage.googleapis.com/storage-ekkocommunity/download.png",
+        "name": "Sufyan ali",
+        "postalCode": "X1X1X1",
+        "city": "ALBERTA",
+        "archive": false,
+        "role": "ADMIN",
+        "email": "samplehy123@gmail.com",
+        "created": "2021-07-13T13:42:52.551Z",
+        "firstName": "Sufyan",
+        "state": "Alberta",
+        "region": "ALBERTA",
+        "user": "Hyx56UxpUPkQe8VSA1rO",
+        "phoneNo": "(321) 482-2702",
+        "lastName": "ali",
+        "address": "Street No 1,Haji park",
+        "lastUpdate": "2021-07-15T13:24:39.631Z",
+        "status": "active",
+        "iat": 1627395397,
+        "exp": 1785183397
+     * }
+     *
+     * Partner api
+     */
     @FormUrlEncoded
+    @POST(PARTNER_LOGIN)
+    suspend fun partnerCredentials(
+        @Field("email") email: String,
+        @Field("password") password: String,
+    ) : Account
+    // admin api
+    @FormUrlEncoded
+    @POST(ADMIN_LOGIN)
     suspend fun adminCredentials(
         @Field("email") email: String,
         @Field("password") password: String,
-    ) : String
+    ) : Account
+
+    /**
+     * Dropbox login api
+     *
+     * token info
+     *
+     * {
+        "id": "RZUGuVtWml9pxFsYTZ51",
+        "region": "ALBERTA",
+        "state": "Alberta",
+        "postalCode": "X1X1X1",
+        "created": "2021-07-13T13:52:33.474Z",
+        "contact": "xufyan_ali",
+        "type": "INDOOR VERSION",
+        "size": "LARGE",
+        "empty": false,
+        "address": "Street No 1,Haji park",
+        "phoneNo": "(321) 720-2004",
+        "city": "GLACE BAI",
+        "launchDate": "2021-07-13T13:51:21.725Z",
+        "user": "1mEECTbL7P4L9qWRCCso",
+        "dropboxName": "xufyan_dropbox",
+        "lastUpdate": "2021-07-26T10:50:23.735Z",
+        "email": "xufyan.wbm@gmail.com",
+        "dbURL": "https://www.wezedotivom.co",
+        "archive": false,
+        "iat": 1627395769,
+        "exp": 1628000569
+     * }
+     *
+     * */
+    @FormUrlEncoded
+    @POST(DROPBOX_LOGIN)
+    suspend fun dropBoxCredentials(
+        @Field("email") email: String
+    ) : Account
 
     companion object {
         const val UPLOAD = "1FAIpQLSfOisc3AeD_Zo8uUqa_7pJW1MwaGRqyLGda8jafoXzFaO3HSg/formResponse"

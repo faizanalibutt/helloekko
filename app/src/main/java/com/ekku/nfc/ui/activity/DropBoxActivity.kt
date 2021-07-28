@@ -24,6 +24,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.auth0.android.jwt.JWT
 import com.ekku.nfc.AppDelegate
 import com.ekku.nfc.R
 import com.ekku.nfc.app.UserActivity
@@ -63,6 +64,12 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
     private var currentLocation: CurrentLocation? = null
     private var preventDialogs = false
     private lateinit var nfcTagScanList: MutableList<TagEntity>
+    // token has information about dropbox
+    private val dropBoxToken by lazy {
+        getDefaultPreferences().getString(
+            AccountActivity.LOGIN_TOKEN, "put-your-login-token-here"
+        )
+    }
 
     /**
      * check no duplication happened tags must be unique.
@@ -135,6 +142,13 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                 MediaButtonEventReceiver::class.java.name
             )
         )
+
+        // display partner name at title bar.
+        val jwtTokenDecoder = dropBoxToken?.let { JWT(it) }
+        Timber.d("JWT TOKEN : $jwtTokenDecoder")
+        supportActionBar?.let {
+            it.title = "${jwtTokenDecoder?.getClaim("dropboxName")?.asString()}"
+        }
 
     }
 

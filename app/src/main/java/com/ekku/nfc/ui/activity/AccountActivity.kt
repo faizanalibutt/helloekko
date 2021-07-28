@@ -1,5 +1,6 @@
 package com.ekku.nfc.ui.activity
 
+import android.net.Network
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -13,16 +14,16 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import com.ekku.nfc.R
 import com.ekku.nfc.databinding.ActivityAccountBinding
+import com.ekku.nfc.model.Account
 import com.ekku.nfc.repository.AccountRepository
 import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.ADMIN
 import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.APP_MODE
 import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.DROPBOX
 import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.PARTNER
 import com.ekku.nfc.ui.viewmodel.AccountViewModel
+import com.ekku.nfc.util.*
 import com.ekku.nfc.util.AppUtils.startActivity
-import com.ekku.nfc.util.Status
-import com.ekku.nfc.util.getDefaultPreferences
-import com.ekku.nfc.util.savePrefs
+import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 
 class AccountActivity : AppCompatActivity() {
@@ -125,69 +126,107 @@ class AccountActivity : AppCompatActivity() {
                 isReady = false
             }
             // after sending login things move to respective screen, call api
-            if (isReady)
+            if (isReady && NetworkUtils.isOnline(this)) {
                 when (appMode) {
                     ADMIN -> {
+                        accountBinding.progressBar.visibility = View.VISIBLE
+                        // api calling
                         accountViewModel.postAdminCredentials(
                             usernameField.editText?.text.toString(),
                             passwordField.editText?.text.toString()
                         ).observe(this, Observer {
                             it?.let { result ->
-                                when (result.status)
-                                {
+                                when (result.status) {
                                     Status.SUCCESS -> {
                                         accountBinding.progressBar.visibility = View.GONE
-                                        getDefaultPreferences().edit()
-                                            .putString(ADMIN_MODE, adminMode).apply()
-                                        savePrefs(true, ADMIN, "put-your-login-token-here")
-                                        startActivity<AdminActivity>()
-                                        finish()
+                                        result.data?.let { account ->
+                                            Timber.d("admin token came $account")
+                                            getDefaultPreferences().edit()
+                                                .putString(ADMIN_MODE, adminMode).apply()
+                                            savePrefs(login_status = true, ADMIN, account.token)
+                                            startActivity<AdminActivity>()
+                                            finish()
+                                        }
                                     }
                                     Status.ERROR -> {
                                         Timber.d("issue came ${result.message}")
                                         accountBinding.progressBar.visibility = View.GONE
+                                        Snackbar.make(
+                                            accountBinding.root, "${result.message}",
+                                            Snackbar.LENGTH_LONG
+                                        ).show()
                                     }
-                                    Status.LOADING -> {
-                                        accountBinding.progressBar.visibility = View.VISIBLE
-                                    }
+                                    Status.LOADING -> {}
                                 }
                             }
                         })
                     }
                     PARTNER -> {
-                        accountViewModel.postAdminCredentials(
+                        accountBinding.progressBar.visibility = View.VISIBLE
+                        // api calling
+                        accountViewModel.postPartnerCredentials(
                             usernameField.editText?.text.toString(),
                             passwordField.editText?.text.toString()
-                        ).observe(this, Observer {
+                        ).observe(this, {
                             it?.let { result ->
-                                when (result.status)
-                                {
+                                when (result.status) {
                                     Status.SUCCESS -> {
                                         accountBinding.progressBar.visibility = View.GONE
-                                        savePrefs(true, PARTNER, "put-your-login-token-here")
-                                        startActivity<PartnerActivity>()
-                                        finish()
+                                        result.data?.let { account ->
+                                            Timber.d("partner token came $account")
+                                            savePrefs(login_status = true, PARTNER, account.token)
+                                            startActivity<PartnerActivity>()
+                                            finish()
+                                        }
                                     }
                                     Status.ERROR -> {
                                         Timber.d("issue came ${result.message}")
+                                        Snackbar.make(
+                                            accountBinding.root, "${result.message}",
+                                            Snackbar.LENGTH_LONG
+                                        ).show()
                                         accountBinding.progressBar.visibility = View.GONE
                                     }
-                                    Status.LOADING -> {
-                                        accountBinding.progressBar.visibility = View.VISIBLE
-                                    }
+                                    Status.LOADING -> {}
                                 }
                             }
                         })
                     }
                     DROPBOX -> {
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            accountBinding.progressBar.visibility = View.GONE
-                            savePrefs(true, DROPBOX, "put-your-login-token-here")
-                            startActivity<DropBoxActivity>()
-                            finish()
-                        }, 2000)
+                        accountBinding.progressBar.visibility = View.GONE
+                        // api calling
+                        accountViewModel.postDropBoxCredentials(
+                            usernameField.editText?.text.toString()
+                        ).observe(this, {
+                            it?.let { result ->
+                                when (result.status) {
+                                    Status.SUCCESS -> {
+                                        accountBinding.progressBar.visibility = View.GONE
+                                        result.data?.let { account ->
+                                            Timber.d("dropbox token came $account")
+                                            savePrefs(login_status = true, DROPBOX, account.token)
+                                            startActivity<DropBoxActivity>()
+                                            finish()
+                                        }
+                                    }
+                                    Status.ERROR -> {
+                                        Timber.d("issue came ${result.message}")
+                                        accountBinding.progressBar.visibility = View.GONE
+                                        Snackbar.make(
+                                            accountBinding.root, "${result.message}",
+                                            Snackbar.LENGTH_LONG
+                                        ).show()
+                                    }
+                                    Status.LOADING -> {}
+                                }
+                            }
+                        })
                     }
                 }
+                hideSystemKeyboard(this@AccountActivity)
+            } else
+                Snackbar.make(accountBinding.root,
+                    getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG).show()
         }
     }
 
@@ -199,6 +238,7 @@ class AccountActivity : AppCompatActivity() {
     }
 
     companion object {
+        // TODO: 7/28/21 handle message coming from server on wrong username/password
         const val LOGIN_PREF = "logged_in"
         const val LOGIN_MODE = "login_mode"
         const val LOGIN_TOKEN = "login_token"

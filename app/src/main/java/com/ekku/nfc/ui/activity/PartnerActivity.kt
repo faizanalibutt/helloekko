@@ -14,20 +14,21 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doOnTextChanged
+import com.auth0.android.jwt.JWT
 import com.ekku.nfc.AppDelegate
 import com.ekku.nfc.R
 import com.ekku.nfc.app.UserActivity
 import com.ekku.nfc.databinding.ActivityRestaurantBinding
 import com.ekku.nfc.model.TagAPI
 import com.ekku.nfc.model.TagDao
+import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_TOKEN
 import com.ekku.nfc.ui.viewmodel.TAGViewModel
 import com.ekku.nfc.util.*
 import com.ekku.nfc.util.AppUtils.allowWritePermission
@@ -62,6 +63,10 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         TAGViewModel.TagViewModelFactory((application as AppDelegate).repository)
     }
     private lateinit var nfcTagScanList: MutableList<TagEntity>
+    // token has information about partner
+    private val partnerToken by lazy {
+        getDefaultPreferences().getString(LOGIN_TOKEN, "put-your-login-token-here")
+    }
 
     /**
      * check no duplication happened tags must be unique.
@@ -141,26 +146,19 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             reset()
         }
 
-        restaurantBinding.orderField.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+        restaurantBinding.orderField.doOnTextChanged { _, _, _, _ ->
+            restaurantBinding.textOrderDesc.setTextColor(
+                ContextCompat.getColor(this@PartnerActivity, R.color.green_500)
+            )
+        }
 
-            }
+        // display partner name at title bar.
+        val jwtTokenDecoder = partnerToken?.let { JWT(it) }
+        Timber.d("JWT TOKEN : $jwtTokenDecoder")
+        supportActionBar?.let {
+            it.title = "${jwtTokenDecoder?.getClaim("partnerName")?.asString()}"
+        }
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                restaurantBinding.textOrderDesc.setTextColor(
-                    ContextCompat.getColor(this@PartnerActivity, R.color.green_500)
-                )
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                // can add multi options later.
-                /*
-                Handler(Looper.getMainLooper()).postDelayed({
-                    restaurantBinding?.orderField?.clearFocus()
-                }, 3000)
-                */
-            }
-        })
     }
 
     override fun onResume() {
