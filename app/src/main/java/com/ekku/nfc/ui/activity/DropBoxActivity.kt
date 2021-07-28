@@ -24,12 +24,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.auth0.android.jwt.JWT
 import com.ekku.nfc.AppDelegate
 import com.ekku.nfc.R
 import com.ekku.nfc.app.UserActivity
-import com.ekku.nfc.model.TagAPI
-import com.ekku.nfc.model.TagDao
 import com.ekku.nfc.ui.adapter.TagListAdapter
 import com.ekku.nfc.ui.viewmodel.TAGViewModel
 import com.ekku.nfc.util.*
@@ -59,22 +56,17 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
 
     private var dialog: AlertDialog? = null
     private val tagViewMadel: TAGViewModel by viewModels {
-        TAGViewModel.TagViewModelFactory((application as AppDelegate).repository)
+        TAGViewModel.TagViewModelFactory((application as AppDelegate).repository, this)
     }
     private var currentLocation: CurrentLocation? = null
     private var preventDialogs = false
-    private lateinit var nfcTagScanList: MutableList<TagEntity>
+
     // token has information about dropbox
     private val dropBoxToken by lazy {
         getDefaultPreferences().getString(
             AccountActivity.LOGIN_TOKEN, "put-your-login-token-here"
         )
     }
-
-    /**
-     * check no duplication happened tags must be unique.
-     * */
-    private var isIdAvailable = true
     private var isNfcStarted = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,19 +77,13 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             isNfcStarted = true
         } else {
             isNfcStarted = false
-            window.clearFlags(
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                        or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-                        or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                        or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-            )
+            disableScanning()
         }
 
         val recyclerView = findViewById<RecyclerView>(R.id.tagListView)
         val adapter = TagListAdapter()
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
-        nfcTagScanList = mutableListOf()
 
         tagViewMadel.allTags.observe(this, { tags ->
             tags?.let { adapter.submitList(it) }
@@ -112,7 +98,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             while (!isFinishing) {
                 Thread.sleep(AppUtils.TAG_SYNC_TIME)
                 runOnUiThread {
-                    syncData(tagViewMadel.syncTags.value)
+                    //syncData(tagViewMadel.syncTags.value)
                 }
             }
         }.start()
@@ -143,18 +129,16 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             )
         )
 
-        // display partner name at title bar.
-        val jwtTokenDecoder = dropBoxToken?.let { JWT(it) }
-        Timber.d("JWT TOKEN : $jwtTokenDecoder")
         supportActionBar?.let {
-            it.title = "${jwtTokenDecoder?.getClaim("dropboxName")?.asString()}"
+            it.title =
+                getDataFromToken("dropboxName", dropBoxToken)?.asString() ?: "title not found"
         }
 
     }
 
     override fun onResume() {
         super.onResume()
-        if(isNfcStarted) {
+        if (isNfcStarted) {
             setUpTorch(true)
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
@@ -213,16 +197,8 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                     }
                 }
                 Handler(Looper.getMainLooper()).postDelayed({
-                    setUpTorch(false)
-                    window.clearFlags(
-                        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                                or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-                                or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                                or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                    )
-                    removeNfcCallback(this@DropBoxActivity)
+                    disableScanning()
                 }, CONSUMER_TIME_OUT)
-
             } else
                 getNfcAdapter()?.let {
                     val isShowing = dialog?.isShowing ?: false
@@ -247,122 +223,35 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         }
     }
 
-    private fun syncData(tagList: List<TagAPI>?) {
-        tagList?.let {
-            if (it.isEmpty())
-                return
-            for (tag in it) {
-                tagViewMadel.postTag(tag).observe(this, { result ->
-                    result?.let { resource ->
-                        when (resource.status) {
-                            Status.SUCCESS -> {
-                                Timber.d("${tag.id} tag data is synced successfully.")
-                                // update the status
-                                tag.tag_sync = 1
-                                tagViewMadel.update(
-                                    tagUpdate = TagDao.TagUpdate(
-                                        tag.id,
-                                        tag.tag_sync
-                                    )
-                                )
-                            }
-                            Status.ERROR -> {
-                                Timber.d("data is not synced as expected")
-                            }
-                            Status.LOADING -> {
-                            }
-                        }
-                    }
-                })
-            }
-        }
-    }
-
-    private var camera: Camera? = null
-    private fun setUpTorch(torchSwitch: Boolean) {
-        val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-            if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
-                try {
-                    if (AppUtils.isAPI23)
-                        cameraManager.setTorchMode("0", torchSwitch)
-                    else {
-                        if (camera == null) {
-                            camera = Camera.open()
-                        }
-                        if (torchSwitch) {
-                            val parameters = camera?.parameters
-                            parameters?.flashMode = Camera.Parameters.FLASH_MODE_TORCH
-                            camera?.parameters = parameters
-                            camera?.startPreview()
-                        } else {
-                            val parameters = camera?.parameters
-                            parameters?.flashMode = Camera.Parameters.FLASH_MODE_OFF
-                            camera?.parameters = parameters
-                            camera?.stopPreview()
-                            camera?.release()
-                            camera = null
-                        }
-                    }
-                } catch (ignored: Exception) {
-                    Timber.d("flash got error: ${ignored.message}")
-                }
-            } else {
-                Toast.makeText(this, "This device has no flash", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Toast.makeText(this, "This device has no camera", Toast.LENGTH_SHORT).show()
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        setUpTorch(false)
+        if (canWrite)
+            setBrightness(
+                .5F, 5,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, this@DropBoxActivity
+            )
     }
 
     override fun onTagDiscovered(tag: Tag?) {
         if (tag != null) {
             Timber.d("Tag Id is: ${BaseEncoding.base16().encode(tag.id)}")
             Handler(Looper.getMainLooper()).post {
-                val tagAPI = TagAPI(
-                    tag_uid = BaseEncoding.base16().encode(tag.id),
-                    tag_date_time = TimeUtils.getFormatDateTime(TimeUtils.getToday()),
-                    tag_phone_uid = AppUtils.STRING_GUID,
-                    tag_sync = 1,
-                    tag_orderId = "consumer"
-                )
-                val tagEntity = TagEntity(
-                    tag_uid = BaseEncoding.base16().encode(tag.id),
-                    tag_time = TimeUtils.getToday(),
-                    tag_date = TimeUtils.getFormatDate(TimeUtils.getToday()),
-                    tag_date_time = TimeUtils.getFormatDateTime(TimeUtils.getToday()),
-                    tag_phone_uid = AppUtils.STRING_GUID,
-                    tag_sync = 1,
-                    tag_orderId = "consumer"
-                )
-                if (nfcTagScanList.isNotEmpty()) {
-                    for (checkId in nfcTagScanList) {
-                        if (checkId.tag_uid == tagEntity.tag_uid) {
-                            isIdAvailable = false
-                            break
-                        } else
-                            isIdAvailable = true
-                    }
-                }
-                if (!isIdAvailable)
-                    return@post
-
-                nfcTagScanList.add(tagEntity)
-                tagViewMadel.postTag(
-                    tagAPI
+                // api call here
+                tagViewMadel.postDropBoxData(
+                    BaseEncoding.base16().encode(tag.id),
+                    dropBoxId = getDataFromToken(tokenName = "id", dropBoxToken)?.asString()
+                        ?: "error"
                 ).observe(this, { it1 ->
                     it1?.let { resource ->
                         when (resource.status) {
                             Status.SUCCESS -> {
                                 resource.data?.let {
-                                    Timber.d("tag data uploaded successfully ${tagEntity.tag_sync}")
-                                    tagViewMadel.insert(tagEntity)
+                                    Timber.d("tag data uploaded successfully $it")
                                 }
                             }
                             Status.ERROR -> {
-                                tagEntity.tag_sync = 0
-                                Timber.d("tag data not uploaded. ${tagEntity.tag_sync}")
-                                tagViewMadel.insert(tagEntity)
+                                Timber.d("tag data not uploaded. ${resource.message}")
                             }
                             Status.LOADING -> {
                             }
@@ -371,25 +260,13 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                 })
             }
             setUpTorch(false)
-            Handler(Looper.getMainLooper()).postDelayed({
-                setUpTorch(true)
-            }, 700)
+            Handler(Looper.getMainLooper()).postDelayed({ setUpTorch(true) }, 700)
             playNotification(
                 getString(R.string.notification_desc), AppUtils.NOTIFICATION_ID, "loved_it"
             )
         } else
             playNotification(
                 getString(R.string.notification_desc_unses), AppUtils.NOTIFICATION_ID, "loved_it"
-            )
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        setUpTorch(false)
-        if (canWrite)
-            setBrightness(
-                .0F, 0,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, this@DropBoxActivity
             )
     }
 
@@ -405,9 +282,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String?>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<String?>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (grantResults.isNotEmpty())
@@ -447,6 +322,55 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
 
             if (!isFinishing)
                 dialog?.show()
+        }
+    }
+
+    private fun disableScanning() {
+        setUpTorch(false)
+        window.clearFlags(
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                    or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+                    or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                    or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+        )
+        removeNfcCallback(this@DropBoxActivity)
+        getDefaultPreferences().edit()?.putBoolean("HEAD_JACK_RESPONSE", false)?.apply()
+    }
+
+    private var camera: Camera? = null
+    private fun setUpTorch(torchSwitch: Boolean) {
+        val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+            if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+                try {
+                    if (AppUtils.isAPI23)
+                        cameraManager.setTorchMode("0", torchSwitch)
+                    else {
+                        if (camera == null) {
+                            camera = Camera.open()
+                        }
+                        if (torchSwitch) {
+                            val parameters = camera?.parameters
+                            parameters?.flashMode = Camera.Parameters.FLASH_MODE_TORCH
+                            camera?.parameters = parameters
+                            camera?.startPreview()
+                        } else {
+                            val parameters = camera?.parameters
+                            parameters?.flashMode = Camera.Parameters.FLASH_MODE_OFF
+                            camera?.parameters = parameters
+                            camera?.stopPreview()
+                            camera?.release()
+                            camera = null
+                        }
+                    }
+                } catch (ignored: Exception) {
+                    Timber.d("flash got error: ${ignored.message}")
+                }
+            } else {
+                Toast.makeText(this, "This device has no flash", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "This device has no camera", Toast.LENGTH_SHORT).show()
         }
     }
 

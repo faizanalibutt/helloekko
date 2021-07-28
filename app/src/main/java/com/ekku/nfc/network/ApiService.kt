@@ -11,15 +11,24 @@ import retrofit2.http.POST
 
 interface ApiService {
 
-    @POST(UPLOAD)
+    /**
+     * customer order will be send along with containers list
+     */
+    @POST(CUSTOMER_ORDER)
     @FormUrlEncoded
-    suspend fun addTagData(
-        @Field("entry.84444851") id: String,
-        @Field("entry.2070776725") tag_uid: String,
-        @Field("entry.645920834") time: String,
-        @Field("entry.2073481602") phone_uid: String,
-        @Field("entry.1002271193") sync: String,
-        @Field("entry.1359494710") orderId: String
+    suspend fun customerOrder(
+        @Field("consumerId") consumer_id: String,
+        @Field("containers") containers_list: List<String>,
+    ) : String
+
+    /**
+     * on each scan this api will be called and send data to firebase
+     */
+    @POST(DROPBOX_SCAN)
+    @FormUrlEncoded
+    suspend fun dropBoxData(
+        @Field("containerId") container_id: String,
+        @Field("dropboxId") dropBox_id: String,
     ) : String
 
     @POST(UPLOAD_MIDNIGHT)
@@ -148,7 +157,8 @@ interface ApiService {
     ) : Account
 
     companion object {
-        const val UPLOAD = "1FAIpQLSfOisc3AeD_Zo8uUqa_7pJW1MwaGRqyLGda8jafoXzFaO3HSg/formResponse"
+        const val CUSTOMER_ORDER = "1FAIpQLSfOisc3AeD_Zo8uUqa_7pJW1MwaGRqyLGda8jafoXzFaO3HSg/formResponse"
+        const val DROPBOX_SCAN = "order/consumer/container/return"
         const val UPLOAD_MIDNIGHT = "1FAIpQLScFRWXUCXgswy7KTs7q1PsZ3N84wPDYjwvXq6-kfCLEWB2ESw/formResponse"
         const val UPLOAD_DEVICE = "1FAIpQLSeoCootOf6W3knjC4scF0h-j_U0fs4gRQeBO-2235nM0Zi0AQ/formResponse"
         const val PARTNER_LOGIN = "partner/signin"

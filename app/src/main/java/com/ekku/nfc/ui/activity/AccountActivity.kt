@@ -1,9 +1,6 @@
 package com.ekku.nfc.ui.activity
 
-import android.net.Network
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -14,7 +11,6 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import com.ekku.nfc.R
 import com.ekku.nfc.databinding.ActivityAccountBinding
-import com.ekku.nfc.model.Account
 import com.ekku.nfc.repository.AccountRepository
 import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.ADMIN
 import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.APP_MODE

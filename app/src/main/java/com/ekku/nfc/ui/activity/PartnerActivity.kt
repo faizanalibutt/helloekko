@@ -60,7 +60,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
     private var currentLocation: CurrentLocation? = null
     private var preventDialogs = false
     private val tagViewMadel: TAGViewModel by viewModels {
-        TAGViewModel.TagViewModelFactory((application as AppDelegate).repository)
+        TAGViewModel.TagViewModelFactory((application as AppDelegate).repository, this)
     }
     private lateinit var nfcTagScanList: MutableList<TagEntity>
     // token has information about partner
@@ -167,14 +167,14 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             setUpNfc()
     }
 
-    override fun onDestroy() {
+    /*override fun onDestroy() {
         super.onDestroy()
         if (canWrite)
             setBrightness(
                 .0F, 0,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, this@PartnerActivity
             )
-    }
+    }*/
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -353,7 +353,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                 return
             for (tag in it) {
                 if (tag.tag_sync == 0)
-                    tagViewMadel.postTag(tag).observe(this, { result ->
+                    tagViewMadel.postCustomerOrder(tag, mutableListOf()).observe(this, { result ->
                         result?.let { resource ->
                             when (resource.status) {
                                 Status.SUCCESS -> {
@@ -388,8 +388,8 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                 tag_sync = tag.tag_sync,
                 tag_orderId = tag.tag_orderId
             )
-            tagViewMadel.postTag(
-                tagAPI
+            tagViewMadel.postCustomerOrder(
+                tagAPI, mutableListOf()
             ).observe(this, { it1 ->
                 it1?.let { resource ->
                     when (resource.status) {

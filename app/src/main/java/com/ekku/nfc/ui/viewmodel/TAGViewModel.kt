@@ -1,5 +1,6 @@
 package com.ekku.nfc.ui.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.*
 import com.ekku.nfc.model.*
 import com.ekku.nfc.network.ApiClient
@@ -8,12 +9,12 @@ import com.ekku.nfc.repository.TagRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class TAGViewModel(private val tagRepository: TagRepository) : ViewModel() {
+class TAGViewModel(private val tagRepository: TagRepository, context: Context) : ViewModel() {
 
     val allTags: LiveData<List<TagAPI>> = tagRepository.allTags.asLiveData()
     val syncTags: LiveData<List<TagAPI>> = tagRepository.syncTags.asLiveData()
 
-    private val apiService: ApiService by lazy { ApiClient.apiClient().create(ApiService::class.java) }
+    private val apiService: ApiService by lazy { ApiClient.apiClient(context).create(ApiService::class.java) }
 
     fun insert(tag: Tag) = viewModelScope.launch {
         tagRepository.insert(tag)
@@ -27,31 +28,43 @@ class TAGViewModel(private val tagRepository: TagRepository) : ViewModel() {
         tagRepository.update(tagUpdate)
     }
 
-    fun postTag(tagData: TagAPI) = liveData(Dispatchers.IO) {
+    fun postCustomerOrder(tagData: TagAPI, containersList: List<String>) = liveData(Dispatchers.IO) {
         emit(Resource.loading(data = null))
         try {
             emit(
                 Resource.success(
-                    data = apiService.addTagData(
+                    data = apiService.customerOrder(
                         tagData.id.toString(),
-                        tagData.tag_uid,
-                        tagData.tag_date_time,
-                        tagData.tag_phone_uid,
-                        tagData.tag_sync.toString(),
-                        tagData.tag_orderId
+                        containersList,
                     )
                 )
             )
         } catch (exception: Exception) {
-            emit(Resource.error(data = null, message = exception.message ?: "Error occured"))
+            emit(Resource.error(data = null, message = exception.message ?: "Error occurred"))
         }
     }
 
-    class TagViewModelFactory(private val repository: TagRepository) : ViewModelProvider.Factory {
+    fun postDropBoxData(containerId: String, dropBoxId: String) = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
+        try {
+            emit(
+                Resource.success(
+                    data = apiService.dropBoxData(
+                        containerId,
+                        dropBoxId
+                    )
+                )
+            )
+        } catch (exception: Exception) {
+            emit(Resource.error(data = null, message = exception.message ?: "Error occurred"))
+        }
+    }
+
+    class TagViewModelFactory(private val repository: TagRepository, val context: Context) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(TAGViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return TAGViewModel(repository) as T
+                return TAGViewModel(repository, context) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }

@@ -6,11 +6,14 @@ import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import com.auth0.android.jwt.Claim
+import com.auth0.android.jwt.JWT
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_MODE
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_PREF
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_TOKEN
 import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.APP_MODE
 import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.FIRST_TIME
+import timber.log.Timber
 
 
 const val TAG_PREF = "tag_prefs"
@@ -40,4 +43,11 @@ fun Context.hideSystemKeyboard(activity: Activity?) {
 
 fun Context.myToast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+}
+
+fun getDataFromToken(tokenName: String, dropBoxToken: String?): Claim? {
+    // display partner name at title bar.
+    val jwtTokenDecoder = dropBoxToken?.let { JWT(it) }
+    Timber.d("JWT TOKEN : $jwtTokenDecoder")
+    return jwtTokenDecoder?.getClaim(tokenName)
 }

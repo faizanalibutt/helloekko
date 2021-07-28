@@ -14,7 +14,7 @@ class MediaButtonEventReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val intentAction = intent?.action
-        if (Intent.ACTION_MEDIA_BUTTON != intentAction) return
+        if (ACTION_MEDIA_BUTTON != intentAction) return
         val event = intent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
             ?: return
         val action = event.action
@@ -30,13 +30,13 @@ class MediaButtonEventReceiver : BroadcastReceiver() {
             context?.startActivity<DropBoxActivity> {
                 this.addFlags(FLAG_ACTIVITY_CLEAR_TOP)
                 this.addFlags(FLAG_ACTIVITY_CLEAR_TASK)
-                //this.addFlags(FLAG_ACTIVITY_SINGLE_TOP)
                 this.addFlags(FLAG_ACTIVITY_NEW_TASK)
-                //this.action = "ACTION_HEAD_PHONE_JACK_CLICK"
             }
 
         }
-        abortBroadcast()
+        try{
+            abortBroadcast()
+        } catch (ignore: Exception) {}
     }
 
 }
