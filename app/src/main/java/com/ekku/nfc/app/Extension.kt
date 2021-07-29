@@ -47,9 +47,9 @@ fun Context.myToast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 }
 
-fun getDataFromToken(tokenName: String, dropBoxToken: String?): Claim? {
-    // display partner name at title bar.
-    val jwtTokenDecoder = dropBoxToken?.let { JWT(it) }
+fun getDataFromToken(tokenName: String, authToken: String?): Claim? {
+    // get information from token.
+    val jwtTokenDecoder = authToken?.let { JWT(it) }
     Timber.d("JWT TOKEN : $jwtTokenDecoder")
     return jwtTokenDecoder?.getClaim(tokenName)
 }

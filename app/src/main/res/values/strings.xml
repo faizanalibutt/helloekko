@@ -31,7 +31,7 @@
     <string name="text_password_detail">Enter your Password</string>
     <string name="text_login">Login</string>
     <string name="text_admin_mode">Select Mode</string>
-    <string name="text_app_mode">Change App Mode?</string>
+    <string name="text_app_mode">Change App Type?</string>
     <string name="text_sign_out">Sign Out</string>
     <string name="text_assign">Assign</string>
     <string name="text_empty">Empty</string>
@@ -59,6 +59,10 @@
     <string name="text_pwd_limit">please enter a password with at least 6 characters</string>
     <string name="text_customer_id">EkkoID</string>
     <string name="text_no_wifi">No Internet Connection</string>
+    <string name="text_username_empty">Please enter dropbox name</string>
+    <string name="text_user_not_found">Folllowing EkkoID is either not correct or is not available.</string>
+    <string name="text_order_status">Order Status</string>
+    <string name="text_order_detail">Something went wrong it\'s not you, it\'s us. We will try our best to fix this as soon as possible.</string>
     <string-array name="admin_modes_array">
         <item>Fleet</item>
         <item>Assign</item>

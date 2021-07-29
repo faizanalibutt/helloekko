@@ -79,6 +79,7 @@ class AccountViewModel(repository: AccountRepository) : ViewModel() {
     fun postDropBoxCredentials(
         username: String
     ) = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
         try {
             emit(
                 Resource.success(data = apiService.dropBoxCredentials(username))

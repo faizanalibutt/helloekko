@@ -4,9 +4,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import com.ekku.nfc.ui.activity.AdminActivity
 import com.ekku.nfc.ui.activity.DropBoxActivity
 import com.ekku.nfc.ui.activity.PartnerActivity
 import com.ekku.nfc.ui.activity.WelcomeActivity
+import com.ekku.nfc.ui.activity.WelcomeActivity.Companion.APP_MODE
 import com.ekku.nfc.util.NotifyUtils.setIntervalWork
 import com.ekku.nfc.util.NotifyUtils.setMidNightWork
 import com.ekku.nfc.util.getDefaultPreferences
@@ -17,18 +19,17 @@ class TagBootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action.equals(ACTION_TAG_BOOT_RECIEVER)) {
             Timber.d("On Reboot called come to Ekko app too.")
-            //context?.playNotification("Boot Called", 10007, "boot_channel")
             context?.startActivity(
                 Intent(
-                    context, when (context.getDefaultPreferences().getInt("APP_TYPE", -1)) {
+                    context, when (context.getDefaultPreferences().getInt(APP_MODE, -1)) {
                         0 -> PartnerActivity::class.java
                         1 -> DropBoxActivity::class.java
+                        2 -> AdminActivity::class.java
                         else -> WelcomeActivity::class.java
                     }
                 ).addFlags(FLAG_ACTIVITY_NEW_TASK)
             )
 
-            context?.setMidNightWork()
             context?.setIntervalWork()
         }
     }

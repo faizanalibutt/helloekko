@@ -95,10 +95,6 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             tags?.let { adapter.submitList(it) }
         })
 
-        tagViewMadel.syncTags.observe(this, { tags ->
-            tags?.let { Timber.d("Synced Tag List: $it") }
-        })
-
         /**
          * save IMEI to global guid. if permission is allowed.
          */
@@ -114,7 +110,6 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         // implement alarm manager at midnight, intervals.
         if (!getDefaultPreferences().getBoolean(AppUtils.TAG_ALARM_KEY, false)) {
             getDefaultPreferences().edit().putBoolean(AppUtils.TAG_ALARM_KEY, true).apply()
-            setMidNightWork()
             setIntervalWork()
         }
 
@@ -236,7 +231,8 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             mCurrentLocation = it
             val lat = mCurrentLocation?.latitude
             val long = mCurrentLocation?.longitude
-            getDefaultPreferences().edit().putString("GPS_DATA", "$lat, $long").apply()
+            getDefaultPreferences().edit().putString("GPS_DATA_LAT", "$lat").apply()
+            getDefaultPreferences().edit().putString("GPS_DATA_LONG", "$long").apply()
         }
     }
 

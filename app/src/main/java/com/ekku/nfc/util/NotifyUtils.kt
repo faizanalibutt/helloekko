@@ -94,7 +94,7 @@ object NotifyUtils {
     }
 
     fun Context.setIntervalWork() {
-        val alarmIntent = Intent(this, TagAlarmReceiver::class.java)
+        val alarmIntent = Intent(this, TagAlarmReceiver::class.java).setAction("INTERVAL")
         val pendingIntent: PendingIntent? = PendingIntent.getBroadcast(
             this, 0, alarmIntent, 0
         )
@@ -102,8 +102,8 @@ object NotifyUtils {
 
         val firstInterval: Calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 5)
-            set(Calendar.MINUTE, 0)
+            set(Calendar.HOUR_OF_DAY, 2)
+            set(Calendar.MINUTE, 35)
         }
         val secondInterval: Calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()

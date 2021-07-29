@@ -18,7 +18,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doOnTextChanged
 import com.auth0.android.jwt.JWT
@@ -26,8 +25,8 @@ import com.ekku.nfc.AppDelegate
 import com.ekku.nfc.R
 import com.ekku.nfc.app.UserActivity
 import com.ekku.nfc.databinding.ActivityRestaurantBinding
+import com.ekku.nfc.model.Consumer
 import com.ekku.nfc.model.TagAPI
-import com.ekku.nfc.model.TagDao
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_TOKEN
 import com.ekku.nfc.ui.viewmodel.TAGViewModel
 import com.ekku.nfc.util.*
@@ -63,6 +62,8 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         TAGViewModel.TagViewModelFactory((application as AppDelegate).repository, this)
     }
     private lateinit var nfcTagScanList: MutableList<TagEntity>
+    private lateinit var consumersList: List<Consumer>
+
     // token has information about partner
     private val partnerToken by lazy {
         getDefaultPreferences().getString(LOGIN_TOKEN, "put-your-login-token-here")
@@ -79,18 +80,6 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         val view = restaurantBinding.root
         setContentView(view)
 
-        tagViewMadel.syncTags.observe(this, { tags ->
-            tags?.let { Timber.d("Synced Tag List: $it") }
-        })
-        // tag data syncing to google sheet of every scan.
-        Thread {
-            while (!isFinishing) {
-                Thread.sleep(AppUtils.TAG_SYNC_TIME)
-                runOnUiThread {
-                    syncData(tagViewMadel.syncTags.value)
-                }
-            }
-        }.start()
         // instantiate location object.
         currentLocation = CurrentLocation(this@PartnerActivity)
         // save IMEI to global guid. if permission is allowed.
@@ -101,9 +90,8 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             AppUtils.STRING_GUID = getDeviceIMEI()
 
         // implement alarm manager at midnight, intervals.
-        if (!getDefaultPreferences().getBoolean(AppUtils.TAG_ALARM_KEY, false)) {
+        if (getDefaultPreferences().getBoolean(AppUtils.TAG_ALARM_KEY, false)) {
             getDefaultPreferences().edit().putBoolean(AppUtils.TAG_ALARM_KEY, true).apply()
-            setMidNightWork()
             setIntervalWork()
         }
 
@@ -126,6 +114,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             setUpNfc()
             setUpTorch(true)
             nfcTagScanList = mutableListOf()
+            isConsumerExist()
         }
 
         restaurantBinding.clearContainers.setOnClickListener {
@@ -141,6 +130,11 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                     "Please first scan container.", Toast.LENGTH_SHORT
                 ).show()
                 return@setOnClickListener
+            } else if (NetworkUtils.isOnline(this)) {
+                Snackbar.make(restaurantBinding.root,
+                    "No Internet Connection Available", Snackbar.LENGTH_LONG
+                ).show()
+                return@setOnClickListener
             }
             submitTagData()
             reset()
@@ -153,12 +147,13 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         }
 
         // display partner name at title bar.
-        val jwtTokenDecoder = partnerToken?.let { JWT(it) }
-        Timber.d("JWT TOKEN : $jwtTokenDecoder")
         supportActionBar?.let {
-            it.title = "${jwtTokenDecoder?.getClaim("partnerName")?.asString()}"
+            it.title =
+                getDataFromToken("partnerName", partnerToken)?.asString() ?: "title not found"
         }
 
+        // verify consumer upon order from partner side
+        showConsumers()
     }
 
     override fun onResume() {
@@ -171,7 +166,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         super.onDestroy()
         if (canWrite)
             setBrightness(
-                .5F, 10,
+                -1F, 10,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, this@PartnerActivity
             )
     }
@@ -230,9 +225,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                 }
             }
             setUpTorch(false)
-            Handler(Looper.getMainLooper()).postDelayed({
-                setUpTorch(true)
-            }, 700)
+            Handler(Looper.getMainLooper()).postDelayed({ setUpTorch(true) }, 700)
             playNotification(
                 getString(R.string.notification_desc), AppUtils.NOTIFICATION_ID, "loved_it"
             )
@@ -249,8 +242,21 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         location?.let {
             val lat = it.latitude
             val long = it.longitude
-            getDefaultPreferences().edit().putString("GPS_DATA", "$lat, $long").apply()
+            getDefaultPreferences().edit().putString("GPS_DATA_LAT", "$lat").apply()
+            getDefaultPreferences().edit().putString("GPS_DATA_LONG", "$long").apply()
         }
+    }
+
+    private fun isConsumerExist() {
+        for (consumer in consumersList)//(226) 505-4408
+            if (restaurantBinding.orderField.text.toString() == takeNumberOnly(consumer.phoneNo))
+                return
+            else
+                showDialog(
+                    dialogType = 104,
+                    desc = getString(R.string.text_user_not_found),
+                    right = getString(R.string.ok)
+                )
     }
 
     private fun reset() {
@@ -347,82 +353,53 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         }
     }
 
-    private fun syncData(tagList: List<TagAPI>?) {
-        tagList?.let {
-            if (it.isEmpty())
-                return
-            for (tag in it) {
-                if (tag.tag_sync == 0)
-                    tagViewMadel.postCustomerOrder(tag, mutableListOf()).observe(this, { result ->
-                        result?.let { resource ->
-                            when (resource.status) {
-                                Status.SUCCESS -> {
-                                    Timber.d("${tag.id} tag data is synced successfully.")
-                                    // update the status
-                                    tag.tag_sync = 1
-                                    tagViewMadel.update(
-                                        tagUpdate = TagDao.TagUpdate(
-                                            tag.id,
-                                            tag.tag_sync
-                                        )
-                                    )
-                                }
-                                Status.ERROR -> {
-                                    Timber.d("data is not synced as expected ${resource.message}")
-                                }
-                                Status.LOADING -> {
-                                }
-                            }
-                        }
-                    })
-            }
-        }
-    }
-
     private fun submitTagData() {
-        for (tag in nfcTagScanList) {
-            val tagAPI = TagAPI(
-                tag_uid = tag.tag_uid,
-                tag_date_time = tag.tag_date_time,
-                tag_phone_uid = tag.tag_phone_uid,
-                tag_sync = tag.tag_sync,
-                tag_orderId = tag.tag_orderId
-            )
-            tagViewMadel.postCustomerOrder(
-                tagAPI, mutableListOf()
-            ).observe(this, { it1 ->
-                it1?.let { resource ->
-                    when (resource.status) {
-                        Status.SUCCESS -> {
-                            resource.data?.let {
-                                Timber.d("tag data uploaded successfully ${tag.tag_sync}")
-                                tagViewMadel.insert(tag)
-                            }
-                        }
-                        Status.ERROR -> {
-                            tag.tag_sync = 0
-                            Timber.d("tag data not uploaded. ${tag.tag_sync}")
-                            tagViewMadel.insert(tag)
-                        }
-                        Status.LOADING -> {
+        // add containers id to final list
+        val containersIds: MutableList<String> = mutableListOf()
+        for (container in nfcTagScanList)
+            containersIds.add(container.tag_uid)
+        // api is calling
+        tagViewMadel.postCustomerOrder(
+            consumerId = restaurantBinding.orderField.text.toString(),
+            containersIds
+        ).observe(this, {
+            it?.let { resource ->
+                when (resource.status) {
+                    Status.SUCCESS -> {
+                        resource.data?.let { response ->
+                            Timber.d("tag data uploaded successfully ${response.message}")
+                            showDialog(
+                                title = getString(R.string.text_order_status),
+                                desc = response.message
+                                    ?: getString(R.string.text_order_detail),
+                                right = getString(R.string.okay),
+                                dialogType = 104
+                            )
                         }
                     }
+                    Status.ERROR -> {
+                        Timber.d("tag data not uploaded. ${resource.message}")
+                        showDialog(
+                            title = getString(R.string.text_order_status),
+                            desc = resource.message
+                                ?: getString(R.string.text_order_detail),
+                            right = getString(R.string.okay),
+                            dialogType = 104
+                        )
+                    }
+                    Status.LOADING -> {
+                    }
                 }
-            })
-        }
-        Snackbar.make(
-            restaurantBinding.root,
-            "Order and containers submitted!",
-            Snackbar.LENGTH_LONG
-        ).show()
+            }
+        })
     }
 
     private fun showDialog(
-        title: String,
-        desc: String,
+        title: String = "",
+        desc: String = "",
         right: String = "",
         left: String = "",
-        dialogType: Int
+        dialogType: Int = -1
     ) {
         val isShowing = dialog?.isShowing ?: false
         if (isShowing)
@@ -437,6 +414,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                         type == ButtonType.RIGHT && dialogType == 101 -> showNFCSettings()
                         type == ButtonType.RIGHT && dialogType == 102 -> allowWritePermission()
                         type == ButtonType.RIGHT && dialogType == 103 -> askForPermission()
+                        type == ButtonType.RIGHT && dialogType == 104 -> dialog.dismiss()
                     }
                 }
             })
@@ -444,4 +422,28 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             dialog?.show()
     }
 
+    private fun showConsumers() {
+        tagViewMadel.getConsumersData().observe(this@PartnerActivity, {
+            it?.let { resource ->
+                when (resource.status) {
+                    Status.SUCCESS -> {
+                        //get users
+                        resource.data?.let { customer ->
+                            consumersList = customer.consumers
+                        }
+                    }
+                    Status.ERROR -> {
+                        // inform user of no connection
+                        Timber.d("we got error while fetching consumers list ${resource.message}")
+                    }
+                    Status.LOADING -> {
+                    }
+                }
+            }
+        })
+    }
+
+    private fun takeNumberOnly(phoneNo: String): String {
+        return phoneNo.replace(Regex("[()\\-\\s]"), "")
+    }
 }

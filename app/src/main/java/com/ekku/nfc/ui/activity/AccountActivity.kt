@@ -82,50 +82,79 @@ class AccountActivity : AppCompatActivity() {
             finish()
         }
 
+        // change hint to dropbox name in dropbox app type
+        usernameField.hint = "Name"
+
         usernameField.editText?.doOnTextChanged { inputText, start, before, count ->
             when {
                 inputText?.isEmpty() == true ->
-                    usernameField.error = getString(R.string.text_email_empty)
+                    if (appMode != DROPBOX)
+                        usernameField.error = getString(R.string.text_email_empty)
+                    else
+                        usernameField.error = getString(R.string.text_username_empty)
                 inputText?.contains("@") != true || !inputText.contains(".com") ->
-                    usernameField.error = getString(R.string.text_invalid_email)
+                    if (appMode != DROPBOX)
+                        usernameField.error = getString(R.string.text_invalid_email)
                 else -> usernameField.error = null
             }
         }
-
-        passwordField.editText?.doOnTextChanged { inputText, start, before, count ->
-            inputText?.let {
-                when {
-                    inputText.isEmpty() ->
-                        passwordField.error = getString(R.string.text_pwd_empty)
-                    inputText.length < 6 ->
-                        passwordField.error =
-                            getString(R.string.text_pwd_limit)
-                    else -> passwordField.error = null
+        if (appMode != DROPBOX)
+            passwordField.editText?.doOnTextChanged { inputText, start, before, count ->
+                inputText?.let {
+                    when {
+                        inputText.isEmpty() ->
+                            passwordField.error = getString(R.string.text_pwd_empty)
+                        inputText.length < 6 ->
+                            passwordField.error =
+                                getString(R.string.text_pwd_limit)
+                        else -> passwordField.error = null
+                    }
                 }
             }
-        }
 
         accountBinding.loginButton.setOnClickListener {
             // look for anything that's remained and ready to go
             var isReady = true
-            if ((passwordField.isEmpty() || passwordField.editText?.text.toString().length < 6)
-                && passwordField.visibility == View.VISIBLE
-            ) {
-                passwordField.error = getString(R.string.text_pwd_empty)
-                isReady = false
+
+            if (passwordField.visibility == View.VISIBLE) {
+                when {
+                    passwordField.isEmpty() -> {
+                        passwordField.error = getString(R.string.text_pwd_empty)
+                        isReady = false
+                    }
+                    passwordField.editText?.text.toString().length < 6 -> {
+                        passwordField.error = getString(R.string.text_pwd_limit)
+                        isReady = false
+                    }
+                }
             }
-            if (usernameField.isEmpty()
-                || usernameField.editText?.text?.contains("@") != true
-                || usernameField.editText?.text?.contains(".com") != true
-            ) {
-                usernameField.error = getString(R.string.text_email_empty)
-                isReady = false
+
+            when {
+                usernameField.editText?.text?.isEmpty() == true -> {
+                    if (appMode != DROPBOX)
+                        usernameField.error = getString(R.string.text_email_empty)
+                    else
+                        usernameField.error = getString(R.string.text_username_empty)
+                    isReady = false
+                }
+                usernameField.editText?.text?.contains("@") != true ->{
+                    if (appMode != DROPBOX) {
+                        usernameField.error = getString(R.string.text_email_empty)
+                        isReady = false
+                    }
+                }
+                usernameField.editText?.text?.contains(".com") != true -> {
+                    if (appMode != DROPBOX) {
+                        usernameField.error = getString(R.string.text_email_empty)
+                        isReady = false
+                    }
+                }
             }
+
             // after sending login things move to respective screen, call api
             if (isReady && NetworkUtils.isOnline(this)) {
                 when (appMode) {
                     ADMIN -> {
-                        accountBinding.progressBar.visibility = View.VISIBLE
                         // api calling
                         accountViewModel.postAdminCredentials(
                             usernameField.editText?.text.toString(),
@@ -152,13 +181,14 @@ class AccountActivity : AppCompatActivity() {
                                             Snackbar.LENGTH_LONG
                                         ).show()
                                     }
-                                    Status.LOADING -> {}
+                                    Status.LOADING -> {
+                                        accountBinding.progressBar.visibility = View.VISIBLE
+                                    }
                                 }
                             }
                         })
                     }
                     PARTNER -> {
-                        accountBinding.progressBar.visibility = View.VISIBLE
                         // api calling
                         accountViewModel.postPartnerCredentials(
                             usernameField.editText?.text.toString(),
@@ -183,13 +213,14 @@ class AccountActivity : AppCompatActivity() {
                                         ).show()
                                         accountBinding.progressBar.visibility = View.GONE
                                     }
-                                    Status.LOADING -> {}
+                                    Status.LOADING -> {
+                                        accountBinding.progressBar.visibility = View.VISIBLE
+                                    }
                                 }
                             }
                         })
                     }
                     DROPBOX -> {
-                        accountBinding.progressBar.visibility = View.GONE
                         // api calling
                         accountViewModel.postDropBoxCredentials(
                             usernameField.editText?.text.toString()
@@ -213,7 +244,9 @@ class AccountActivity : AppCompatActivity() {
                                             Snackbar.LENGTH_LONG
                                         ).show()
                                     }
-                                    Status.LOADING -> {}
+                                    Status.LOADING -> {
+                                        accountBinding.progressBar.visibility = View.VISIBLE
+                                    }
                                 }
                             }
                         })
@@ -222,8 +255,10 @@ class AccountActivity : AppCompatActivity() {
                 hideSystemKeyboard(this@AccountActivity)
             } else {
                 if (!NetworkUtils.isOnline(this))
-                    Snackbar.make(accountBinding.root,
-                        getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG).show()
+                    Snackbar.make(
+                        accountBinding.root,
+                        getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG
+                    ).show()
             }
         }
     }
