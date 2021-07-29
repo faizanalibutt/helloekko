@@ -1,11 +1,13 @@
 package com.ekku.nfc.util
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import com.auth0.android.jwt.Claim
 import com.auth0.android.jwt.JWT
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_MODE
@@ -50,4 +52,14 @@ fun getDataFromToken(tokenName: String, dropBoxToken: String?): Claim? {
     val jwtTokenDecoder = dropBoxToken?.let { JWT(it) }
     Timber.d("JWT TOKEN : $jwtTokenDecoder")
     return jwtTokenDecoder?.getClaim(tokenName)
+}
+
+fun Activity.askForPermission() {
+    ActivityCompat.requestPermissions(
+        this, arrayOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.READ_PHONE_STATE
+        ), 1001
+    )
 }

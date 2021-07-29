@@ -6,6 +6,8 @@ import android.net.ConnectivityManager
 import android.net.wifi.SupplicantState
 import android.net.wifi.WifiManager
 import android.telephony.TelephonyManager
+import org.json.JSONObject
+import retrofit2.HttpException
 import timber.log.Timber
 
 
@@ -47,6 +49,13 @@ object NetworkUtils {
             else telephonyManager?.deviceId ?: "unable to get device id"
         }.onFailure { Timber.d("IMEI Exception Message: ${it.message}") }
         return "unable to get device id"
+    }
+
+    fun getError(httpException: HttpException): String {
+        val jsonObject = httpException.response()?.errorBody()?.string()?.let { JSONObject(it) }
+        val error: Boolean = (jsonObject?.get("error") ?: false) as Boolean
+        val message = jsonObject?.get("message") ?: "Something went wrong"
+        return message as String
     }
 
 }

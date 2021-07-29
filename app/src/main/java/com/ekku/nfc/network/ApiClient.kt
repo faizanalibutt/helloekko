@@ -35,7 +35,9 @@ object ApiClient {
                         val newRequest: Request = chain.request().newBuilder()
                             .addHeader(
                                 "x-auth-token",
-                                "${context.getDefaultPreferences().getString(LOGIN_TOKEN, null)}"
+                                "${context.getDefaultPreferences().getString(
+                                    LOGIN_TOKEN, null
+                                )}"
                             )
                             .build()
                         chain.proceed(newRequest)

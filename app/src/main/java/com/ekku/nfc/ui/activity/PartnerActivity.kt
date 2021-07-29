@@ -167,14 +167,14 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             setUpNfc()
     }
 
-    /*override fun onDestroy() {
+    override fun onDestroy() {
         super.onDestroy()
         if (canWrite)
             setBrightness(
-                .0F, 0,
+                .5F, 10,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, this@PartnerActivity
             )
-    }*/
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -442,16 +442,6 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             })
         if (!isFinishing)
             dialog?.show()
-    }
-
-    private fun askForPermission() {
-        ActivityCompat.requestPermissions(
-            this, arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE
-            ), 1001
-        )
     }
 
 }

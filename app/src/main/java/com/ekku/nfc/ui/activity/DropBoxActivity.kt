@@ -69,6 +69,12 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
     }
     private var isNfcStarted = true
 
+    // access location for device
+    private var mCurrentLocation: Location? = null
+
+    // take camera variable for flash
+    private var camera: Camera? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_consumer)
@@ -93,16 +99,6 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             tags?.let { Timber.d("Synced Tag List: $it") }
         })
 
-        // tag data syncing to google sheet of every scan.
-        Thread {
-            while (!isFinishing) {
-                Thread.sleep(AppUtils.TAG_SYNC_TIME)
-                runOnUiThread {
-                    //syncData(tagViewMadel.syncTags.value)
-                }
-            }
-        }.start()
-
         /**
          * save IMEI to global guid. if permission is allowed.
          */
@@ -122,6 +118,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             setIntervalWork()
         }
 
+        // headphone jack code here.
         (getSystemService(Context.AUDIO_SERVICE) as AudioManager).registerMediaButtonEventReceiver(
             ComponentName(
                 packageName,
@@ -129,6 +126,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             )
         )
 
+        // dropbox name is here.
         supportActionBar?.let {
             it.title =
                 getDataFromToken("dropboxName", dropBoxToken)?.asString() ?: "title not found"
@@ -149,21 +147,11 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             if (isNFCOnline()) {
                 addNfcCallback(this, this)
                 if (!canWrite) {
-                    dialog = createConfirmationAlert(
+                    showDialog(
                         getString(R.string.txt_dim_title),
                         getString(R.string.txt_dim_desc),
-                        right = getString(R.string.txt_go_to_settings),
-                        listener = object : AlertButtonListener {
-                            override fun onClick(
-                                dialog: DialogInterface,
-                                type: ButtonType
-                            ) {
-                                if (type == ButtonType.RIGHT)
-                                    allowWritePermission()
-                            }
-                        })
-                    if (!isFinishing)
-                        dialog?.show()
+                        right = getString(R.string.txt_go_to_settings), dialogType = 102
+                    )
                 } else {
                     setBrightness(
                         -1F, 20,
@@ -176,49 +164,25 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                             ) == PackageManager.PERMISSION_GRANTED && AppUtils.isAPI23
                         ) {
                             currentLocation?.getLocation(this)
-                            ActivityCompat.requestPermissions(
-                                this, arrayOf(
-                                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                                    Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.READ_PHONE_STATE
-                                ), 1001
-                            )
+                            askForPermission()
                         } else if (Build.VERSION.SDK_INT < 23) {
                             currentLocation?.getLocation(this)
                         } else {
-                            ActivityCompat.requestPermissions(
-                                this, arrayOf(
-                                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                                    Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.READ_PHONE_STATE
-                                ), 1001
-                            )
+                            askForPermission()
                         }
                     }
                 }
                 Handler(Looper.getMainLooper()).postDelayed({
+                    // halt the scanning operation manually
                     disableScanning()
                 }, CONSUMER_TIME_OUT)
             } else
                 getNfcAdapter()?.let {
-                    val isShowing = dialog?.isShowing ?: false
-                    if (isShowing)
-                        return
-                    dialog = createConfirmationAlert(
+                    showDialog(
                         getString(R.string.dialog_nfc_title),
                         getString(R.string.dialog_nfc_desc),
-                        right = getString(R.string.txt_go_to_settings),
-                        listener = object : AlertButtonListener {
-                            override fun onClick(
-                                dialog: DialogInterface, type: ButtonType
-                            ) {
-                                if (type == ButtonType.RIGHT)
-                                    showNFCSettings()
-                            }
-                        })
-
-                    if (!isFinishing)
-                        dialog?.show()
+                        right = getString(R.string.txt_go_to_settings), dialogType = 101
+                    )
                 }
         }
     }
@@ -228,7 +192,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         setUpTorch(false)
         if (canWrite)
             setBrightness(
-                .5F, 5,
+                .5F, 10,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, this@DropBoxActivity
             )
     }
@@ -240,15 +204,12 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                 // api call here
                 tagViewMadel.postDropBoxData(
                     BaseEncoding.base16().encode(tag.id),
-                    dropBoxId = getDataFromToken(tokenName = "id", dropBoxToken)?.asString()
-                        ?: "error"
+                    dropBoxId = getDataFromToken(tokenName = "id", dropBoxToken)?.asString() ?: "error"
                 ).observe(this, { it1 ->
                     it1?.let { resource ->
                         when (resource.status) {
                             Status.SUCCESS -> {
-                                resource.data?.let {
-                                    Timber.d("tag data uploaded successfully $it")
-                                }
+                                resource.data?.let { Timber.d("tag data uploaded successfully $it") }
                             }
                             Status.ERROR -> {
                                 Timber.d("tag data not uploaded. ${resource.message}")
@@ -270,13 +231,11 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             )
     }
 
-    private var mCurrentLocation: Location? = null
     override fun gotLocation(location: Location?) {
         location?.let {
             mCurrentLocation = it
             val lat = mCurrentLocation?.latitude
             val long = mCurrentLocation?.longitude
-
             getDefaultPreferences().edit().putString("GPS_DATA", "$lat, $long").apply()
         }
     }
@@ -298,30 +257,11 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
              * its compulsory for uniqueness of a device. must grant it.
              * show dialog to the user.
              */
-            val isShowing = dialog?.isShowing ?: false
-            if (isShowing)
-                return
-            dialog = createConfirmationAlert(
+            showDialog(
                 getString(R.string.dialog_phone_title),
                 getString(R.string.dialog_phone_desc),
-                right = getString(R.string.okay),
-                listener = object : AlertButtonListener {
-                    override fun onClick(
-                        dialog: DialogInterface, type: ButtonType
-                    ) {
-                        if (type == ButtonType.RIGHT)
-                            ActivityCompat.requestPermissions(
-                                this@DropBoxActivity, arrayOf(
-                                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                                    Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.READ_PHONE_STATE
-                                ), 1001
-                            )
-                    }
-                })
-
-            if (!isFinishing)
-                dialog?.show()
+                right = getString(R.string.okay), dialogType = 103
+            )
         }
     }
 
@@ -337,7 +277,6 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         getDefaultPreferences().edit()?.putBoolean("HEAD_JACK_RESPONSE", false)?.apply()
     }
 
-    private var camera: Camera? = null
     private fun setUpTorch(torchSwitch: Boolean) {
         val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
@@ -372,6 +311,33 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         } else {
             Toast.makeText(this, "This device has no camera", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun showDialog(
+        title: String,
+        desc: String,
+        right: String = "",
+        left: String = "",
+        dialogType: Int
+    ) {
+        val isShowing = dialog?.isShowing ?: false
+        if (isShowing)
+            return
+        dialog = createConfirmationAlert(
+            title, desc,
+            right = right,
+            left = left,
+            listener = object : AlertButtonListener {
+                override fun onClick(dialog: DialogInterface, type: ButtonType) {
+                    when {
+                        type == ButtonType.RIGHT && dialogType == 101 -> showNFCSettings()
+                        type == ButtonType.RIGHT && dialogType == 102 -> allowWritePermission()
+                        type == ButtonType.RIGHT && dialogType == 103 -> askForPermission()
+                    }
+                }
+            })
+        if (!isFinishing)
+            dialog?.show()
     }
 
 }

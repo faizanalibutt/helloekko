@@ -220,9 +220,11 @@ class AccountActivity : AppCompatActivity() {
                     }
                 }
                 hideSystemKeyboard(this@AccountActivity)
-            } else
-                Snackbar.make(accountBinding.root,
-                    getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG).show()
+            } else {
+                if (!NetworkUtils.isOnline(this))
+                    Snackbar.make(accountBinding.root,
+                        getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG).show()
+            }
         }
     }
 

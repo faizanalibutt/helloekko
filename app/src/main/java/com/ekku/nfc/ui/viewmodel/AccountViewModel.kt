@@ -5,13 +5,17 @@ import com.ekku.nfc.model.Resource
 import com.ekku.nfc.network.ApiClient
 import com.ekku.nfc.network.ApiService
 import com.ekku.nfc.repository.AccountRepository
+import com.ekku.nfc.util.NetworkUtils
 import kotlinx.coroutines.Dispatchers
+import retrofit2.HttpException
 
-class AccountViewModel(repository: AccountRepository): ViewModel() {
+class AccountViewModel(repository: AccountRepository) : ViewModel() {
 
     // it will handle all of the users login like consumer, partner, admin
 
-    private val apiService: ApiService by lazy { ApiClient.apiClient().create(ApiService::class.java) }
+    private val apiService: ApiService by lazy {
+        ApiClient.apiClient().create(ApiService::class.java)
+    }
 
     /**
      * Admin API
@@ -32,7 +36,12 @@ class AccountViewModel(repository: AccountRepository): ViewModel() {
                 )
             )
         } catch (exception: Exception) {
-            emit(Resource.error(data = null, message = exception.message ?: "Error message unknown"))
+            emit(
+                Resource.error(
+                    data = null,
+                    message = NetworkUtils.getError(exception as HttpException)
+                )
+            )
         }
     }
 
@@ -55,7 +64,12 @@ class AccountViewModel(repository: AccountRepository): ViewModel() {
                 )
             )
         } catch (exception: Exception) {
-            emit(Resource.error(data = null, message = exception.message ?: "Error message unknown"))
+            emit(
+                Resource.error(
+                    data = null,
+                    message = NetworkUtils.getError(exception as HttpException)
+                )
+            )
         }
     }
 
@@ -67,18 +81,20 @@ class AccountViewModel(repository: AccountRepository): ViewModel() {
     ) = liveData(Dispatchers.IO) {
         try {
             emit(
-                Resource.success(
-                    data = apiService.dropBoxCredentials(
-                        username
-                    )
-                )
+                Resource.success(data = apiService.dropBoxCredentials(username))
             )
         } catch (exception: Exception) {
-            emit(Resource.error(data = null, message = exception.message ?: "Error message unknown"))
+            emit(
+                Resource.error(
+                    data = null,
+                    message = NetworkUtils.getError(exception as HttpException)
+                )
+            )
         }
     }
 
-    class AccountViewModelFactory(private val repository: AccountRepository) : ViewModelProvider.Factory {
+    class AccountViewModelFactory(private val repository: AccountRepository) :
+        ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(AccountViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
