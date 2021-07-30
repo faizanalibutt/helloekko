@@ -13,6 +13,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import timber.log.Timber
 
 
 object ApiClient {
@@ -32,12 +33,21 @@ object ApiClient {
             OkHttpClient.Builder().addInterceptor(
                 if (context?.getDefaultPreferences()?.getBoolean(LOGIN_PREF, false) == true)
                     Interceptor { chain ->
+                        Timber.d(
+                            "LOGIN_TOKEN is: ${
+                                context.getDefaultPreferences().getString(
+                                    LOGIN_TOKEN, null
+                                )
+                            }"
+                        )
                         val newRequest: Request = chain.request().newBuilder()
                             .addHeader(
                                 "x-auth-token",
-                                "${context.getDefaultPreferences().getString(
-                                    LOGIN_TOKEN, null
-                                )}"
+                                "${
+                                    context.getDefaultPreferences().getString(
+                                        LOGIN_TOKEN, null
+                                    )
+                                }"
                             )
                             .build()
                         chain.proceed(newRequest)

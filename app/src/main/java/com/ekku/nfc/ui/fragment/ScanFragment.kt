@@ -97,11 +97,6 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
             }
             scanBinding.clearContainers.setOnClickListener { navigateToAdminMode(adminMode) }
 
-            Snackbar.make(
-                view,
-                "Coming from Fleet Fragment with this information ${scanFragmentArgs.argContainerSize} ${scanFragmentArgs.argContainerType}",
-                Snackbar.LENGTH_LONG
-            ).show()
             nfcTagScanList = mutableListOf()
         }
 
@@ -150,11 +145,15 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                 { _context?.let { setUpTorch(true, it) } }, 700
             )
             _context?.playNotification(
-                getString(R.string.notification_desc), AppUtils.NOTIFICATION_ID, channelName = "loved_it"
+                getString(R.string.notification_desc),
+                AppUtils.NOTIFICATION_ID,
+                channelName = "loved_it"
             )
         } ?: run {
             _context?.playNotification(
-                getString(R.string.notification_desc_unses), AppUtils.NOTIFICATION_ID, channelName = "loved_it"
+                getString(R.string.notification_desc_unses),
+                AppUtils.NOTIFICATION_ID,
+                channelName = "loved_it"
             )
         }
     }
@@ -176,18 +175,56 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                 fleetApi()
             }
             getString(R.string.text_assign) -> {
-
+                assignApi()
             }
             getString(R.string.text_check_in) -> {
-
-            }
-            getString(R.string.text_empty) -> {
 
             }
             getString(R.string.text_retired) -> {
 
             }
         }
+    }
+
+    private fun assignApi() {
+        // prepare object to send
+        val containersAssign = mutableListOf<String>()
+        for (container in nfcTagScanList)
+            containersAssign.add(container.tag_uid)
+
+        // assign container to partner and saving record to cloud
+        adminViewModel.postAssignedContainers(scanFragmentArgs.argPartnerName, containersAssign).observe(viewLifecycleOwner, {
+            it?.let { resource ->
+                when (resource.status) {
+                    Status.SUCCESS -> {
+                        resource.data?.let { response ->
+                            Timber.d("Fleet Api Response: ${response.message}")
+                            showDialog(
+                                title = getString(R.string.text_admin_response),
+                                desc = response.message,
+                                right = getString(R.string.okay),
+                                dialogType = 104,
+                                context = _context
+                            )
+                        }
+                    }
+                    Status.ERROR -> {
+                        Timber.d("Fleet Api Response ${resource.message}")
+                        showDialog(
+                            title = getString(R.string.text_admin_response),
+                            desc = resource.message
+                                ?: getString(R.string.text_order_detail),
+                            right = getString(R.string.okay),
+                            dialogType = 104,
+                            context = _context
+                        )
+                    }
+                    Status.LOADING -> {
+                        Timber.d("Fleet Api Response You didn't implement it.")
+                    }
+                }
+            }
+        })
     }
 
     private fun fleetApi() {
@@ -205,13 +242,15 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                         ?.asString() ?: "region_not_available"
                 )
             )
+
+
         // add api for fleet to add container in it
         adminViewModel.postContainersToFleet(containersFleet).observe(viewLifecycleOwner, {
             it?.let { resource ->
-                when(resource.status) {
+                when (resource.status) {
                     Status.SUCCESS -> {
                         resource.data?.let { response ->
-                            Timber.d("Fleet Api Response ${response.message}")
+                            Timber.d("Fleet Api Response: ${response.message}")
                             showDialog(
                                 title = getString(R.string.text_admin_response),
                                 desc = response.message,

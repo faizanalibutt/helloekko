@@ -29,10 +29,6 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
-        <argument
-            android:name="arg_partner_name"
-            app:argType="string"
-            android:defaultValue="ekko" />
     </fragment>
     <fragment
         android:id="@+id/checkInFragment"
@@ -86,6 +82,10 @@
             android:name="arg_container_size"
             app:argType="string"
             android:defaultValue="Large" />
+        <argument
+            android:name="arg_partner_name"
+            app:argType="string"
+            android:defaultValue="EKKO" />
         <action
             android:id="@+id/fleet_action"
             app:popUpTo="@id/fleetFragment" />

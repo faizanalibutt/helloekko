@@ -50,7 +50,6 @@ fun Context.myToast(message: String) {
 fun Context.getDataFromToken(tokenName: String, authToken: String?): Claim? {
     // get information from token.
     val jwtTokenDecoder = authToken?.let { JWT(it) }
-    Timber.d("JWT TOKEN : $jwtTokenDecoder")
     return jwtTokenDecoder?.getClaim(tokenName)
 }
 

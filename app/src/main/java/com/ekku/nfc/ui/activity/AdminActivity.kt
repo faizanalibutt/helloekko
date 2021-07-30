@@ -59,11 +59,11 @@ class AdminActivity : AppCompatActivity() {
                 true
             }
             // move to this fragment
-            R.id.fleet_action -> { setNavigationGraph(R.id.fleetFragment); true }
-            R.id.assign_action -> { setNavigationGraph(R.id.assignFragment); true }
-            R.id.empty_action -> { setNavigationGraph(R.id.emptyFragment); true }
-            R.id.check_in_action -> { setNavigationGraph(R.id.checkInFragment); true }
-            R.id.retired_action -> { setNavigationGraph(R.id.retiredFragment);true }
+            R.id.fleet_action -> { setNavigationGraph(R.id.fleetFragment, getString(R.string.text_fleet)); true }
+            R.id.assign_action -> { setNavigationGraph(R.id.assignFragment, getString(R.string.text_assign)); true }
+            R.id.empty_action -> { setNavigationGraph(R.id.emptyFragment, getString(R.string.text_empty)); true }
+            R.id.check_in_action -> { setNavigationGraph(R.id.checkInFragment, getString(R.string.text_check_in)); true }
+            R.id.retired_action -> { setNavigationGraph(R.id.retiredFragment, getString(R.string.text_retired)); true }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -89,7 +89,8 @@ class AdminActivity : AppCompatActivity() {
         setupActionBar(navController, appBarConfiguration)
     }
 
-    private fun setNavigationGraph(destinationFragmentId: Int) {
+    private fun setNavigationGraph(destinationFragmentId: Int, admin_mode: String) {
+        getDefaultPreferences().edit().putString(ADMIN_MODE, admin_mode).apply()
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.admin_nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController

@@ -58,7 +58,6 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
     private val tagViewMadel: TAGViewModel by viewModels {
         TAGViewModel.TagViewModelFactory((application as AppDelegate).repository, this)
     }
-    private var currentLocation: CurrentLocation? = null
     private var preventDialogs = false
 
     // token has information about dropbox
@@ -71,6 +70,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
 
     // access location for device
     private var mCurrentLocation: Location? = null
+    private var currentLocation: CurrentLocation? = null
 
     // take camera variable for flash
     private var camera: Camera? = null

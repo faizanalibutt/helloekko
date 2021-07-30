@@ -8,40 +8,22 @@
     tools:context=".ui.fragment.AssignFragment">
 
     <TextView
-        android:id="@+id/assign_mode"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:gravity="center"
-        android:text="@string/text_assign_mode"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-        android:textColor="@color/green_500"
-        app:layout_constraintBottom_toTopOf="@+id/assign_line"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/assign_line"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent=".15" />
-
-    <TextView
         android:id="@+id/partner_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:text="@string/text_partner_name"
-        android:textColor="@color/green_500"
-        app:layout_constraintBottom_toTopOf="@+id/spinner_type"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/spinner_partner"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/assign_line"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <Spinner
-        android:id="@+id/spinner_type"
+        android:id="@+id/spinner_partner"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
+        android:layout_height="@dimen/spinner_size"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toTopOf="@+id/btn_scan"
         app:layout_constraintTop_toBottomOf="@+id/partner_name" />
@@ -54,9 +36,10 @@
         android:paddingHorizontal="44dp"
         app:backgroundTint="@color/green_500"
         android:text="@string/text_scan"
+        android:enabled="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinner_type" />
+        app:layout_constraintTop_toBottomOf="@+id/spinner_partner" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

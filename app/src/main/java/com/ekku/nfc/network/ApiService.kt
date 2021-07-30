@@ -177,8 +177,7 @@ interface ApiService {
     /**
      * fetching most valuable partners of ekko
      */
-    @POST(ADMIN_ASSIGN_PARTNER_LIST)
-    @FormUrlEncoded
+    @GET(ADMIN_ASSIGN_PARTNER_LIST)
     suspend fun fetchPartners(): PartnerShell
 
     /**
