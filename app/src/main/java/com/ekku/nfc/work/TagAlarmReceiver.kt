@@ -59,9 +59,9 @@ class TagAlarmReceiver : BroadcastReceiver() {
 
             // finally call the API, make sheet first
             apiService.sendDeviceInfo(
-                user_id = getDataFromToken(tokenName = "id", authToken)?.asString() ?: "F",
-                name = getDataFromToken("partnerName", authToken)?.asString()
-                    ?: getDataFromToken("dropboxName", authToken)?.asString() ?: "UNKNOWN_NAME",
+                user_id = context?.getDataFromToken(tokenName = "id", authToken)?.asString() ?: "FU*K",
+                name = context?.getDataFromToken("partnerName", authToken)?.asString()
+                    ?: context?.getDataFromToken("dropboxName", authToken)?.asString() ?: "UNKNOWN_NAME",
                 latitude = location_lat ?: "location permission not allowed",
                 longitude = location_long ?: "location permission not allowed",
                 phone_uid = appUid ?: "app imei not found",

@@ -90,7 +90,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             AppUtils.STRING_GUID = getDeviceIMEI()
 
         // implement alarm manager at midnight, intervals.
-        if (getDefaultPreferences().getBoolean(AppUtils.TAG_ALARM_KEY, false)) {
+        if (!getDefaultPreferences().getBoolean(AppUtils.TAG_ALARM_KEY, false)) {
             getDefaultPreferences().edit().putBoolean(AppUtils.TAG_ALARM_KEY, true).apply()
             setIntervalWork()
         }

@@ -44,11 +44,12 @@ object AppUtils {
         left: String = "",
         listener: AlertButtonListener?,
         context: Context = this,
+        cancelable: Boolean = true,
     ): AlertDialog {
         return AlertDialog.Builder(context)
             .setTitle(title)
             .setMessage(message)
-            .setCancelable(true)
+            .setCancelable(cancelable)
             .setNegativeButton(left) { dialogInterface, _ ->
                 listener?.onClick(dialogInterface, ButtonType.LEFT)
             }

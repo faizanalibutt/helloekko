@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/sign_out"
+        android:title="@string/text_sign_out" />
+    <item
+        android:id="@+id/fleet_action"
+        android:title="@string/text_fleet" />
+    <item
+        android:id="@+id/assign_action"
+        android:title="@string/text_assign" />
+    <item
+        android:id="@+id/empty_action"
+        android:title="@string/text_empty" />
+    <item
+        android:id="@+id/check_in_action"
+        android:title="@string/text_check_in" />
+    <item
+        android:id="@+id/retired_action"
+        android:title="@string/text_retired" />
+</menu>

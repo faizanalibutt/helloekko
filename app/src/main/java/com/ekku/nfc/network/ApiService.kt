@@ -1,14 +1,8 @@
 package com.ekku.nfc.network
 
-import com.ekku.nfc.model.Account
-import com.ekku.nfc.model.Customer
-import com.ekku.nfc.model.GenericResponse
-import com.ekku.nfc.model.Tag
+import com.ekku.nfc.model.*
 import retrofit2.Call
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.GET
-import retrofit2.http.POST
+import retrofit2.http.*
 
 interface ApiService {
 
@@ -71,14 +65,15 @@ interface ApiService {
     suspend fun partnerCredentials(
         @Field("email") username: String,
         @Field("password") password: String,
-    ) : Account
+    ): Account
+
     // admin api
     @FormUrlEncoded
     @POST(ADMIN_LOGIN)
     suspend fun adminCredentials(
         @Field("email") username: String,
         @Field("password") password: String,
-    ) : Account
+    ): Account
 
     /**
      * Dropbox login api
@@ -114,16 +109,14 @@ interface ApiService {
     @POST(DROPBOX_LOGIN)
     suspend fun dropBoxCredentials(
         @Field("dropboxName") username: String
-    ) : Account
-
-    // ADMIN MODES APIS
-
+    ): Account
 
     /**
      * consumers data to verify customer upon order from partner.
      * */
     @GET(CONSUMERS_DATA)
-    suspend fun consumersData() : Customer
+    suspend fun consumersData(): Customer
+    // TODO: 7/30/21 how to configure this type of api
 
     /**
      * customer order will be send along with containers list
@@ -133,7 +126,7 @@ interface ApiService {
     suspend fun customerOrder(
         @Field("consumerId") consumer_id: String,
         @Field("containers") containers_list: List<String>,
-    ) : GenericResponse
+    ): GenericResponse
 
     /**
      * on each scan this api will be called and send data to firebase
@@ -143,7 +136,7 @@ interface ApiService {
     suspend fun dropBoxData(
         @Field("containerId") container_id: String,
         @Field("dropboxId") dropBox_id: String,
-    ) : String
+    ): String
 
     /**
      * device logs are sending using thig api to specific location in firestore LOGS
@@ -158,15 +151,80 @@ interface ApiService {
         @Field("imei") phone_uid: String,
         @Field("battery") battery: String,
         @Field("network") network: String,
-    ) : Call<String>
+    ): Call<String>
+
+    /////////////////// ADMIN MODES APIS \\\\\\\\\\\\\\\\\\
+
+    /**
+     * adding containers by using fleet api
+     */
+    @POST(ADMIN_FLEET_MODE)
+    @FormUrlEncoded
+    suspend fun postContainersFleet(
+        @Field("containers") fleetContainers: List<Container>
+    ): GenericResponse
+
+    /**
+     * assigning containers to different partners using this api
+     */
+    @POST(ADMIN_ASSIGN_MODE)
+    @FormUrlEncoded
+    suspend fun postContainersAssign(
+        @Field("partnerId") id: String,
+        @Field("containers") assignContainers: List<String>
+    ): GenericResponse
+
+    /**
+     * fetching most valuable partners of ekko
+     */
+    @POST(ADMIN_ASSIGN_PARTNER_LIST)
+    @FormUrlEncoded
+    suspend fun fetchPartners(): PartnerShell
+
+    /**
+     * this implies when container is returned from dropbox
+     */
+    @GET(ADMIN_CHECK_IN_MODE)
+    suspend fun postContainersCheckIN(
+        @Path("container_id") container_id: String,
+    ): GenericResponse
+
+    /**
+     * finally container is empty and ready to dump in dropbox
+     */
+    @POST(ADMIN_EMPTY_MODE)
+    @FormUrlEncoded
+    suspend fun postContainersEmpty(
+        @Field("dropboxId") id: String,
+        @Field("latitude") latitude: Float,
+        @Field("longitude") longitude: Float
+    ): GenericResponse
+
+    /**
+     * we got dropboxes list hurrah!
+     */
+    @GET(ADMIN_EMPTY_DROPBOX_LIST)
+    suspend fun gatherDropBoxes(): DropBoxShell
+
+    @GET(ADMIN_RETIRED_MODE)
+    suspend fun postContainersRetired(
+        @Path("container_id") container_id: String,
+    ): GenericResponse
 
     companion object {
-        const val CUSTOMER_ORDER = "partner/consumer/order"
-        const val DROPBOX_SCAN = "order/consumer/container/return"
-        const val UPLOAD_DEVICE = "logs"
         const val PARTNER_LOGIN = "partner/signin"
         const val DROPBOX_LOGIN = "dropbox/signin"
         const val ADMIN_LOGIN = "admin/admin/signin"
         const val CONSUMERS_DATA = "partner/get/userlist"
+        const val CUSTOMER_ORDER = "partner/consumer/order"
+        const val DROPBOX_SCAN = "order/consumer/container/return"
+        const val ADMIN_FLEET_MODE = "admin/admin/add/container/fleet"
+        const val ADMIN_ASSIGN_MODE = "admin/admin/assign/container/partner"
+        const val ADMIN_ASSIGN_PARTNER_LIST = "admin/admin/get/partner/list"
+        const val ADMIN_CHECK_IN_MODE = "take/containers/dropbox/{container_id}"
+        const val ADMIN_EMPTY_MODE = "admin/admin/makedropboxempty"
+        const val ADMIN_EMPTY_DROPBOX_LIST = "admin/admin/get/dropbox/list"
+        const val ADMIN_RETIRED_MODE = "admin/admin/add/container/retired/{container_id}"
+        const val UPLOAD_DEVICE = "logs"
     }
 }

@@ -40,7 +40,32 @@
             android:screenOrientation="portrait"
             android:label="@string/text_activity_title"
             android:theme="@style/Theme.EkkoTag.White"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan">
+
+            <!-- multiple types of nfc tag data is available -->
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.TECH_DISCOVERED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.nfc.action.TECH_DISCOVERED"
+                android:resource="@xml/nfc_tech_filter" />
+
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="application/com.ekku.nfc.ui.activity.restaurantactivity" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ui.activity.PartnerActivity"
             android:label="@string/text_activity_title"
@@ -70,15 +95,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:mimeType="application/com.ekku.nfc.ui.activity.restaurantactivity" />
-            </intent-filter>
-
-            <!-- Register as a system camera app -->
-            <intent-filter>
-                <action android:name="android.media.action.IMAGE_CAPTURE" />
-                <action android:name="android.media.action.STILL_IMAGE_CAMERA" />
-                <action android:name="android.media.action.VIDEO_CAMERA" />
-
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
