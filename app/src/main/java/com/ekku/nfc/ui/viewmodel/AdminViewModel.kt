@@ -1,7 +1,6 @@
 package com.ekku.nfc.ui.viewmodel
 
 import android.content.Context
-import android.net.Network
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
@@ -11,6 +10,8 @@ import com.ekku.nfc.network.ApiClient
 import com.ekku.nfc.network.ApiService
 import com.ekku.nfc.util.NetworkUtils
 import kotlinx.coroutines.Dispatchers
+import org.json.JSONArray
+import org.json.JSONObject
 import retrofit2.HttpException
 
 class AdminViewModel(context: Context) : ViewModel() {
@@ -24,7 +25,7 @@ class AdminViewModel(context: Context) : ViewModel() {
     /**
      * adding containers to fleet
      */
-    fun postContainersToFleet(containers: List<Container>) = liveData(Dispatchers.IO) {
+    fun postContainersToFleet(containers: JSONArray) = liveData(Dispatchers.IO) {
         emit(Resource.loading(data = null))
         try {
             emit(
@@ -128,6 +129,48 @@ class AdminViewModel(context: Context) : ViewModel() {
             emit(
                 Resource.success(
                     data = apiService.gatherDropBoxes()
+                )
+            )
+        } catch (exception: Exception) {
+            emit(
+                Resource.error(
+                    data = null,
+                    message = NetworkUtils.getError(exception as HttpException)
+                )
+            )
+        }
+    }
+
+    /**
+     * containers are going to check in by admin
+     */
+    fun checkInContainers(containers: List<String>) = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
+        try {
+            emit(
+                Resource.success(
+                    data = apiService.postContainersCheckIN(containers)
+                )
+            )
+        } catch (exception: Exception) {
+            emit(
+                Resource.error(
+                    data = null,
+                    message = NetworkUtils.getError(exception as HttpException)
+                )
+            )
+        }
+    }
+
+    /**
+     * containers are going to retired from fleet
+     */
+    fun retiredContainers(containers: List<String>) = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
+        try {
+            emit(
+                Resource.success(
+                    data = apiService.postContainersRetired(containers)
                 )
             )
         } catch (exception: Exception) {

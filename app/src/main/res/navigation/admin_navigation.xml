@@ -96,9 +96,6 @@
             android:id="@+id/check_in_action"
             app:popUpTo="@id/checkInFragment" />
         <action
-            android:id="@+id/empty_action"
-            app:popUpTo="@id/emptyFragment" />
-        <action
             android:id="@+id/retired_action"
             app:popUpTo="@id/retiredFragment" />
     </fragment>

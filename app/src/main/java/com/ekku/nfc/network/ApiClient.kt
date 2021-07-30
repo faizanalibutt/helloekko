@@ -5,6 +5,7 @@ import com.ekku.nfc.ui.activity.AccountActivity
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_PREF
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_TOKEN
 import com.ekku.nfc.util.getDefaultPreferences
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -22,9 +23,9 @@ object ApiClient {
     private var BASE_URL: String = /*"https://docs.google.com/forms/d/e/"*/
         "https://ekkocommunity.uc.r.appspot.com/api/user/"
 
-    fun apiClient(context: Context? = null): Retrofit {
+    val gson: Gson = GsonBuilder().setLenient().create()
 
-        val gson = GsonBuilder().setLenient().create()
+    fun apiClient(context: Context? = null): Retrofit {
 
         val interceptor = HttpLoggingInterceptor()
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)

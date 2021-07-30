@@ -1,6 +1,8 @@
 package com.ekku.nfc.network
 
 import com.ekku.nfc.model.*
+import org.json.JSONArray
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -116,7 +118,6 @@ interface ApiService {
      * */
     @GET(CONSUMERS_DATA)
     suspend fun consumersData(): Customer
-    // TODO: 7/30/21 how to configure this type of api
 
     /**
      * customer order will be send along with containers list
@@ -161,7 +162,7 @@ interface ApiService {
     @POST(ADMIN_FLEET_MODE)
     @FormUrlEncoded
     suspend fun postContainersFleet(
-        @Field("containers") fleetContainers: List<Container>
+        @Field("containers") fleetContainers: JSONArray
     ): GenericResponse
 
     /**
@@ -183,9 +184,10 @@ interface ApiService {
     /**
      * this implies when container is returned from dropbox
      */
-    @GET(ADMIN_CHECK_IN_MODE)
+    @POST(ADMIN_CHECK_IN_MODE)
+    @FormUrlEncoded
     suspend fun postContainersCheckIN(
-        @Path("container_id") container_id: String,
+        @Field("containers") containersCheckIn: List<String>
     ): GenericResponse
 
     /**
@@ -205,9 +207,10 @@ interface ApiService {
     @GET(ADMIN_EMPTY_DROPBOX_LIST)
     suspend fun gatherDropBoxes(): DropBoxShell
 
-    @GET(ADMIN_RETIRED_MODE)
+    @POST(ADMIN_RETIRED_MODE)
+    @FormUrlEncoded
     suspend fun postContainersRetired(
-        @Path("container_id") container_id: String,
+        @Field("containers") containersCheckIn: List<String>,
     ): GenericResponse
 
     companion object {
@@ -220,10 +223,10 @@ interface ApiService {
         const val ADMIN_FLEET_MODE = "admin/admin/add/container/fleet"
         const val ADMIN_ASSIGN_MODE = "admin/admin/assign/container/partner"
         const val ADMIN_ASSIGN_PARTNER_LIST = "admin/admin/get/partner/list"
-        const val ADMIN_CHECK_IN_MODE = "take/containers/dropbox/{container_id}"
+        const val ADMIN_CHECK_IN_MODE = "take/containers/dropbox"
         const val ADMIN_EMPTY_MODE = "admin/admin/makedropboxempty"
         const val ADMIN_EMPTY_DROPBOX_LIST = "admin/admin/get/dropbox/list"
-        const val ADMIN_RETIRED_MODE = "admin/admin/add/container/retired/{container_id}"
+        const val ADMIN_RETIRED_MODE = "admin/admin/containers/retired"
         const val UPLOAD_DEVICE = "logs"
     }
 }

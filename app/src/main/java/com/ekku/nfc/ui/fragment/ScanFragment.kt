@@ -1,6 +1,5 @@
 package com.ekku.nfc.ui.fragment
 
-import android.Manifest
 import android.content.Context
 import android.content.DialogInterface
 import android.content.pm.PackageManager
@@ -8,42 +7,36 @@ import android.hardware.Camera
 import android.hardware.camera2.CameraManager
 import android.nfc.NfcAdapter
 import android.nfc.Tag
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.ekku.nfc.R
 import com.ekku.nfc.databinding.FragmentScanBinding
-import com.ekku.nfc.model.Consumer
 import com.ekku.nfc.model.Container
-import com.ekku.nfc.ui.activity.AccountActivity
+import com.ekku.nfc.network.ApiClient
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.ADMIN_MODE
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_TOKEN
-import com.ekku.nfc.ui.activity.AdminActivity
 import com.ekku.nfc.ui.viewmodel.AdminViewModel
 import com.ekku.nfc.util.*
-import com.ekku.nfc.util.AppUtils.allowWritePermission
-import com.ekku.nfc.util.AppUtils.canWrite
 import com.ekku.nfc.util.AppUtils.createConfirmationAlert
 import com.ekku.nfc.util.NfcUtils.addNfcCallback
 import com.ekku.nfc.util.NfcUtils.getNfcAdapter
 import com.ekku.nfc.util.NfcUtils.isNFCOnline
 import com.ekku.nfc.util.NfcUtils.showNFCSettings
 import com.ekku.nfc.util.NotifyUtils.playNotification
-import com.google.android.material.snackbar.Snackbar
 import com.google.common.io.BaseEncoding
+import org.json.JSONArray
+import org.json.JSONObject
 import timber.log.Timber
 import com.ekku.nfc.model.Tag as TagEntity
 
@@ -178,27 +171,27 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                 assignApi()
             }
             getString(R.string.text_check_in) -> {
-
+                checkInApi()
             }
             getString(R.string.text_retired) -> {
-
+                retiredApi()
             }
         }
     }
 
-    private fun assignApi() {
+    private fun retiredApi() {
         // prepare object to send
-        val containersAssign = mutableListOf<String>()
+        val containersRetired = mutableListOf<String>()
         for (container in nfcTagScanList)
-            containersAssign.add(container.tag_uid)
+            containersRetired.add(container.tag_uid)
 
         // assign container to partner and saving record to cloud
-        adminViewModel.postAssignedContainers(scanFragmentArgs.argPartnerName, containersAssign).observe(viewLifecycleOwner, {
+        adminViewModel.retiredContainers(containersRetired).observe(viewLifecycleOwner, {
             it?.let { resource ->
                 when (resource.status) {
                     Status.SUCCESS -> {
                         resource.data?.let { response ->
-                            Timber.d("Fleet Api Response: ${response.message}")
+                            Timber.d("CheckIn Api Response: ${response.message}")
                             showDialog(
                                 title = getString(R.string.text_admin_response),
                                 desc = response.message,
@@ -209,7 +202,7 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                         }
                     }
                     Status.ERROR -> {
-                        Timber.d("Fleet Api Response ${resource.message}")
+                        Timber.d("CheckIn Api Response ${resource.message}")
                         showDialog(
                             title = getString(R.string.text_admin_response),
                             desc = resource.message
@@ -220,11 +213,94 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                         )
                     }
                     Status.LOADING -> {
-                        Timber.d("Fleet Api Response You didn't implement it.")
+                        Timber.d("CheckIn Api Response You didn't implement it.")
                     }
                 }
             }
         })
+    }
+
+    private fun checkInApi() {
+        // prepare object to send
+        val containersCheckIn = mutableListOf<String>()
+        for (container in nfcTagScanList)
+            containersCheckIn.add(container.tag_uid)
+
+        // assign container to partner and saving record to cloud
+        adminViewModel.checkInContainers(containersCheckIn).observe(viewLifecycleOwner, {
+            it?.let { resource ->
+                when (resource.status) {
+                    Status.SUCCESS -> {
+                        resource.data?.let { response ->
+                            Timber.d("CheckIn Api Response: ${response.message}")
+                            showDialog(
+                                title = getString(R.string.text_admin_response),
+                                desc = response.message,
+                                right = getString(R.string.okay),
+                                dialogType = 104,
+                                context = _context
+                            )
+                        }
+                    }
+                    Status.ERROR -> {
+                        Timber.d("CheckIn Api Response ${resource.message}")
+                        showDialog(
+                            title = getString(R.string.text_admin_response),
+                            desc = resource.message
+                                ?: getString(R.string.text_order_detail),
+                            right = getString(R.string.okay),
+                            dialogType = 104,
+                            context = _context
+                        )
+                    }
+                    Status.LOADING -> {
+                        Timber.d("CheckIn Api Response You didn't implement it.")
+                    }
+                }
+            }
+        })
+    }
+
+    private fun assignApi() {
+        // prepare object to send
+        val containersAssign = mutableListOf<String>()
+        for (container in nfcTagScanList)
+            containersAssign.add(container.tag_uid)
+
+        // assign container to partner and saving record to cloud
+        adminViewModel.postAssignedContainers(scanFragmentArgs.argPartnerName, containersAssign)
+            .observe(viewLifecycleOwner, {
+                it?.let { resource ->
+                    when (resource.status) {
+                        Status.SUCCESS -> {
+                            resource.data?.let { response ->
+                                Timber.d("Fleet Api Response: ${response.message}")
+                                showDialog(
+                                    title = getString(R.string.text_admin_response),
+                                    desc = response.message,
+                                    right = getString(R.string.okay),
+                                    dialogType = 104,
+                                    context = _context
+                                )
+                            }
+                        }
+                        Status.ERROR -> {
+                            Timber.d("Fleet Api Response ${resource.message}")
+                            showDialog(
+                                title = getString(R.string.text_admin_response),
+                                desc = resource.message
+                                    ?: getString(R.string.text_order_detail),
+                                right = getString(R.string.okay),
+                                dialogType = 104,
+                                context = _context
+                            )
+                        }
+                        Status.LOADING -> {
+                            Timber.d("Fleet Api Response You didn't implement it.")
+                        }
+                    }
+                }
+            })
     }
 
     private fun fleetApi() {
@@ -243,9 +319,10 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                 )
             )
 
+        val jsonArray = JSONArray(ApiClient.gson.toJson(containersFleet))
 
         // add api for fleet to add container in it
-        adminViewModel.postContainersToFleet(containersFleet).observe(viewLifecycleOwner, {
+        adminViewModel.postContainersToFleet(jsonArray).observe(viewLifecycleOwner, {
             it?.let { resource ->
                 when (resource.status) {
                     Status.SUCCESS -> {
