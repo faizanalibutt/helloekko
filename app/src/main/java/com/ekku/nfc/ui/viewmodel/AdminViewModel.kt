@@ -1,18 +1,22 @@
 package com.ekku.nfc.ui.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
 import com.ekku.nfc.model.Container
+import com.ekku.nfc.model.Containers
 import com.ekku.nfc.model.Resource
 import com.ekku.nfc.network.ApiClient
 import com.ekku.nfc.network.ApiService
 import com.ekku.nfc.util.NetworkUtils
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
-import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.HttpException
+import timber.log.Timber
+
 
 class AdminViewModel(context: Context) : ViewModel() {
 
@@ -25,12 +29,12 @@ class AdminViewModel(context: Context) : ViewModel() {
     /**
      * adding containers to fleet
      */
-    fun postContainersToFleet(containers: JSONArray) = liveData(Dispatchers.IO) {
+    fun postContainersToFleet(containers: Containers) = liveData(Dispatchers.IO) {
         emit(Resource.loading(data = null))
         try {
             emit(
                 Resource.success(
-                    data = apiService.postContainersFleet(containers)
+                    data = apiService.postContainersFleet(ApiClient.gson.toJson(containers))
                 )
             )
         } catch (exception: Exception) {

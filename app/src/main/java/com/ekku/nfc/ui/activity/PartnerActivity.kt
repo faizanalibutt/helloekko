@@ -20,13 +20,11 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doOnTextChanged
-import com.auth0.android.jwt.JWT
 import com.ekku.nfc.AppDelegate
 import com.ekku.nfc.R
 import com.ekku.nfc.app.UserActivity
 import com.ekku.nfc.databinding.ActivityRestaurantBinding
 import com.ekku.nfc.model.Consumer
-import com.ekku.nfc.model.TagAPI
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_TOKEN
 import com.ekku.nfc.ui.viewmodel.TAGViewModel
 import com.ekku.nfc.util.*
@@ -43,7 +41,6 @@ import com.ekku.nfc.util.NfcUtils.removeNfcCallback
 import com.ekku.nfc.util.NfcUtils.showNFCSettings
 import com.ekku.nfc.util.NotifyUtils.playNotification
 import com.ekku.nfc.util.NotifyUtils.setIntervalWork
-import com.ekku.nfc.util.NotifyUtils.setMidNightWork
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.io.BaseEncoding
 import timber.log.Timber
@@ -130,7 +127,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                     "Please first scan container.", Toast.LENGTH_SHORT
                 ).show()
                 return@setOnClickListener
-            } else if (NetworkUtils.isOnline(this)) {
+            } else if (!NetworkUtils.isOnline(this)) {
                 Snackbar.make(restaurantBinding.root,
                     "No Internet Connection Available", Snackbar.LENGTH_LONG
                 ).show()

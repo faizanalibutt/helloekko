@@ -45,6 +45,7 @@ import com.ekku.nfc.util.NotifyUtils.playNotification
 import com.ekku.nfc.util.NotifyUtils.setIntervalWork
 import com.ekku.nfc.util.NotifyUtils.setMidNightWork
 import com.ekku.nfc.work.MediaButtonEventReceiver
+import com.google.android.material.snackbar.Snackbar
 import com.google.common.io.BaseEncoding
 import kotlinx.coroutines.*
 import timber.log.Timber
@@ -127,6 +128,11 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                 getDataFromToken("dropboxName", dropBoxToken)?.asString() ?: "title not found"
         }
 
+        if (!NetworkUtils.isOnline(this)) {
+            Snackbar.make(recyclerView,
+                "No Internet Connection Available, Please connect to network", Snackbar.LENGTH_LONG
+            ).show()
+        }
     }
 
     override fun onResume() {

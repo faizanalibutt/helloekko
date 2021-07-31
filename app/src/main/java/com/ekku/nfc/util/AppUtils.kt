@@ -8,6 +8,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AlertDialog
+import com.ekku.nfc.R
 
 object AppUtils {
 
@@ -46,7 +47,7 @@ object AppUtils {
         context: Context = this,
         cancelable: Boolean = true,
     ): AlertDialog {
-        return AlertDialog.Builder(context)
+        return AlertDialog.Builder(context, R.style.MyAlertDialogStyle)
             .setTitle(title)
             .setMessage(message)
             .setCancelable(cancelable)
@@ -55,7 +56,8 @@ object AppUtils {
             }
             .setPositiveButton(right) { dialogInterface, _ ->
                 listener?.onClick(dialogInterface, ButtonType.RIGHT)
-            }.create()
+            }
+            .create()
     }
 
     // Allow write system settings

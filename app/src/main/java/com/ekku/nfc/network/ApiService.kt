@@ -1,8 +1,6 @@
 package com.ekku.nfc.network
 
 import com.ekku.nfc.model.*
-import org.json.JSONArray
-import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -160,9 +158,9 @@ interface ApiService {
      * adding containers by using fleet api
      */
     @POST(ADMIN_FLEET_MODE)
-    @FormUrlEncoded
+    @Headers("Content-Type: application/json")
     suspend fun postContainersFleet(
-        @Field("containers") fleetContainers: JSONArray
+         @Body fleetContainers: String
     ): GenericResponse
 
     /**

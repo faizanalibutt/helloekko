@@ -23,6 +23,7 @@ import androidx.navigation.fragment.navArgs
 import com.ekku.nfc.R
 import com.ekku.nfc.databinding.FragmentScanBinding
 import com.ekku.nfc.model.Container
+import com.ekku.nfc.model.Containers
 import com.ekku.nfc.network.ApiClient
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.ADMIN_MODE
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_TOKEN
@@ -36,7 +37,6 @@ import com.ekku.nfc.util.NfcUtils.showNFCSettings
 import com.ekku.nfc.util.NotifyUtils.playNotification
 import com.google.common.io.BaseEncoding
 import org.json.JSONArray
-import org.json.JSONObject
 import timber.log.Timber
 import com.ekku.nfc.model.Tag as TagEntity
 
@@ -319,10 +319,8 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                 )
             )
 
-        val jsonArray = JSONArray(ApiClient.gson.toJson(containersFleet))
-
         // add api for fleet to add container in it
-        adminViewModel.postContainersToFleet(jsonArray).observe(viewLifecycleOwner, {
+        adminViewModel.postContainersToFleet(Containers(containersFleet)).observe(viewLifecycleOwner, {
             it?.let { resource ->
                 when (resource.status) {
                     Status.SUCCESS -> {
