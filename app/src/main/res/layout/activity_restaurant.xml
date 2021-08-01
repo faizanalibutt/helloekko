@@ -29,6 +29,9 @@
         android:autofillHints="Order Number"
         android:hint="@string/text_hint_customer_order_number"
         android:inputType="number"
+        android:maxLength="10"
+        android:maxLines="1"
+        android:singleLine="true"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
         android:textColor="@color/black"
@@ -124,5 +127,16 @@
         android:visibility="gone"
         app:constraint_referenced_ids="text_containers, clear_containers,
          containers_number, btn_submit, btn_submit" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="@style/Widget.AppCompat.ProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

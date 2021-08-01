@@ -83,7 +83,8 @@ class AccountActivity : AppCompatActivity() {
         }
 
         // change hint to dropbox name in dropbox app type
-        usernameField.hint = "Name"
+        if (appMode == DROPBOX)
+            usernameField.hint = "Name"
 
         usernameField.editText?.doOnTextChanged { inputText, start, before, count ->
             when {
@@ -104,9 +105,9 @@ class AccountActivity : AppCompatActivity() {
                     when {
                         inputText.isEmpty() ->
                             passwordField.error = getString(R.string.text_pwd_empty)
-                        inputText.length < 6 ->
+                        /*inputText.length < 6 ->
                             passwordField.error =
-                                getString(R.string.text_pwd_limit)
+                                getString(R.string.text_pwd_limit)*/
                         else -> passwordField.error = null
                     }
                 }
@@ -122,10 +123,10 @@ class AccountActivity : AppCompatActivity() {
                         passwordField.error = getString(R.string.text_pwd_empty)
                         isReady = false
                     }
-                    passwordField.editText?.text.toString().length < 6 -> {
+                    /*passwordField.editText?.text.toString().length < 6 -> {
                         passwordField.error = getString(R.string.text_pwd_limit)
                         isReady = false
-                    }
+                    }*/
                 }
             }
 

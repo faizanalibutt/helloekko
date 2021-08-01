@@ -239,6 +239,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             val long = mCurrentLocation?.longitude
             getDefaultPreferences().edit().putString("GPS_DATA_LAT", "$lat").apply()
             getDefaultPreferences().edit().putString("GPS_DATA_LONG", "$long").apply()
+            Timber.d("Location DropBox: $lat, $long")
         }
     }
 

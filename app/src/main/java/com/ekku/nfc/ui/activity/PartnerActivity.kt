@@ -96,7 +96,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             if (restaurantBinding.orderField.text.isEmpty()) {
                 Toast.makeText(
                     this@PartnerActivity,
-                    "Please enter order number first.", Toast.LENGTH_SHORT
+                    "Please enter ekko id first.", Toast.LENGTH_SHORT
                 ).show()
                 return@setOnClickListener
             }
@@ -106,12 +106,23 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             restaurantBinding.scansGroup.visibility = View.GONE
             restaurantBinding.containersGroup.visibility = View.VISIBLE
             restaurantBinding.orderField.isEnabled = false
+            restaurantBinding.progressBar.visibility = View.VISIBLE
             // initialize list for scans against orderID
             // enable NFC scanning
-            setUpNfc()
-            setUpTorch(true)
+            val isReady = isConsumerExist()
+            if (isReady) {
+                setUpNfc()
+                setUpTorch(true)
+            } else {
+                restaurantBinding.progressBar.visibility = View.GONE
+                showDialog(
+                    dialogType = 105,
+                    desc = getString(R.string.text_user_not_found),
+                    right = getString(R.string.text_continue),
+                    left = getString(R.string.text_back)
+                )
+            }
             nfcTagScanList = mutableListOf()
-            isConsumerExist()
         }
 
         restaurantBinding.clearContainers.setOnClickListener {
@@ -128,7 +139,8 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                 ).show()
                 return@setOnClickListener
             } else if (!NetworkUtils.isOnline(this)) {
-                Snackbar.make(restaurantBinding.root,
+                Snackbar.make(
+                    restaurantBinding.root,
                     "No Internet Connection Available", Snackbar.LENGTH_LONG
                 ).show()
                 return@setOnClickListener
@@ -149,6 +161,11 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                 getDataFromToken("partnerName", partnerToken)?.asString() ?: "title not found"
         }
 
+        if (!NetworkUtils.isOnline(this))
+            Snackbar.make(
+                restaurantBinding.root,
+                "No Internet Connection Available", Snackbar.LENGTH_LONG
+            ).show()
         // verify consumer upon order from partner side
         showConsumers()
     }
@@ -157,15 +174,6 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         super.onResume()
         if (scanBtnClicked)
             setUpNfc()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (canWrite)
-            setBrightness(
-                -1F, 10,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC, this@PartnerActivity
-            )
     }
 
     override fun onRequestPermissionsResult(
@@ -241,24 +249,28 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             val long = it.longitude
             getDefaultPreferences().edit().putString("GPS_DATA_LAT", "$lat").apply()
             getDefaultPreferences().edit().putString("GPS_DATA_LONG", "$long").apply()
+            Timber.d("Location Partner: $lat, $long")
         }
     }
 
-    private fun isConsumerExist() {
+    private fun isConsumerExist(): Boolean {
         for (consumer in consumersList)//(226) 505-4408
-            if (restaurantBinding.orderField.text.toString() == takeNumberOnly(consumer.phoneNo))
-                return
-            else
-                showDialog(
-                    dialogType = 104,
-                    desc = getString(R.string.text_user_not_found),
-                    right = getString(R.string.ok)
-                )
+            if (restaurantBinding.orderField.text.toString() == takeNumberOnly(consumer.phoneNo)) {
+                restaurantBinding.progressBar.visibility = View.GONE
+                return true
+            }
+        return false
     }
 
-    private fun reset() {
+    private fun reEnterEkkoId() {
+        // give focus to text field, blink cursor and show keyboard
+        reset(isValidating = true)
+        restaurantBinding.orderField.focusAndShowKeyboard()
+    }
+
+    private fun reset(isValidating: Boolean = false) {
         restaurantBinding.containersNumber.text = ""
-        restaurantBinding.orderField.setText("")
+        if (!isValidating) restaurantBinding.orderField.setText("")
         restaurantBinding.textOrderDesc.setTextColor(
             ContextCompat.getColor(this@PartnerActivity, android.R.color.background_dark)
         )
@@ -412,6 +424,12 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                         type == ButtonType.RIGHT && dialogType == 102 -> allowWritePermission()
                         type == ButtonType.RIGHT && dialogType == 103 -> askForPermission()
                         type == ButtonType.RIGHT && dialogType == 104 -> dialog.dismiss()
+                        type == ButtonType.LEFT && dialogType == 105 -> reEnterEkkoId()
+                        type == ButtonType.RIGHT && dialogType == 105 -> {
+                            dialog.dismiss()
+                            setUpNfc()
+                            setUpTorch(true)
+                        }
                     }
                 }
             })
@@ -440,7 +458,5 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         })
     }
 
-    private fun takeNumberOnly(phoneNo: String): String {
-        return phoneNo.replace(Regex("[()\\-\\s]"), "")
-    }
+    private fun takeNumberOnly(phoneNo: String) = phoneNo.replace(Regex("[()\\-\\s]"), "")
 }

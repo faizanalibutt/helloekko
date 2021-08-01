@@ -64,6 +64,8 @@
     <string name="text_order_status">Order Status</string>
     <string name="text_order_detail">Something went wrong it\'s not you, it\'s us. We will try our best to fix this as soon as possible.</string>
     <string name="text_admin_response">Admin Operations</string>
+    <string name="text_continue">Continue</string>
+    <string name="text_back">Back</string>
     <string-array name="admin_modes_array">
         <item>Fleet</item>
         <item>Assign</item>
