@@ -49,9 +49,9 @@ class TagAlarmReceiver : BroadcastReceiver() {
             val appUid = context?.getDeviceIMEI()
             val batteryStatus = isConnected(context)
             val location_lat = context?.getDefaultPreferences()
-                ?.getString("GPS_DATA_LAT", "location permission not allowed")
+                ?.getString("GPS_DATA_LAT", "location not allowed")
             val location_long = context?.getDefaultPreferences()
-                ?.getString("GPS_DATA_LONG", "location permission not allowed")
+                ?.getString("GPS_DATA_LONG", "location not allowed")
             val carrierName = NetworkUtils.getCarrierName(context)
 
             // summary of all we got
@@ -62,8 +62,8 @@ class TagAlarmReceiver : BroadcastReceiver() {
                 user_id = context?.getDataFromToken(tokenName = "id", authToken)?.asString() ?: "FU*K",
                 name = context?.getDataFromToken("partnerName", authToken)?.asString()
                     ?: context?.getDataFromToken("dropboxName", authToken)?.asString() ?: "UNKNOWN_NAME",
-                latitude = location_lat ?: "location permission not allowed",
-                longitude = location_long ?: "location permission not allowed",
+                latitude = location_lat ?: "location not allowed",
+                longitude = location_long ?: "location not allowed",
                 phone_uid = appUid ?: "app imei not found",
                 battery = batteryStatus,
                 network = carrierName

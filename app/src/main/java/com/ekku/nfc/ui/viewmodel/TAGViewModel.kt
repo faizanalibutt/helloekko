@@ -5,6 +5,7 @@ import androidx.lifecycle.*
 import com.ekku.nfc.model.*
 import com.ekku.nfc.network.ApiClient
 import com.ekku.nfc.network.ApiService
+import com.ekku.nfc.model.CustomerOrderPair
 import com.ekku.nfc.repository.TagRepository
 import com.ekku.nfc.util.NetworkUtils
 import kotlinx.coroutines.Dispatchers
@@ -39,8 +40,12 @@ class TAGViewModel(private val tagRepository: TagRepository, context: Context) :
                 emit(
                     Resource.success(
                         data = apiService.customerOrder(
-                            consumerId,
-                            containersList,
+                            ApiClient.gson.toJson(
+                                CustomerOrderPair(
+                                    consumerId,
+                                    containersList
+                                )
+                            )
                         )
                     )
                 )

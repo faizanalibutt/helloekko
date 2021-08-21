@@ -51,7 +51,7 @@ class FleetFragment : Fragment() {
             // navigate to scan fragment code
             fleetBinding.btnScan.setOnClickListener {
                 val actionScan = FleetFragmentDirections.actionFleetFragmentToScanFragment(
-                    containerSize, containerType
+                    containerType, containerSize
                 )
                 findNavController().navigate(actionScan)
             }
@@ -108,7 +108,7 @@ class FleetFragment : Fragment() {
                         id: Long
                     ) {
                         // here we will get container type.
-                        containerType = parent?.getItemAtPosition(position) as? String ?: "Large"
+                        containerType = parent?.getItemAtPosition(position) as? String ?: "Food"
                         Timber.d("Container Size Sending : $containerType")
                     }
 

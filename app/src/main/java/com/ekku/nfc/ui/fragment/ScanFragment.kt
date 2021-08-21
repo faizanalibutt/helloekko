@@ -199,6 +199,8 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                                 dialogType = 104,
                                 context = _context
                             )
+                            scanBinding?.btnSubmit?.isEnabled = true
+                            scanBinding?.progressBar?.visibility = View.GONE
                         }
                     }
                     Status.ERROR -> {
@@ -211,9 +213,13 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                             dialogType = 104,
                             context = _context
                         )
+                        scanBinding?.btnSubmit?.isEnabled = true
+                        scanBinding?.progressBar?.visibility = View.GONE
                     }
                     Status.LOADING -> {
                         Timber.d("CheckIn Api Response You didn't implement it.")
+                        scanBinding?.btnSubmit?.isEnabled = false
+                        scanBinding?.progressBar?.visibility = View.VISIBLE
                     }
                 }
             }
@@ -240,6 +246,8 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                                 dialogType = 104,
                                 context = _context
                             )
+                            scanBinding?.btnSubmit?.isEnabled = true
+                            scanBinding?.progressBar?.visibility = View.GONE
                         }
                     }
                     Status.ERROR -> {
@@ -252,9 +260,13 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                             dialogType = 104,
                             context = _context
                         )
+                        scanBinding?.btnSubmit?.isEnabled = true
+                        scanBinding?.progressBar?.visibility = View.GONE
                     }
                     Status.LOADING -> {
                         Timber.d("CheckIn Api Response You didn't implement it.")
+                        scanBinding?.btnSubmit?.isEnabled = false
+                        scanBinding?.progressBar?.visibility = View.VISIBLE
                     }
                 }
             }
@@ -283,6 +295,8 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                                     context = _context
                                 )
                             }
+                            scanBinding?.btnSubmit?.isEnabled = true
+                            scanBinding?.progressBar?.visibility = View.GONE
                         }
                         Status.ERROR -> {
                             Timber.d("Fleet Api Response ${resource.message}")
@@ -294,9 +308,13 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                                 dialogType = 104,
                                 context = _context
                             )
+                            scanBinding?.btnSubmit?.isEnabled = true
+                            scanBinding?.progressBar?.visibility = View.GONE
                         }
                         Status.LOADING -> {
                             Timber.d("Fleet Api Response You didn't implement it.")
+                            scanBinding?.btnSubmit?.isEnabled = false
+                            scanBinding?.progressBar?.visibility = View.VISIBLE
                         }
                     }
                 }
@@ -333,6 +351,8 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                                 dialogType = 104,
                                 context = _context
                             )
+                            scanBinding?.btnSubmit?.isEnabled = true
+                            scanBinding?.progressBar?.visibility = View.GONE
                         }
                     }
                     Status.ERROR -> {
@@ -345,9 +365,13 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                             dialogType = 104,
                             context = _context
                         )
+                        scanBinding?.btnSubmit?.isEnabled = true
+                        scanBinding?.progressBar?.visibility = View.GONE
                     }
                     Status.LOADING -> {
                         Timber.d("Fleet Api Response You didn't implement it.")
+                        scanBinding?.btnSubmit?.isEnabled = false
+                        scanBinding?.progressBar?.visibility = View.VISIBLE
                     }
                 }
             }

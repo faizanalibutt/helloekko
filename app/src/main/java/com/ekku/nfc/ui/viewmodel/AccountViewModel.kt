@@ -26,6 +26,7 @@ class AccountViewModel(repository: AccountRepository) : ViewModel() {
         username: String,
         password: String
     ) = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
         try {
             emit(
                 Resource.success(
@@ -54,6 +55,7 @@ class AccountViewModel(repository: AccountRepository) : ViewModel() {
         username: String,
         password: String
     ) = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
         try {
             emit(
                 Resource.success(

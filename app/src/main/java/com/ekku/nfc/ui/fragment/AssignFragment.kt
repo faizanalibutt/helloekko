@@ -134,7 +134,7 @@ class AssignFragment : Fragment() {
 
                 // going to scan fragment with partner id.
                 val actionScan = AssignFragmentDirections.actionAssignFragmentToScanFragment(
-                    partnerId
+                    argPartnerName = partnerId
                 )
                 findNavController().navigate(actionScan)
             }

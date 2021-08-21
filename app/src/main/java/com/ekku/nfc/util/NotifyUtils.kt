@@ -102,8 +102,8 @@ object NotifyUtils {
 
         val firstInterval: Calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 2)
-            set(Calendar.MINUTE, 35)
+            set(Calendar.HOUR_OF_DAY, 5)
+            set(Calendar.MINUTE, 0)
         }
         val secondInterval: Calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()

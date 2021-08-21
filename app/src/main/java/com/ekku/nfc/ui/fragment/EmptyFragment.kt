@@ -148,6 +148,7 @@ class EmptyFragment : Fragment(), CurrentLocation.LocationResultListener {
                 dropBoxApi(dropBoxId)
             }
 
+            currentLocation = CurrentLocation(view.context)
             if (!preventDialogs) {
                 preventDialogs = true
                 if (ContextCompat.checkSelfPermission(
@@ -208,6 +209,14 @@ class EmptyFragment : Fragment(), CurrentLocation.LocationResultListener {
                     Status.SUCCESS -> {
                         resource.data?.let { response ->
                             Timber.d("DropBox Api Response: ${response.message}")
+                            showDialog(
+                                title = getString(R.string.text_admin_response),
+                                desc = resource.message
+                                    ?: "Dropbox Empty Successful",
+                                right = getString(R.string.okay),
+                                dialogType = 104,
+                                context = _context
+                            )
                         }
                     }
                     Status.ERROR -> {

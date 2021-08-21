@@ -1,6 +1,7 @@
 package com.ekku.nfc.ui.activity
 
 import android.os.Bundle
+import android.util.Patterns
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -93,7 +94,7 @@ class AccountActivity : AppCompatActivity() {
                         usernameField.error = getString(R.string.text_email_empty)
                     else
                         usernameField.error = getString(R.string.text_username_empty)
-                inputText?.contains("@") != true || !inputText.contains(".com") ->
+                !Patterns.EMAIL_ADDRESS.matcher(usernameField.editText?.text.toString()).matches() ->
                     if (appMode != DROPBOX)
                         usernameField.error = getString(R.string.text_invalid_email)
                 else -> usernameField.error = null
@@ -105,9 +106,6 @@ class AccountActivity : AppCompatActivity() {
                     when {
                         inputText.isEmpty() ->
                             passwordField.error = getString(R.string.text_pwd_empty)
-                        /*inputText.length < 6 ->
-                            passwordField.error =
-                                getString(R.string.text_pwd_limit)*/
                         else -> passwordField.error = null
                     }
                 }
@@ -123,10 +121,6 @@ class AccountActivity : AppCompatActivity() {
                         passwordField.error = getString(R.string.text_pwd_empty)
                         isReady = false
                     }
-                    /*passwordField.editText?.text.toString().length < 6 -> {
-                        passwordField.error = getString(R.string.text_pwd_limit)
-                        isReady = false
-                    }*/
                 }
             }
 
@@ -138,13 +132,7 @@ class AccountActivity : AppCompatActivity() {
                         usernameField.error = getString(R.string.text_username_empty)
                     isReady = false
                 }
-                usernameField.editText?.text?.contains("@") != true ->{
-                    if (appMode != DROPBOX) {
-                        usernameField.error = getString(R.string.text_email_empty)
-                        isReady = false
-                    }
-                }
-                usernameField.editText?.text?.contains(".com") != true -> {
+                !Patterns.EMAIL_ADDRESS.matcher(usernameField.editText?.text.toString()).matches() ->{
                     if (appMode != DROPBOX) {
                         usernameField.error = getString(R.string.text_email_empty)
                         isReady = false
@@ -244,6 +232,7 @@ class AccountActivity : AppCompatActivity() {
                                             accountBinding.root, "${result.message}",
                                             Snackbar.LENGTH_LONG
                                         ).show()
+                                        accountBinding.progressBar.visibility = View.GONE
                                     }
                                     Status.LOADING -> {
                                         accountBinding.progressBar.visibility = View.VISIBLE

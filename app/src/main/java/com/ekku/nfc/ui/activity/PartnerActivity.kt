@@ -14,6 +14,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.telephony.PhoneNumberFormattingTextWatcher
+import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -70,6 +72,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
      * check no duplication happened tags must be unique.
      * */
     private var isIdAvailable = true
+    private lateinit var consumerId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -154,6 +157,8 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                 ContextCompat.getColor(this@PartnerActivity, R.color.green_500)
             )
         }
+
+        restaurantBinding.orderField.addTextChangedListener(PhoneNumberFormattingTextWatcher())
 
         // display partner name at title bar.
         supportActionBar?.let {
@@ -257,6 +262,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         for (consumer in consumersList)//(226) 505-4408
             if (restaurantBinding.orderField.text.toString() == takeNumberOnly(consumer.phoneNo)) {
                 restaurantBinding.progressBar.visibility = View.GONE
+                consumerId = consumer.id
                 return true
             }
         return false
@@ -369,7 +375,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             containersIds.add(container.tag_uid)
         // api is calling
         tagViewMadel.postCustomerOrder(
-            consumerId = restaurantBinding.orderField.text.toString(),
+            consumerId = if (isConsumerExist()) consumerId else restaurantBinding.orderField.text.toString(),
             containersIds
         ).observe(this, {
             it?.let { resource ->
@@ -377,6 +383,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                     Status.SUCCESS -> {
                         resource.data?.let { response ->
                             Timber.d("tag data uploaded successfully ${response.message}")
+                            restaurantBinding.progressBar.visibility = View.GONE
                             showDialog(
                                 title = getString(R.string.text_order_status),
                                 desc = response.message
@@ -388,6 +395,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                     }
                     Status.ERROR -> {
                         Timber.d("tag data not uploaded. ${resource.message}")
+                        restaurantBinding.progressBar.visibility = View.GONE
                         showDialog(
                             title = getString(R.string.text_order_status),
                             desc = resource.message
@@ -397,6 +405,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                         )
                     }
                     Status.LOADING -> {
+                        restaurantBinding.progressBar.visibility = View.VISIBLE
                     }
                 }
             }

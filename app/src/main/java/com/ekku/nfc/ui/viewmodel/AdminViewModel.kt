@@ -1,21 +1,18 @@
 package com.ekku.nfc.ui.viewmodel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
-import com.ekku.nfc.model.Container
+import com.ekku.nfc.model.AssignPartnerPair
+import com.ekku.nfc.model.ContainerPair
 import com.ekku.nfc.model.Containers
 import com.ekku.nfc.model.Resource
 import com.ekku.nfc.network.ApiClient
 import com.ekku.nfc.network.ApiService
 import com.ekku.nfc.util.NetworkUtils
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
-import org.json.JSONObject
 import retrofit2.HttpException
-import timber.log.Timber
 
 
 class AdminViewModel(context: Context) : ViewModel() {
@@ -59,8 +56,12 @@ class AdminViewModel(context: Context) : ViewModel() {
             emit(
                 Resource.success(
                     data = apiService.postContainersAssign(
-                        partnerId,
-                        containers
+                        ApiClient.gson.toJson(
+                            AssignPartnerPair(
+                                partnerId,
+                                containers
+                            )
+                        )
                     )
                 )
             )
@@ -153,7 +154,13 @@ class AdminViewModel(context: Context) : ViewModel() {
         try {
             emit(
                 Resource.success(
-                    data = apiService.postContainersCheckIN(containers)
+                    data = apiService.postContainersCheckIN(
+                        ApiClient.gson.toJson(
+                            ContainerPair(
+                                containers
+                            )
+                        )
+                    )
                 )
             )
         } catch (exception: Exception) {
@@ -174,7 +181,13 @@ class AdminViewModel(context: Context) : ViewModel() {
         try {
             emit(
                 Resource.success(
-                    data = apiService.postContainersRetired(containers)
+                    data = apiService.postContainersRetired(
+                        ApiClient.gson.toJson(
+                            ContainerPair(
+                                containers
+                            )
+                        )
+                    )
                 )
             )
         } catch (exception: Exception) {

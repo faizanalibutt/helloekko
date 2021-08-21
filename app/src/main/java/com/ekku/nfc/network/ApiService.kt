@@ -121,10 +121,9 @@ interface ApiService {
      * customer order will be send along with containers list
      */
     @POST(CUSTOMER_ORDER)
-    @FormUrlEncoded
+    @Headers("Content-Type: application/json")
     suspend fun customerOrder(
-        @Field("consumerId") consumer_id: String,
-        @Field("containers") containers_list: List<String>,
+        @Body customerOrderPair: String
     ): GenericResponse
 
     /**
@@ -167,10 +166,9 @@ interface ApiService {
      * assigning containers to different partners using this api
      */
     @POST(ADMIN_ASSIGN_MODE)
-    @FormUrlEncoded
+    @Headers("Content-Type: application/json")
     suspend fun postContainersAssign(
-        @Field("partnerId") id: String,
-        @Field("containers") assignContainers: List<String>
+        @Body assignPartners: String,
     ): GenericResponse
 
     /**
@@ -183,9 +181,9 @@ interface ApiService {
      * this implies when container is returned from dropbox
      */
     @POST(ADMIN_CHECK_IN_MODE)
-    @FormUrlEncoded
+    @Headers("Content-Type: application/json")
     suspend fun postContainersCheckIN(
-        @Field("containers") containersCheckIn: List<String>
+        @Body containersCheckIn: String
     ): GenericResponse
 
     /**
@@ -206,9 +204,9 @@ interface ApiService {
     suspend fun gatherDropBoxes(): DropBoxShell
 
     @POST(ADMIN_RETIRED_MODE)
-    @FormUrlEncoded
+    @Headers("Content-Type: application/json")
     suspend fun postContainersRetired(
-        @Field("containers") containersCheckIn: List<String>,
+        @Body containersCheckIn: String,
     ): GenericResponse
 
     companion object {

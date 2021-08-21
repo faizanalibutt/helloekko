@@ -67,6 +67,11 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             AccountActivity.LOGIN_TOKEN, "put-your-login-token-here"
         )
     }
+    /**
+     * check no duplication happened tags must be unique.
+     * */
+    private lateinit var nfcTagScanList: MutableList<TagEntity>
+    private var isIdAvailable = true
     private var isNfcStarted = true
 
     // access location for device
@@ -87,10 +92,14 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             disableScanning()
         }
 
+        /**
+         * give some feedbacks to us dropbox becomes empty.
+         */
         val recyclerView = findViewById<RecyclerView>(R.id.tagListView)
         val adapter = TagListAdapter()
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
+        nfcTagScanList = mutableListOf()
 
         tagViewMadel.allTags.observe(this, { tags ->
             tags?.let { adapter.submitList(it) }
@@ -202,18 +211,40 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         if (tag != null) {
             Timber.d("Tag Id is: ${BaseEncoding.base16().encode(tag.id)}")
             Handler(Looper.getMainLooper()).post {
+                val tagEntity = TagEntity(
+                    tag_uid = BaseEncoding.base16().encode(tag.id),
+                    tag_time = TimeUtils.getToday(),
+                    tag_date = TimeUtils.getFormatDate(TimeUtils.getToday()),
+                    tag_date_time = TimeUtils.getFormatDateTime(TimeUtils.getToday()),
+                    tag_phone_uid = AppUtils.STRING_GUID,
+                    tag_sync = 1,
+                    tag_orderId = "consumer"
+                )
+                if (nfcTagScanList.isNotEmpty()) {
+                    for (checkId in nfcTagScanList) {
+                        if (checkId.tag_uid == tagEntity.tag_uid) {
+                            isIdAvailable = false
+                            break
+                        } else
+                            isIdAvailable = true
+                    }
+                }
+                if (!isIdAvailable)
+                    return@post
                 // api call here
                 tagViewMadel.postDropBoxData(
                     BaseEncoding.base16().encode(tag.id),
                     dropBoxId = getDataFromToken(tokenName = "id", dropBoxToken)?.asString() ?: "error"
-                ).observe(this, { it1 ->
-                    it1?.let { resource ->
+                ).observe(this, { it ->
+                    it?.let { resource ->
                         when (resource.status) {
                             Status.SUCCESS -> {
                                 resource.data?.let { Timber.d("tag data uploaded successfully $it") }
+                                tagViewMadel.insert(tagEntity)
                             }
                             Status.ERROR -> {
                                 Timber.d("tag data not uploaded. ${resource.message}")
+                                tagViewMadel.insert(tagEntity)
                             }
                             Status.LOADING -> {
                             }
