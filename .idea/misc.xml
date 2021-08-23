@@ -15,6 +15,7 @@
         <entry key="app/src/main/res/layout/fragment_fleet.xml" value="0.27794871794871795" />
         <entry key="app/src/main/res/layout/fragment_retired.xml" value="0.27794871794871795" />
         <entry key="app/src/main/res/layout/fragment_scan.xml" value="0.27794871794871795" />
+        <entry key="app/src/main/res/menu/admin_menu.xml" value="0.28229166666666666" />
       </map>
     </option>
   </component>

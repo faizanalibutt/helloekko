@@ -158,7 +158,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             )
         }
 
-        restaurantBinding.orderField.addTextChangedListener(PhoneNumberFormattingTextWatcher())
+        //restaurantBinding.orderField.addTextChangedListener(PhoneNumberFormattingTextWatcher())
 
         // display partner name at title bar.
         supportActionBar?.let {

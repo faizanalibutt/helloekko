@@ -367,6 +367,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                         type == ButtonType.RIGHT && dialogType == 101 -> showNFCSettings()
                         type == ButtonType.RIGHT && dialogType == 102 -> allowWritePermission()
                         type == ButtonType.RIGHT && dialogType == 103 -> askForPermission()
+                        type == ButtonType.RIGHT && dialogType == 104 -> dialog.dismiss()
                     }
                 }
             })
