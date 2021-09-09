@@ -4,10 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
-import com.ekku.nfc.model.AssignPartnerPair
-import com.ekku.nfc.model.ContainerPair
-import com.ekku.nfc.model.Containers
-import com.ekku.nfc.model.Resource
+import com.ekku.nfc.model.*
 import com.ekku.nfc.network.ApiClient
 import com.ekku.nfc.network.ApiService
 import com.ekku.nfc.util.NetworkUtils
@@ -49,7 +46,8 @@ class AdminViewModel(context: Context) : ViewModel() {
      */
     fun postAssignedContainers(
         partnerId: String,
-        containers: List<String>
+        containers: List<String>,
+        partnerName: String
     ) = liveData(Dispatchers.IO) {
         emit(Resource.loading(data = null))
         try {
@@ -59,7 +57,8 @@ class AdminViewModel(context: Context) : ViewModel() {
                         ApiClient.gson.toJson(
                             AssignPartnerPair(
                                 partnerId,
-                                containers
+                                containers,
+                                partnerName
                             )
                         )
                     )
@@ -149,17 +148,42 @@ class AdminViewModel(context: Context) : ViewModel() {
     /**
      * containers are going to check in by admin
      */
-    fun checkInContainers(containers: List<String>) = liveData(Dispatchers.IO) {
+    fun checkInContainers(containers: List<String>, dropboxName: String) = liveData(Dispatchers.IO) {
         emit(Resource.loading(data = null))
         try {
             emit(
                 Resource.success(
                     data = apiService.postContainersCheckIN(
                         ApiClient.gson.toJson(
-                            ContainerPair(
-                                containers
+                            ContainerReturn(
+                                containers,
+                                dropboxName
                             )
                         )
+                    )
+                )
+            )
+        } catch (exception: Exception) {
+            emit(
+                Resource.error(
+                    data = null,
+                    message = NetworkUtils.getError(exception as HttpException)
+                )
+            )
+        }
+    }
+
+    /**
+     * return containers order status
+     */
+    fun checkReturnedContainers(tagUid: String, argCheckInDropbox: String) = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
+        try {
+            emit(
+                Resource.success(
+                    data = apiService.postContainersReturnStatus(
+                        tagUid,
+                        argCheckInDropbox
                     )
                 )
             )

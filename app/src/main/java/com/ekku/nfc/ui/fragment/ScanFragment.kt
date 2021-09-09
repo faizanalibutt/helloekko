@@ -24,19 +24,19 @@ import com.ekku.nfc.R
 import com.ekku.nfc.databinding.FragmentScanBinding
 import com.ekku.nfc.model.Container
 import com.ekku.nfc.model.Containers
-import com.ekku.nfc.network.ApiClient
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.ADMIN_MODE
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_TOKEN
+import com.ekku.nfc.ui.activity.AdminActivity
 import com.ekku.nfc.ui.viewmodel.AdminViewModel
 import com.ekku.nfc.util.*
 import com.ekku.nfc.util.AppUtils.createConfirmationAlert
 import com.ekku.nfc.util.NfcUtils.addNfcCallback
 import com.ekku.nfc.util.NfcUtils.getNfcAdapter
 import com.ekku.nfc.util.NfcUtils.isNFCOnline
+import com.ekku.nfc.util.NfcUtils.removeNfcCallback
 import com.ekku.nfc.util.NfcUtils.showNFCSettings
 import com.ekku.nfc.util.NotifyUtils.playNotification
 import com.google.common.io.BaseEncoding
-import org.json.JSONArray
 import timber.log.Timber
 import com.ekku.nfc.model.Tag as TagEntity
 
@@ -105,7 +105,10 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        _context?.let { setUpTorch(false, it) }
+        _context?.let {
+            setUpTorch(false, it)
+            it.removeNfcCallback(it as AdminActivity)
+        }
     }
 
     override fun onTagDiscovered(tagInfo: Tag?) {
@@ -131,12 +134,15 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                 if (isIdAvailable) {
                     nfcTagScanList.add(tagEntity)
                     scanBinding?.containersNumber?.text = nfcTagScanList.size.toString()
+                    if (adminMode == _context?.getString(R.string.text_check_in)) {
+                        Timber.d("Check return container status: ${tagEntity.tag_uid} ${scanFragmentArgs.argCheckInDropbox}")
+                        returnContainers(tagEntity.tag_uid, scanFragmentArgs.argCheckInDropbox)
+                    }
                 }
             }
             _context?.let { setUpTorch(false, it) }
-            Handler(Looper.getMainLooper()).postDelayed(
-                { _context?.let { setUpTorch(true, it) } }, 700
-            )
+            Handler(Looper.getMainLooper())
+                .postDelayed({ _context?.let { setUpTorch(true, it) } }, 700)
             _context?.playNotification(
                 getString(R.string.notification_desc),
                 AppUtils.NOTIFICATION_ID,
@@ -233,15 +239,30 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
             containersCheckIn.add(container.tag_uid)
 
         // assign container to partner and saving record to cloud
-        adminViewModel.checkInContainers(containersCheckIn).observe(viewLifecycleOwner, {
-            it?.let { resource ->
-                when (resource.status) {
-                    Status.SUCCESS -> {
-                        resource.data?.let { response ->
-                            Timber.d("CheckIn Api Response: ${response.message}")
+        adminViewModel.checkInContainers(containersCheckIn, scanFragmentArgs.argCheckInDropboxName)
+            .observe(viewLifecycleOwner, {
+                it?.let { resource ->
+                    when (resource.status) {
+                        Status.SUCCESS -> {
+                            resource.data?.let { response ->
+                                Timber.d("CheckIn Api Response: ${response.message}")
+                                showDialog(
+                                    title = getString(R.string.text_admin_response),
+                                    desc = response.message,
+                                    right = getString(R.string.okay),
+                                    dialogType = 104,
+                                    context = _context
+                                )
+                                scanBinding?.btnSubmit?.isEnabled = true
+                                scanBinding?.progressBar?.visibility = View.GONE
+                            }
+                        }
+                        Status.ERROR -> {
+                            Timber.d("CheckIn Api Response ${resource.message}")
                             showDialog(
                                 title = getString(R.string.text_admin_response),
-                                desc = response.message,
+                                desc = resource.message
+                                    ?: getString(R.string.text_order_detail),
                                 right = getString(R.string.okay),
                                 dialogType = 104,
                                 context = _context
@@ -249,28 +270,31 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                             scanBinding?.btnSubmit?.isEnabled = true
                             scanBinding?.progressBar?.visibility = View.GONE
                         }
-                    }
-                    Status.ERROR -> {
-                        Timber.d("CheckIn Api Response ${resource.message}")
-                        showDialog(
-                            title = getString(R.string.text_admin_response),
-                            desc = resource.message
-                                ?: getString(R.string.text_order_detail),
-                            right = getString(R.string.okay),
-                            dialogType = 104,
-                            context = _context
-                        )
-                        scanBinding?.btnSubmit?.isEnabled = true
-                        scanBinding?.progressBar?.visibility = View.GONE
-                    }
-                    Status.LOADING -> {
-                        Timber.d("CheckIn Api Response You didn't implement it.")
-                        scanBinding?.btnSubmit?.isEnabled = false
-                        scanBinding?.progressBar?.visibility = View.VISIBLE
+                        Status.LOADING -> {
+                            Timber.d("CheckIn Api Response You didn't implement it.")
+                            scanBinding?.btnSubmit?.isEnabled = false
+                            scanBinding?.progressBar?.visibility = View.VISIBLE
+                        }
                     }
                 }
-            }
-        })
+            })
+    }
+
+    private fun returnContainers(tagUid: String, argCheckInDropbox: String) {
+        adminViewModel.checkReturnedContainers(tagUid, argCheckInDropbox)
+            .observe(viewLifecycleOwner, {
+                it?.let { resource ->
+                    when (resource.status) {
+                        Status.SUCCESS -> {
+                            Timber.d(
+                                "successfully check return status of container: $tagUid from dropbox: $argCheckInDropbox"
+                            )
+                        }
+                        Status.ERROR -> Timber.d("return container status error: ${resource.message}")
+                        Status.LOADING -> {}
+                    }
+                }
+            })
     }
 
     private fun assignApi() {
@@ -280,7 +304,7 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
             containersAssign.add(container.tag_uid)
 
         // assign container to partner and saving record to cloud
-        adminViewModel.postAssignedContainers(scanFragmentArgs.argPartnerName, containersAssign)
+        adminViewModel.postAssignedContainers(scanFragmentArgs.argPartnerId, containersAssign, scanFragmentArgs.argPartnerName)
             .observe(viewLifecycleOwner, {
                 it?.let { resource ->
                     when (resource.status) {
@@ -338,15 +362,30 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
             )
 
         // add api for fleet to add container in it
-        adminViewModel.postContainersToFleet(Containers(containersFleet)).observe(viewLifecycleOwner, {
-            it?.let { resource ->
-                when (resource.status) {
-                    Status.SUCCESS -> {
-                        resource.data?.let { response ->
-                            Timber.d("Fleet Api Response: ${response.message}")
+        adminViewModel.postContainersToFleet(Containers(containersFleet))
+            .observe(viewLifecycleOwner, {
+                it?.let { resource ->
+                    when (resource.status) {
+                        Status.SUCCESS -> {
+                            resource.data?.let { response ->
+                                Timber.d("Fleet Api Response: ${response.message}")
+                                showDialog(
+                                    title = getString(R.string.text_admin_response),
+                                    desc = response.message,
+                                    right = getString(R.string.okay),
+                                    dialogType = 104,
+                                    context = _context
+                                )
+                                scanBinding?.btnSubmit?.isEnabled = true
+                                scanBinding?.progressBar?.visibility = View.GONE
+                            }
+                        }
+                        Status.ERROR -> {
+                            Timber.d("Fleet Api Response ${resource.message}")
                             showDialog(
                                 title = getString(R.string.text_admin_response),
-                                desc = response.message,
+                                desc = resource.message
+                                    ?: getString(R.string.text_order_detail),
                                 right = getString(R.string.okay),
                                 dialogType = 104,
                                 context = _context
@@ -354,28 +393,14 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
                             scanBinding?.btnSubmit?.isEnabled = true
                             scanBinding?.progressBar?.visibility = View.GONE
                         }
-                    }
-                    Status.ERROR -> {
-                        Timber.d("Fleet Api Response ${resource.message}")
-                        showDialog(
-                            title = getString(R.string.text_admin_response),
-                            desc = resource.message
-                                ?: getString(R.string.text_order_detail),
-                            right = getString(R.string.okay),
-                            dialogType = 104,
-                            context = _context
-                        )
-                        scanBinding?.btnSubmit?.isEnabled = true
-                        scanBinding?.progressBar?.visibility = View.GONE
-                    }
-                    Status.LOADING -> {
-                        Timber.d("Fleet Api Response You didn't implement it.")
-                        scanBinding?.btnSubmit?.isEnabled = false
-                        scanBinding?.progressBar?.visibility = View.VISIBLE
+                        Status.LOADING -> {
+                            Timber.d("Fleet Api Response You didn't implement it.")
+                            scanBinding?.btnSubmit?.isEnabled = false
+                            scanBinding?.progressBar?.visibility = View.VISIBLE
+                        }
                     }
                 }
-            }
-        })
+            })
     }
 
     private fun setUpNfc(context: Context) {

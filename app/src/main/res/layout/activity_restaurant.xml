@@ -67,6 +67,18 @@
         app:layout_constraintTop_toBottomOf="@+id/text_order_desc" />
 
     <TextView
+        android:id="@+id/text_scan_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/text_scan_process_desc"
+        android:textAlignment="textStart"
+        android:textSize="12sp"
+        android:textColor="@color/green_500"
+        android:layout_margin="24dp"
+        app:layout_constraintBottom_toTopOf="@+id/text_containers"
+        app:layout_constraintTop_toBottomOf="@+id/btn_scan" />
+
+    <TextView
         android:id="@+id/text_containers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -74,18 +86,20 @@
         android:textAlignment="center"
         android:textSize="18sp"
         android:textColor="@color/black"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         app:layout_constraintBottom_toTopOf="@+id/containers_number"
         app:layout_constraintTop_toBottomOf="@+id/btn_scan" />
 
     <TextView
         android:id="@+id/containers_number"
         android:layout_width="match_parent"
-        android:textAlignment="center"
         android:layout_height="wrap_content"
-        android:textSize="70sp"
+        android:text="#"
+        android:textAlignment="center"
         android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@+id/text_containers" />
+        android:textSize="70sp"
+        app:layout_constraintTop_toBottomOf="@+id/text_containers"
+        tools:ignore="HardcodedText" />
 
     <TextView
         android:id="@+id/clear_containers"
@@ -125,7 +139,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="text_containers, clear_containers,
+        app:constraint_referenced_ids="text_scan_desc, text_containers, clear_containers,
          containers_number, btn_submit, btn_submit" />
 
     <ProgressBar

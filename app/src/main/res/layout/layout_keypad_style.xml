@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/field_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/text_containers_no_desc"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/chip_group"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/field_desc">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/id_one"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="1"
+            android:textAlignment="center"
+            tools:ignore="HardcodedText" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/id_two"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="2"
+            android:textAlignment="center"
+            tools:ignore="HardcodedText" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/id_three"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="3"
+            android:textAlignment="center"
+            tools:ignore="HardcodedText" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/id_four"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="4"
+            android:textAlignment="center"
+            tools:ignore="HardcodedText" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/id_five"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="5"
+            android:textAlignment="center"
+            tools:ignore="HardcodedText" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/id_six"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="6"
+            android:textAlignment="center"
+            tools:ignore="HardcodedText" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/id_seven"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="7"
+            android:textAlignment="center"
+            tools:ignore="HardcodedText" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/id_eight"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="8"
+            android:textAlignment="center"
+            tools:ignore="HardcodedText" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/id_nine"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="9"
+            android:textAlignment="center"
+            tools:ignore="HardcodedText" />
+    </com.google.android.material.chip.ChipGroup>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -30,7 +30,7 @@ class AdminActivity : AppCompatActivity() {
     }
 
     private val adminMode by lazy {
-        getDefaultPreferences().getString(ADMIN_MODE, getString(R.string.text_fleet))
+        getDefaultPreferences().getString(ADMIN_MODE, getString(R.string.text_assign))
     }
     private lateinit var appBarConfiguration: AppBarConfiguration
     private val adminToken by lazy {
@@ -78,11 +78,11 @@ class AdminActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         val navGraph = navController.navInflater.inflate(R.navigation.admin_navigation)
         navGraph.startDestination = when (adminMode) {
-            getString(R.string.text_assign) -> R.id.assignFragment
+            getString(R.string.text_fleet) -> R.id.fleetFragment
             getString(R.string.text_check_in) -> R.id.checkInFragment
             getString(R.string.text_empty) -> R.id.emptyFragment
             getString(R.string.text_retired) -> R.id.retiredFragment
-            else -> R.id.fleetFragment
+            else -> R.id.assignFragment
         }
         navController.graph = navGraph
         appBarConfiguration = AppBarConfiguration(navController.graph)

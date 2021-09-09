@@ -12,13 +12,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="@string/text_dropbox_desc"
+        android:text="@string/text_dropbox_desc_top"
         android:textColor="@color/black"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintVertical_chainStyle="packed"
         app:layout_constraintBottom_toTopOf="@+id/spinner_dropbox"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
         android:id="@+id/spinner_dropbox"
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:paddingHorizontal="44dp"
-        android:text="@string/text_clean"
+        android:text="@string/text_reset"
         android:enabled="false"
         app:backgroundTint="@color/green_500"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -12,13 +12,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="@string/text_partner_name"
+        android:text="@string/text_partner_desc"
         android:textColor="@color/black"
-        app:layout_constraintBottom_toTopOf="@+id/spinner_partner"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintBottom_toTopOf="@+id/spinner_partner" />
 
     <Spinner
         android:id="@+id/spinner_partner"
@@ -33,10 +33,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:paddingHorizontal="44dp"
-        app:backgroundTint="@color/green_500"
-        android:text="@string/text_scan"
         android:enabled="false"
+        android:paddingHorizontal="44dp"
+        android:text="@string/text_scan"
+        app:backgroundTint="@color/green_500"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

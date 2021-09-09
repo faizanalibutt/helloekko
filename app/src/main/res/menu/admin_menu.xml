@@ -11,7 +11,7 @@
         android:title="@string/text_assign" />
     <item
         android:id="@+id/empty_action"
-        android:title="@string/text_empty" />
+        android:title="@string/text_dropbox" />
     <item
         android:id="@+id/check_in_action"
         android:title="@string/text_check_in" />

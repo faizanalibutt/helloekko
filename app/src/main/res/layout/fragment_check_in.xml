@@ -13,12 +13,20 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="@string/text_check_in_desc"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-        app:layout_constraintBottom_toTopOf="@+id/btn_scan"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/spinner_dropbox"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0"
         app:layout_constraintVertical_chainStyle="packed" />
+
+    <Spinner
+        android:id="@+id/spinner_dropbox"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spinner_size"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_scan"
+        app:layout_constraintTop_toBottomOf="@+id/check_in_desc" />
 
     <Button
         android:id="@+id/btn_scan"
@@ -27,10 +35,11 @@
         android:layout_marginTop="24dp"
         android:paddingHorizontal="44dp"
         android:text="@string/text_scan"
+        android:enabled="false"
         app:backgroundTint="@color/green_500"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/check_in_desc" />
+        app:layout_constraintTop_toBottomOf="@+id/spinner_dropbox" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

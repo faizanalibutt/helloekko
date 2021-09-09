@@ -151,7 +151,7 @@ interface ApiService {
         @Field("network") network: String,
     ): Call<String>
 
-    /////////////////// ADMIN MODES APIS \\\\\\\\\\\\\\\\\\
+    /////////////////// ADMIN MODES APIS \\\\\\\\\\\\\\\\\\\
 
     /**
      * adding containers by using fleet api
@@ -209,6 +209,13 @@ interface ApiService {
         @Body containersCheckIn: String,
     ): GenericResponse
 
+    @POST(ADMIN_RETURN_CONTAINER_STATUS)
+    @FormUrlEncoded
+    suspend fun postContainersReturnStatus(
+        @Field("containerId") tagUid: String,
+        @Field("dropboxId") argCheckInDropbox: String
+    ): GenericResponse
+
     companion object {
         const val PARTNER_LOGIN = "partner/signin"
         const val DROPBOX_LOGIN = "dropbox/signin"
@@ -220,6 +227,7 @@ interface ApiService {
         const val ADMIN_ASSIGN_MODE = "admin/admin/assign/container/partner"
         const val ADMIN_ASSIGN_PARTNER_LIST = "admin/admin/get/partner/list"
         const val ADMIN_CHECK_IN_MODE = "take/containers/dropbox"
+        const val ADMIN_RETURN_CONTAINER_STATUS = "check/status/order/container"
         const val ADMIN_EMPTY_MODE = "admin/admin/makedropboxempty"
         const val ADMIN_EMPTY_DROPBOX_LIST = "admin/admin/get/dropbox/list"
         const val ADMIN_RETIRED_MODE = "admin/admin/containers/retired"

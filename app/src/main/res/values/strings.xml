@@ -47,7 +47,7 @@
     <string name="text_container_size">Select Container Size</string>
     <string name="text_region">Select Region</string>
     <string name="text_partner_name">Select Partner Name</string>
-    <string name="text_check_in_desc">Please Click Scan button to start checking in containers.</string>
+    <string name="text_check_in_desc">Select the dropbox you want to check in items from, then tap Scan.</string>
     <string name="text_dropbox_desc">Select Drop Box</string>
     <string name="text_clean">Clean</string>
     <string name="text_retired_desc">Please click on scan button to remove container from fleet.</string>
@@ -60,12 +60,23 @@
     <string name="text_customer_id">EkkoID</string>
     <string name="text_no_wifi">No Internet Connection</string>
     <string name="text_username_empty">Please enter dropbox name</string>
-    <string name="text_user_not_found">Folllowing EkkoID is either not correct or is not available.</string>
+    <string name="text_user_not_found">Ekko ID is not correct or is not registered. Please confirm with customer.</string>
     <string name="text_order_status">Order Status</string>
     <string name="text_order_detail">Something went wrong it\'s not you, it\'s us. We will try our best to fix this as soon as possible.</string>
     <string name="text_admin_response">Admin Operations</string>
     <string name="text_continue">Continue</string>
     <string name="text_back">Back</string>
+    <string name="text_dropbox">Dropbox</string>
+    <string name="text_reset">Reset</string>
+    <string name="text_dropbox_desc_top">Select the dropbox you want to reset the status for, then tap Reset.</string>
+    <string name="text_partner_desc">Select the Partner you want to assign items to, then tap Scan.</string>
+    <string name="text_scan_process_desc">Scan Ekko items and tap Submit when done.</string>
+    <string name="text_containers_no">Number of Containers</string>
+    <string name="text_set">Set</string>
+    <string name="text_cancel">Cancel</string>
+    <string name="text_number">Enter Number Here</string>
+    <string name="text_more">More</string>
+    <string name="text_containers_no_desc">Enter the number of Ekko items in the order:</string>
     <string-array name="admin_modes_array">
         <item>Fleet</item>
         <item>Assign</item>

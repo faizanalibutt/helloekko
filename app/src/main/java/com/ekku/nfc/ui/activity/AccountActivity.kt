@@ -63,7 +63,7 @@ class AccountActivity : AppCompatActivity() {
                 ) {
                     // here we will get admin mode.
                     adminMode = parent?.getItemAtPosition(position) as? String
-                        ?: getString(R.string.text_fleet)
+                        ?: getString(R.string.text_assign)
                     Timber.d("Admin Mode is : $adminMode")
                 }
 
@@ -155,8 +155,7 @@ class AccountActivity : AppCompatActivity() {
                                         accountBinding.progressBar.visibility = View.GONE
                                         result.data?.let { account ->
                                             Timber.d("admin token came $account")
-                                            getDefaultPreferences().edit()
-                                                .putString(ADMIN_MODE, adminMode).apply()
+
                                             savePrefs(login_status = true, ADMIN, account.token)
                                             startActivity<AdminActivity>()
                                             finish()
@@ -254,8 +253,8 @@ class AccountActivity : AppCompatActivity() {
     }
 
     private fun showViews(appMode: Int) {
-        accountBinding.adminModeGroup.visibility =
-            if (appMode == ADMIN) View.VISIBLE else View.GONE
+        /*accountBinding.adminModeGroup.visibility =
+            if (appMode == ADMIN) View.VISIBLE else View.GONE*/
         accountBinding.passwordField.visibility =
             if (appMode == DROPBOX) View.GONE else View.VISIBLE
     }

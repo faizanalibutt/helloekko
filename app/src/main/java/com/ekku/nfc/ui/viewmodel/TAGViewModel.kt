@@ -33,7 +33,7 @@ class TAGViewModel(private val tagRepository: TagRepository, context: Context) :
         tagRepository.update(tagUpdate)
     }
 
-    fun postCustomerOrder(consumerId: String, containersList: List<String>) =
+    fun postCustomerOrder(consumerId: String, containersList: List<String>, ekkoId: String) =
         liveData(Dispatchers.IO) {
             emit(Resource.loading(data = null))
             try {
@@ -43,7 +43,8 @@ class TAGViewModel(private val tagRepository: TagRepository, context: Context) :
                             ApiClient.gson.toJson(
                                 CustomerOrderPair(
                                     consumerId,
-                                    containersList
+                                    containersList,
+                                    ekkoId
                                 )
                             )
                         )
