@@ -77,6 +77,12 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
     private lateinit var consumerId: String
     private lateinit var consumerPhone: String
 
+    /**
+     * see if we have same number of containers
+     */
+    var containerNo: Int = 0
+    var containerNoChecked: Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         restaurantBinding = ActivityRestaurantBinding.inflate(layoutInflater)
@@ -113,8 +119,10 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             restaurantBinding.containersGroup.visibility = View.VISIBLE
             restaurantBinding.orderField.isEnabled = false
             restaurantBinding.progressBar.visibility = View.VISIBLE
-            // set up containers number and halt this function.
-            showContainersKeypadDialog()
+            // initialize containers scanned list
+            nfcTagScanList = mutableListOf()
+            // start nfc process right away.
+            startNFCScanProcess()
         }
 
         restaurantBinding.clearContainers.setOnClickListener {
@@ -139,7 +147,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                     ).show()
                     return@setOnClickListener
                 }
-                containerNo != restaurantBinding.containersNumber.text.toString().toInt() -> {
+                containerNo != nfcTagScanList.size -> {
                     Snackbar.make(
                         restaurantBinding.root,
                         "Please make sure Number of Containers Ordered and Scanned are same",
@@ -181,22 +189,19 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
     private fun startNFCScanProcess() {
         val isReady = isConsumerExist()
         if (isReady) {
-            // enable NFC scanning
-            setUpNfc()
-            setUpTorch(true)
+            // set up containers number and halt this function.
+            showContainersKeypadDialog()
         } else {
             restaurantBinding.progressBar.visibility = View.GONE
             showDialog(
                 dialogType = 105,
                 desc = getString(R.string.text_user_not_found),
                 right = getString(R.string.text_continue),
-                left = getString(R.string.text_back)
+                left = getString(R.string.text_back),
+                cancelable = false
             )
         }
-        nfcTagScanList = mutableListOf()
     }
-
-    var containerNo: Int = 0
 
     @SuppressLint("InflateParams")
     private fun showContainersNumberDialog() {
@@ -213,12 +218,13 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                 containerNo =
                     if (fieldContainer.text.toString()
                             .isEmpty()) 0 else fieldContainer.text.toString().toInt()
-                // initialize list for scans against orderID
-                startNFCScanProcess()
+                // enable NFC scanning
+                setUpNfc()
+                setUpTorch(true)
             }
             .setNegativeButton(getString(R.string.text_cancel)) { _, _ ->
                 // initialize list for scans against orderID
-                startNFCScanProcess()
+                reEnterEkkoId()
             }
             .setCancelable(false)
         if (!isFinishing)
@@ -228,9 +234,11 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
     @SuppressLint("InflateParams")
     private fun showContainersKeypadDialog() {
         var _dialog: AlertDialog? = null
-        fun dismissKeypadDialog() {
+        fun startNfcProcess() {
             _dialog?.dismiss()
-            startNFCScanProcess()
+            // enable NFC scanning
+            setUpNfc()
+            setUpTorch(true)
         }
         val containerDialog = MaterialAlertDialogBuilder(
             this@PartnerActivity,
@@ -239,23 +247,23 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         val customDialogView: View = LayoutInflater.from(this@PartnerActivity)
             .inflate(R.layout.layout_keypad_style, null, false)
         customDialogView.findViewById<Chip>(R.id.id_one)
-            .setOnClickListener { containerNo = 1; dismissKeypadDialog() }
+            .setOnClickListener { containerNo = 1; startNfcProcess() }
         customDialogView.findViewById<Chip>(R.id.id_two)
-            .setOnClickListener { containerNo = 2; dismissKeypadDialog() }
+            .setOnClickListener { containerNo = 2; startNfcProcess() }
         customDialogView.findViewById<Chip>(R.id.id_three)
-            .setOnClickListener { containerNo = 3; dismissKeypadDialog() }
+            .setOnClickListener { containerNo = 3; startNfcProcess() }
         customDialogView.findViewById<Chip>(R.id.id_four)
-            .setOnClickListener { containerNo = 4; dismissKeypadDialog() }
+            .setOnClickListener { containerNo = 4; startNfcProcess() }
         customDialogView.findViewById<Chip>(R.id.id_five)
-            .setOnClickListener { containerNo = 5; dismissKeypadDialog() }
+            .setOnClickListener { containerNo = 5; startNfcProcess() }
         customDialogView.findViewById<Chip>(R.id.id_six)
-            .setOnClickListener { containerNo = 6; dismissKeypadDialog() }
+            .setOnClickListener { containerNo = 6; startNfcProcess() }
         customDialogView.findViewById<Chip>(R.id.id_seven)
-            .setOnClickListener { containerNo = 7;dismissKeypadDialog() }
+            .setOnClickListener { containerNo = 7;startNfcProcess() }
         customDialogView.findViewById<Chip>(R.id.id_eight)
-            .setOnClickListener { containerNo = 8;dismissKeypadDialog() }
+            .setOnClickListener { containerNo = 8;startNfcProcess() }
         customDialogView.findViewById<Chip>(R.id.id_nine)
-            .setOnClickListener { containerNo = 9; dismissKeypadDialog() }
+            .setOnClickListener { containerNo = 9; startNfcProcess() }
         containerDialog.setView(customDialogView)
             .setTitle(getString(R.string.text_containers_no))
             .setPositiveButton(getString(R.string.text_more)) { _, _ ->
@@ -263,7 +271,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             }
             .setNegativeButton(getString(R.string.text_cancel)) { _, _ ->
                 // initialize list for scans against orderID
-                startNFCScanProcess()
+                reEnterEkkoId()
             }
             .setCancelable(false)
         if (!isFinishing)
@@ -375,7 +383,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
     }
 
     private fun reset(isValidating: Boolean = false) {
-        restaurantBinding.containersNumber.text = ""
+        restaurantBinding.containersNumber.text = "#"
         if (!isValidating) restaurantBinding.orderField.setText("")
         restaurantBinding.textOrderDesc.setTextColor(
             ContextCompat.getColor(this@PartnerActivity, android.R.color.background_dark)
@@ -383,6 +391,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         restaurantBinding.scansGroup.visibility = View.VISIBLE
         restaurantBinding.containersGroup.visibility = View.GONE
         restaurantBinding.orderField.isEnabled = true
+        restaurantBinding.progressBar.visibility = View.GONE
         // remove list created for scans against orderID
         // disable nfc scanning
         nfcTagScanList.clear()
@@ -519,7 +528,8 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         desc: String = "",
         right: String = "",
         left: String = "",
-        dialogType: Int = -1
+        dialogType: Int = -1,
+        cancelable: Boolean = true
     ) {
         val isShowing = dialog?.isShowing ?: false
         if (isShowing)
@@ -537,13 +547,14 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                         type == ButtonType.RIGHT && dialogType == 104 -> dialog.dismiss()
                         type == ButtonType.LEFT && dialogType == 105 -> reEnterEkkoId()
                         type == ButtonType.RIGHT && dialogType == 105 -> {
+                            // set up containers number and halt this function.
                             dialog.dismiss()
-                            setUpNfc()
-                            setUpTorch(true)
+                            showContainersKeypadDialog()
                         }
                     }
                 }
-            })
+            },
+        cancelable = cancelable)
         if (!isFinishing)
             dialog?.show()
     }
