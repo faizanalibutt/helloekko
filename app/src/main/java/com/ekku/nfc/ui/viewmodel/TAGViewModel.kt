@@ -1,6 +1,7 @@
 package com.ekku.nfc.ui.viewmodel
 
 import android.content.Context
+import android.net.Network
 import androidx.lifecycle.*
 import com.ekku.nfc.model.*
 import com.ekku.nfc.network.ApiClient
@@ -10,6 +11,7 @@ import com.ekku.nfc.repository.TagRepository
 import com.ekku.nfc.util.NetworkUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.Dispatcher
 import retrofit2.HttpException
 
 class TAGViewModel(private val tagRepository: TagRepository, context: Context) : ViewModel() {
@@ -87,6 +89,24 @@ class TAGViewModel(private val tagRepository: TagRepository, context: Context) :
             emit(
                 Resource.success(
                     data = apiService.consumersData()
+                )
+            )
+        } catch (exception: Exception) {
+            emit(
+                Resource.error(
+                    data = null,
+                    message = NetworkUtils.getError(exception as HttpException)
+                )
+            )
+        }
+    }
+
+    fun postNewCustomer(newCustomerNumber: String) = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
+        try {
+            emit(
+                Resource.success(
+                    data = apiService.postNewCustomer(newCustomerNumber)
                 )
             )
         } catch (exception: Exception) {

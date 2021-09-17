@@ -224,6 +224,42 @@ class AdminViewModel(context: Context) : ViewModel() {
         }
     }
 
+    fun getItemType() = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
+        try {
+            emit(
+                Resource.success(
+                    data = apiService.getItemType()
+                )
+            )
+        } catch(exception: Exception) {
+            emit(
+                Resource.error(
+                    data = null,
+                    message = NetworkUtils.getError(exception as HttpException)
+                )
+            )
+        }
+    }
+
+    fun getItemSize() = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
+        try {
+            emit(
+                Resource.success(
+                    data = apiService.getItemSize()
+                )
+            )
+        } catch(exception: Exception) {
+            emit(
+                Resource.error(
+                    data = null,
+                    message = NetworkUtils.getError(exception as HttpException)
+                )
+            )
+        }
+    }
+
 
     class AdminViewModelFactory(private val context: Context? = null) :
         ViewModelProvider.Factory {

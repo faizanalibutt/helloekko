@@ -81,7 +81,6 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
      * see if we have same number of containers
      */
     var containerNo: Int = 0
-    var containerNoChecked: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,7 +107,13 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             if (restaurantBinding.orderField.text.isEmpty()) {
                 Toast.makeText(
                     this@PartnerActivity,
-                    "Please enter ekko id first.", Toast.LENGTH_SHORT
+                    "Please enter Ekko ID", Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            } else if (!NetworkUtils.isOnline(this)) {
+                Snackbar.make(
+                    restaurantBinding.root,
+                    "No Internet Connection Available", Snackbar.LENGTH_LONG
                 ).show()
                 return@setOnClickListener
             }
@@ -136,7 +141,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                 restaurantBinding.containersNumber.text.isEmpty() -> {
                     Toast.makeText(
                         this@PartnerActivity,
-                        "Please first scan container.", Toast.LENGTH_SHORT
+                        "Please first scan reusable.", Toast.LENGTH_SHORT
                     ).show()
                     return@setOnClickListener
                 }
@@ -148,11 +153,10 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                     return@setOnClickListener
                 }
                 containerNo != nfcTagScanList.size -> {
-                    Snackbar.make(
-                        restaurantBinding.root,
-                        "Please make sure Number of Containers Ordered and Scanned are same",
-                        Snackbar.LENGTH_LONG
-                    ).show()
+                    showDialog(
+                        desc = getString(R.string.text_containers_scanned_ordered_check),
+                        right = getString(R.string.okay)
+                    )
                     return@setOnClickListener
                 }
                 else -> {
@@ -160,12 +164,6 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                     reset()
                 }
             }
-        }
-
-        restaurantBinding.orderField.doOnTextChanged { _, _, _, _ ->
-            restaurantBinding.textOrderDesc.setTextColor(
-                ContextCompat.getColor(this@PartnerActivity, R.color.green_500)
-            )
         }
 
         // phone number dashes added perfectly.
@@ -184,98 +182,6 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             ).show()
         // verify consumer upon order from partner side
         showConsumers()
-    }
-
-    private fun startNFCScanProcess() {
-        val isReady = isConsumerExist()
-        if (isReady) {
-            // set up containers number and halt this function.
-            showContainersKeypadDialog()
-        } else {
-            restaurantBinding.progressBar.visibility = View.GONE
-            showDialog(
-                dialogType = 105,
-                desc = getString(R.string.text_user_not_found),
-                right = getString(R.string.text_continue),
-                left = getString(R.string.text_back),
-                cancelable = false
-            )
-        }
-    }
-
-    @SuppressLint("InflateParams")
-    private fun showContainersNumberDialog() {
-        val containerDialog = MaterialAlertDialogBuilder(
-            this@PartnerActivity,
-            R.style.Theme_MaterialComponents_DayNight_Dialog_Alert
-        )
-        val customDialogView: View = LayoutInflater.from(this@PartnerActivity)
-            .inflate(R.layout.layout_container_dialog, null, false)
-        val fieldContainer = customDialogView.findViewById<EditText>(R.id.field_container_number)
-        containerDialog.setView(customDialogView)
-            .setTitle(getString(R.string.text_containers_no))
-            .setPositiveButton(getString(R.string.text_set)) { _, _ ->
-                containerNo =
-                    if (fieldContainer.text.toString()
-                            .isEmpty()) 0 else fieldContainer.text.toString().toInt()
-                // enable NFC scanning
-                setUpNfc()
-                setUpTorch(true)
-            }
-            .setNegativeButton(getString(R.string.text_cancel)) { _, _ ->
-                // initialize list for scans against orderID
-                reEnterEkkoId()
-            }
-            .setCancelable(false)
-        if (!isFinishing)
-            containerDialog.show()
-    }
-
-    @SuppressLint("InflateParams")
-    private fun showContainersKeypadDialog() {
-        var _dialog: AlertDialog? = null
-        fun startNfcProcess() {
-            _dialog?.dismiss()
-            // enable NFC scanning
-            setUpNfc()
-            setUpTorch(true)
-        }
-        val containerDialog = MaterialAlertDialogBuilder(
-            this@PartnerActivity,
-            R.style.Theme_MaterialComponents_DayNight_Dialog_Alert
-        )
-        val customDialogView: View = LayoutInflater.from(this@PartnerActivity)
-            .inflate(R.layout.layout_keypad_style, null, false)
-        customDialogView.findViewById<Chip>(R.id.id_one)
-            .setOnClickListener { containerNo = 1; startNfcProcess() }
-        customDialogView.findViewById<Chip>(R.id.id_two)
-            .setOnClickListener { containerNo = 2; startNfcProcess() }
-        customDialogView.findViewById<Chip>(R.id.id_three)
-            .setOnClickListener { containerNo = 3; startNfcProcess() }
-        customDialogView.findViewById<Chip>(R.id.id_four)
-            .setOnClickListener { containerNo = 4; startNfcProcess() }
-        customDialogView.findViewById<Chip>(R.id.id_five)
-            .setOnClickListener { containerNo = 5; startNfcProcess() }
-        customDialogView.findViewById<Chip>(R.id.id_six)
-            .setOnClickListener { containerNo = 6; startNfcProcess() }
-        customDialogView.findViewById<Chip>(R.id.id_seven)
-            .setOnClickListener { containerNo = 7;startNfcProcess() }
-        customDialogView.findViewById<Chip>(R.id.id_eight)
-            .setOnClickListener { containerNo = 8;startNfcProcess() }
-        customDialogView.findViewById<Chip>(R.id.id_nine)
-            .setOnClickListener { containerNo = 9; startNfcProcess() }
-        containerDialog.setView(customDialogView)
-            .setTitle(getString(R.string.text_containers_no))
-            .setPositiveButton(getString(R.string.text_more)) { _, _ ->
-                showContainersNumberDialog()
-            }
-            .setNegativeButton(getString(R.string.text_cancel)) { _, _ ->
-                // initialize list for scans against orderID
-                reEnterEkkoId()
-            }
-            .setCancelable(false)
-        if (!isFinishing)
-            _dialog = containerDialog.show()
     }
 
     override fun onResume() {
@@ -383,11 +289,8 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
     }
 
     private fun reset(isValidating: Boolean = false) {
-        restaurantBinding.containersNumber.text = "#"
+        restaurantBinding.containersNumber.text = "0"
         if (!isValidating) restaurantBinding.orderField.setText("")
-        restaurantBinding.textOrderDesc.setTextColor(
-            ContextCompat.getColor(this@PartnerActivity, android.R.color.background_dark)
-        )
         restaurantBinding.scansGroup.visibility = View.VISIBLE
         restaurantBinding.containersGroup.visibility = View.GONE
         restaurantBinding.orderField.isEnabled = true
@@ -404,30 +307,18 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
     private fun setUpNfc() {
         if (isNFCOnline()) {
             addNfcCallback(this@PartnerActivity, this)
-            if (!canWrite) {
-                /*showDialog(
-                    getString(R.string.txt_dim_title),
-                    getString(R.string.txt_dim_desc),
-                    right = getString(R.string.txt_go_to_settings), dialogType = 102
-                )*/
-            } else {
-                /*setBrightness(
-                    -1F, 20,
-                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, this@PartnerActivity
-                )*/
-                if (!preventDialogs) {
-                    preventDialogs = true
-                    if (ContextCompat.checkSelfPermission(
-                            this, Manifest.permission.ACCESS_COARSE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED && isAPI23
-                    ) {
-                        currentLocation?.getLocation(this)
-                        askForPermission()
-                    } else if (Build.VERSION.SDK_INT < 23) {
-                        currentLocation?.getLocation(this)
-                    } else {
-                        askForPermission()
-                    }
+            if (!preventDialogs) {
+                preventDialogs = true
+                if (ContextCompat.checkSelfPermission(
+                        this, Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED && isAPI23
+                ) {
+                    currentLocation?.getLocation(this)
+                    askForPermission()
+                } else if (Build.VERSION.SDK_INT < 23) {
+                    currentLocation?.getLocation(this)
+                } else {
+                    askForPermission()
                 }
             }
         } else
@@ -474,6 +365,124 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
             }
         } else {
             Toast.makeText(this, "This device has no camera", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showConsumers() {
+        tagViewMadel.getConsumersData().observe(this@PartnerActivity, {
+            it?.let { resource ->
+                when (resource.status) {
+                    Status.SUCCESS -> {
+                        //get users
+                        resource.data?.let { customer ->
+                            consumersList = customer.consumers
+                            Timber.d("customers list: $consumersList")
+                        }
+                    }
+                    Status.ERROR -> {
+                        // inform user of no connection
+                        Timber.d("we got error while fetching consumers list ${resource.message}")
+                    }
+                    Status.LOADING -> {
+                    }
+                }
+            }
+        })
+    }
+
+    @SuppressLint("InflateParams")
+    private fun showContainersNumberDialog() {
+        val containerDialog = MaterialAlertDialogBuilder(
+            this@PartnerActivity,
+            if (isAPI23) R.style.ThemeOverlay_MyApp_MaterialAlertDialog else R.style.AlertDialogTheme
+        )
+        val customDialogView: View = LayoutInflater.from(this@PartnerActivity)
+            .inflate(R.layout.layout_container_dialog, null, false)
+        val fieldContainer = customDialogView.findViewById<EditText>(R.id.field_container_number)
+        containerDialog.setView(customDialogView)
+            .setTitle(getString(R.string.text_containers_no))
+            .setPositiveButton(getString(R.string.text_set)) { _, _ ->
+                containerNo =
+                    if (fieldContainer.text.toString()
+                            .isEmpty()
+                    ) 0 else fieldContainer.text.toString().toInt()
+                // enable NFC scanning
+                setUpNfc()
+                setUpTorch(true)
+                "0 of $containerNo".also { restaurantBinding.containersNumber.text = it }
+            }
+            .setNegativeButton(getString(R.string.text_cancel)) { _, _ ->
+                // initialize list for scans against orderID
+                reEnterEkkoId()
+            }
+            .setCancelable(false)
+        if (!isFinishing)
+            containerDialog.show()
+    }
+
+    @SuppressLint("InflateParams")
+    private fun showContainersKeypadDialog() {
+        var _dialog: AlertDialog? = null
+        fun startNfcProcess() {
+            _dialog?.dismiss()
+            // enable NFC scanning
+            setUpNfc()
+            setUpTorch(true)
+            "0 of $containerNo".also { restaurantBinding.containersNumber.text = it }
+        }
+
+        val containerDialog = MaterialAlertDialogBuilder(
+            this@PartnerActivity,
+            if (isAPI23) R.style.ThemeOverlay_MyApp_MaterialAlertDialog else R.style.AlertDialogTheme
+        )
+        val customDialogView: View = LayoutInflater.from(this@PartnerActivity)
+            .inflate(R.layout.layout_keypad_style, null, false)
+        customDialogView.findViewById<Chip>(R.id.id_one)
+            .setOnClickListener { containerNo = 1; startNfcProcess() }
+        customDialogView.findViewById<Chip>(R.id.id_two)
+            .setOnClickListener { containerNo = 2; startNfcProcess() }
+        customDialogView.findViewById<Chip>(R.id.id_three)
+            .setOnClickListener { containerNo = 3; startNfcProcess() }
+        customDialogView.findViewById<Chip>(R.id.id_four)
+            .setOnClickListener { containerNo = 4; startNfcProcess() }
+        customDialogView.findViewById<Chip>(R.id.id_five)
+            .setOnClickListener { containerNo = 5; startNfcProcess() }
+        customDialogView.findViewById<Chip>(R.id.id_six)
+            .setOnClickListener { containerNo = 6; startNfcProcess() }
+        customDialogView.findViewById<Chip>(R.id.id_seven)
+            .setOnClickListener { containerNo = 7;startNfcProcess() }
+        customDialogView.findViewById<Chip>(R.id.id_eight)
+            .setOnClickListener { containerNo = 8;startNfcProcess() }
+        customDialogView.findViewById<Chip>(R.id.id_nine)
+            .setOnClickListener { containerNo = 9; startNfcProcess() }
+        containerDialog.setView(customDialogView)
+            .setTitle(getString(R.string.text_containers_no))
+            .setPositiveButton(getString(R.string.text_more)) { _, _ ->
+                showContainersNumberDialog()
+            }
+            .setNegativeButton(getString(R.string.text_cancel)) { _, _ ->
+                // initialize list for scans against orderID
+                reEnterEkkoId()
+            }
+            .setCancelable(false)
+        if (!isFinishing)
+            _dialog = containerDialog.show()
+    }
+
+    private fun startNFCScanProcess() {
+        val isReady = isConsumerExist()
+        if (isReady) {
+            // set up containers number and halt this function.
+            showContainersKeypadDialog()
+        } else {
+            restaurantBinding.progressBar.visibility = View.GONE
+            showDialog(
+                dialogType = 105,
+                desc = getString(R.string.text_user_not_found),
+                right = getString(R.string.text_confirm),
+                left = getString(R.string.text_edit),
+                cancelable = false
+            )
         }
     }
 
@@ -547,39 +556,43 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                         type == ButtonType.RIGHT && dialogType == 104 -> dialog.dismiss()
                         type == ButtonType.LEFT && dialogType == 105 -> reEnterEkkoId()
                         type == ButtonType.RIGHT && dialogType == 105 -> {
-                            // set up containers number and halt this function.
                             dialog.dismiss()
-                            showContainersKeypadDialog()
+                            showDialog(
+                                desc = getString(R.string.text_customer_not_present_desc),
+                                right = getString(R.string.okay)
+                            )
+                            // send partner id and new customer no to fire store
+                            uploadNewCustomer()
+                            // customer was not registered so reset it.
+                            reset()
                         }
                     }
                 }
             },
-        cancelable = cancelable)
+            cancelable = cancelable
+        )
         if (!isFinishing)
             dialog?.show()
     }
 
-    private fun showConsumers() {
-        tagViewMadel.getConsumersData().observe(this@PartnerActivity, {
-            it?.let { resource ->
-                when (resource.status) {
-                    Status.SUCCESS -> {
-                        //get users
-                        resource.data?.let { customer ->
-                            consumersList = customer.consumers
-                            Timber.d("customers list: $consumersList")
+    private fun takeNumberOnly(phoneNo: String) =
+        phoneNo.replace(Regex("[()\\-\\s]"), "")
+
+    private fun uploadNewCustomer() {
+        tagViewMadel.postNewCustomer(restaurantBinding.orderField.text.toString()).observe(
+            this, {
+                it?.let { resource ->
+                    when (resource.status) {
+                        Status.SUCCESS -> {
+                            Timber.d("New Customer Successfully Captured.")
                         }
-                    }
-                    Status.ERROR -> {
-                        // inform user of no connection
-                        Timber.d("we got error while fetching consumers list ${resource.message}")
-                    }
-                    Status.LOADING -> {
+                        Status.ERROR -> {
+                            Timber.d("new customer not uploaded. ${resource.message}")
+                        }
+                        Status.LOADING -> {}
                     }
                 }
             }
-        })
+        )
     }
-
-    private fun takeNumberOnly(phoneNo: String) = phoneNo.replace(Regex("[()\\-\\s]"), "")
 }

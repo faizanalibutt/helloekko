@@ -15,14 +15,14 @@ class MediaButtonEventReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val intentAction = intent?.action
         if (ACTION_MEDIA_BUTTON != intentAction) return
-        val event = intent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
+        val event = intent.getParcelableExtra<KeyEvent>(EXTRA_KEY_EVENT)
             ?: return
         val action = event.action
         if (action == KeyEvent.ACTION_DOWN) {
             // do something
             // call for localBroadcast to enable flash and nfc scanning.
             // activity will be started with new intent and parameters
-            Timber.e("onReceive: ")
+            Timber.e("onButtonReceive: ")
             if (context?.getDefaultPreferences()?.getBoolean("HEAD_JACK_RESPONSE", false) == false)
                 context.getDefaultPreferences().edit()?.putBoolean("HEAD_JACK_RESPONSE", true)?.apply()
             else

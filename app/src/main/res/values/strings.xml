@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Ekko Tag</string>
-    <string name="notification_desc">Container successfully scanned</string>
+    <string name="notification_desc">Reusable successfully scanned</string>
     <string name="channel_description">channel desc is random.</string>
     <string name="channel_name">high channel</string>
     <string name="dialog_nfc_title">Nfc Turned Off</string>
@@ -16,10 +16,10 @@
     <string name="text_consumer">Dropbox</string>
     <string name="text_restaurant">Partner</string>
     <string name="text_order">Order Number</string>
-    <string name="text_hint_customer_order_number">Customer EkkoID</string>
-    <string name="text_customer_order_default">Enter Customer EkkoID</string>
+    <string name="text_hint_customer_order_number">Customer Ekko ID</string>
+    <string name="text_customer_order_default">Enter Customer Ekko ID</string>
     <string name="text_scan">scan</string>
-    <string name="text_no_of_containers">Number of Containers</string>
+    <string name="text_no_of_containers">Number of Reusables</string>
     <string name="text_clear_containers" tools:ignore="ButtonCase">CANCEL</string>
     <string name="text_submit">submit</string>
     <string name="text_edit_customer_order">Tap to edit Customer order #</string>
@@ -43,24 +43,24 @@
     <string name="text_fleet_mode">Fleet Mode</string>
     <string name="text_check_in_mode">Check In Mode</string>
     <string name="text_retired_mode">Retired Mode</string>
-    <string name="text_container_type">Select Container Type</string>
-    <string name="text_container_size">Select Container Size</string>
+    <string name="text_container_type">Select Reusable Type</string>
+    <string name="text_container_size">Select Reusable Size</string>
     <string name="text_region">Select Region</string>
     <string name="text_partner_name">Select Partner Name</string>
-    <string name="text_check_in_desc">Select the dropbox you want to check in items from, then tap Scan.</string>
+    <string name="text_check_in_desc">Select the dropbox you want to check in reusables from, then tap Scan.</string>
     <string name="text_dropbox_desc">Select Drop Box</string>
     <string name="text_clean">Clean</string>
-    <string name="text_retired_desc">Please click on scan button to remove container from fleet.</string>
+    <string name="text_retired_desc">Please click on scan button to remove reusable from fleet.</string>
     <string name="text_activity_title">Ekko</string>
     <string name="text_email">Email</string>
     <string name="text_email_empty">please enter your email address</string>
     <string name="text_invalid_email">invalid email</string>
     <string name="text_pwd_empty">please enter a password</string>
     <string name="text_pwd_limit">please enter a password with at least 6 characters</string>
-    <string name="text_customer_id">EkkoID</string>
+    <string name="text_customer_id">Ekko ID</string>
     <string name="text_no_wifi">No Internet Connection</string>
     <string name="text_username_empty">Please enter dropbox name</string>
-    <string name="text_user_not_found">Ekko ID is not correct or is not registered. Please confirm with customer.</string>
+    <string name="text_user_not_found">Ekko ID entered is incorrect. Please correct or confirm customer has signed up for Ekko and try again</string>
     <string name="text_order_status">Order Status</string>
     <string name="text_order_detail">Something went wrong it\'s not you, it\'s us. We will try our best to fix this as soon as possible.</string>
     <string name="text_admin_response">Admin Operations</string>
@@ -69,14 +69,18 @@
     <string name="text_dropbox">Dropbox</string>
     <string name="text_reset">Reset</string>
     <string name="text_dropbox_desc_top">Select the dropbox you want to reset the status for, then tap Reset.</string>
-    <string name="text_partner_desc">Select the Partner you want to assign items to, then tap Scan.</string>
-    <string name="text_scan_process_desc">Scan Ekko items and tap Submit when done.</string>
-    <string name="text_containers_no">Number of Containers</string>
+    <string name="text_partner_desc">Select the Partner you want to assign reusables to, then tap Scan.</string>
+    <string name="text_scan_process_desc">Scan Ekko reusables and tap Submit when done.</string>
+    <string name="text_containers_no">Number of Reusables</string>
     <string name="text_set">Set</string>
     <string name="text_cancel">Cancel</string>
     <string name="text_number">Enter Number Here</string>
     <string name="text_more">More</string>
-    <string name="text_containers_no_desc">Enter the number of Ekko items in the order:</string>
+    <string name="text_containers_no_desc">Enter the number of Ekko reusables in the order:</string>
+    <string name="text_containers_scanned_ordered_check">Please ensure the number of reusables scanned match the number of reusables in the order</string>
+    <string name="text_edit">Edit</string>
+    <string name="text_confirm">Unable to Confirm</string>
+    <string name="text_customer_not_present_desc">Customer has not signed up with Ekko. Do not use Ekko reusables for this order, do not charge customer for Ekko. Ekko will notify customer that they will not get Ekko with their order because they have not signed up.</string>
     <string-array name="admin_modes_array">
         <item>Fleet</item>
         <item>Assign</item>

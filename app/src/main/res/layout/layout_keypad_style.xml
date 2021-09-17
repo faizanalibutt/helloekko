@@ -13,7 +13,7 @@
         android:layout_marginTop="16dp"
         android:text="@string/text_containers_no_desc"
         android:textColor="@color/black"
-        android:textSize="12sp"
+        android:textSize="14sp"
         app:layout_constraintBottom_toTopOf="@+id/chip_group"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -32,6 +32,7 @@
             android:layout_width="70dp"
             android:layout_height="wrap_content"
             android:text="1"
+            android:textSize="18sp"
             android:textAlignment="center"
             tools:ignore="HardcodedText" />
 
@@ -40,6 +41,7 @@
             android:layout_width="70dp"
             android:layout_height="wrap_content"
             android:text="2"
+            android:textSize="18sp"
             android:textAlignment="center"
             tools:ignore="HardcodedText" />
 
@@ -48,6 +50,7 @@
             android:layout_width="70dp"
             android:layout_height="wrap_content"
             android:text="3"
+            android:textSize="18sp"
             android:textAlignment="center"
             tools:ignore="HardcodedText" />
 
@@ -56,6 +59,7 @@
             android:layout_width="70dp"
             android:layout_height="wrap_content"
             android:text="4"
+            android:textSize="18sp"
             android:textAlignment="center"
             tools:ignore="HardcodedText" />
 
@@ -64,6 +68,7 @@
             android:layout_width="70dp"
             android:layout_height="wrap_content"
             android:text="5"
+            android:textSize="18sp"
             android:textAlignment="center"
             tools:ignore="HardcodedText" />
 
@@ -72,6 +77,7 @@
             android:layout_width="70dp"
             android:layout_height="wrap_content"
             android:text="6"
+            android:textSize="18sp"
             android:textAlignment="center"
             tools:ignore="HardcodedText" />
 
@@ -80,6 +86,7 @@
             android:layout_width="70dp"
             android:layout_height="wrap_content"
             android:text="7"
+            android:textSize="18sp"
             android:textAlignment="center"
             tools:ignore="HardcodedText" />
 
@@ -88,6 +95,7 @@
             android:layout_width="70dp"
             android:layout_height="wrap_content"
             android:text="8"
+            android:textSize="18sp"
             android:textAlignment="center"
             tools:ignore="HardcodedText" />
 
@@ -96,6 +104,7 @@
             android:layout_width="70dp"
             android:layout_height="wrap_content"
             android:text="9"
+            android:textSize="18sp"
             android:textAlignment="center"
             tools:ignore="HardcodedText" />
     </com.google.android.material.chip.ChipGroup>

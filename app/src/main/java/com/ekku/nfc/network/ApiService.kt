@@ -1,6 +1,7 @@
 package com.ekku.nfc.network
 
 import com.ekku.nfc.model.*
+import com.ekku.nfc.network.ApiService.Companion.DOWNLOAD_CONTAINER_SIZE
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -203,18 +204,45 @@ interface ApiService {
     @GET(ADMIN_EMPTY_DROPBOX_LIST)
     suspend fun gatherDropBoxes(): DropBoxShell
 
+    /**
+     * item is going to be retired.
+     */
     @POST(ADMIN_RETIRED_MODE)
     @Headers("Content-Type: application/json")
     suspend fun postContainersRetired(
         @Body containersCheckIn: String,
     ): GenericResponse
 
+    /**
+     * dropbox didn't scan container so we are doing it at the time checkIn
+     */
     @POST(ADMIN_RETURN_CONTAINER_STATUS)
     @FormUrlEncoded
     suspend fun postContainersReturnStatus(
         @Field("containerId") tagUid: String,
         @Field("dropboxId") argCheckInDropbox: String
     ): GenericResponse
+
+    /**
+     * customer is new not present in our system.
+     */
+    @POST(POST_NEW_CUSTOMER)
+    @FormUrlEncoded
+    suspend fun postNewCustomer(
+        @Field("phoneNo") customerNumber: String
+    ): GenericResponse
+
+    /**
+     * Item type is a lot.
+     */
+    @GET(DOWNLOAD_CONTAINER_TYPE)
+    suspend fun getItemType(): ItemShell
+
+    /**
+     * Item size is of variuos types.
+     */
+    @GET(DOWNLOAD_CONTAINER_SIZE)
+    suspend fun getItemSize(): ItemShell
 
     companion object {
         const val PARTNER_LOGIN = "partner/signin"
@@ -232,5 +260,8 @@ interface ApiService {
         const val ADMIN_EMPTY_DROPBOX_LIST = "admin/admin/get/dropbox/list"
         const val ADMIN_RETIRED_MODE = "admin/admin/containers/retired"
         const val UPLOAD_DEVICE = "logs"
+        const val DOWNLOAD_CONTAINER_TYPE = "admin/admin/list/containerType"
+        const val DOWNLOAD_CONTAINER_SIZE = "admin/admin/list/containerSize"
+        const val POST_NEW_CUSTOMER = "partner/EkkoId/unconfirmed"
     }
 }

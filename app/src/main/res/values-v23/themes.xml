@@ -34,14 +34,30 @@
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <style name="MyAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <!-- Used for the buttons -->
-        <item name="colorAccent">#FFFFFF</item>
-        <!-- Used for the title and text -->
-        <item name="android:textColorPrimary">#FFFFFF</item>
-        <!-- Used for the background -->
-        <item name="android:background">@color/green_500</item>
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.MyApp.MaterialAlertDialog</item>
     </style>
 
+    <style name="ThemeOverlay.MyApp.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="dialogCornerRadius">6dp</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.MyApp.NegativeButton</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.MyApp.PositiveButton</item>
+    </style>
+
+    <style name="Widget.MyApp.NegativeButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.MyApp.NegativeButton</item>
+    </style>
+
+    <style name="Widget.MyApp.PositiveButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.MyApp.PositiveButton</item>
+    </style>
+
+    <style name="ThemeOverlay.MyApp.NegativeButton" parent="">
+        <item name="colorPrimary">@color/green_500</item>
+    </style>
+
+    <style name="ThemeOverlay.MyApp.PositiveButton" parent="">
+        <item name="colorPrimary">@color/green_500</item>
+    </style>
 
 </resources>

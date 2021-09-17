@@ -1,5 +1,6 @@
 package com.ekku.nfc.ui.fragment
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -7,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.fragment.app.viewModels
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
@@ -14,6 +16,10 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.navOptions
 import com.ekku.nfc.R
 import com.ekku.nfc.databinding.FragmentFleetBinding
+import com.ekku.nfc.model.Item
+import com.ekku.nfc.model.Partner
+import com.ekku.nfc.ui.viewmodel.AdminViewModel
+import com.ekku.nfc.util.Status
 import timber.log.Timber
 
 
@@ -22,6 +28,11 @@ class FleetFragment : Fragment() {
     private var fleetBinding: FragmentFleetBinding? = null
     private lateinit var containerSize: String
     private lateinit var containerType: String
+    private val adminViewModel: AdminViewModel by viewModels {
+        AdminViewModel.AdminViewModelFactory(_context)
+    }
+
+    private var _context: Context? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,6 +46,7 @@ class FleetFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        _context = view.context ?: null
         // for null check this ia a good approach
         fleetBinding?.let { fleetBinding ->
 
@@ -60,14 +72,37 @@ class FleetFragment : Fragment() {
             // fleetBinding.btnScan.setOnClickListener(Navigation.createNavigateOnClickListener(actionScan))
 
             // add items to size spinner
-            ArrayAdapter.createFromResource(
-                view.context,
-                R.array.container_size_array,
-                android.R.layout.simple_spinner_item
-            ).also { adapter ->
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                fleetBinding.spinnerSize.adapter = adapter
-            }
+            adminViewModel.getItemSize().observe(viewLifecycleOwner, {
+                it?.let { resource ->
+                    when (resource.status) {
+                        Status.SUCCESS -> {
+                            resource.data?.let { itemData ->
+                                // prepare list for items type spinner
+                                val itemsSize = mutableListOf<String>()
+                                for (item in itemData.items)
+                                    itemsSize.add(item.name)
+                                Timber.d("Item Size Api Response: ${itemData.message}")
+                                // set spinner adapter from types coming from cloud.
+                                ArrayAdapter(
+                                    view.context,
+                                    android.R.layout.simple_spinner_item,
+                                    itemsSize
+                                ).also { adapter ->
+                                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                                    fleetBinding.spinnerSize.adapter = adapter
+                                }
+                                fleetBinding.btnScan.isEnabled = true
+                            }
+                        }
+                        Status.ERROR -> {
+                            Timber.d("Item Size Api Response ${resource.message}")
+                        }
+                        Status.LOADING -> {
+                            Timber.d("Item Size Response You didn't implement it.")
+                        }
+                    }
+                }
+            })
 
             // add click listener to spinner size
             fleetBinding.spinnerSize.onItemSelectedListener =
@@ -89,14 +124,37 @@ class FleetFragment : Fragment() {
                 }
 
             // add items to type spinner
-            ArrayAdapter.createFromResource(
-                view.context,
-                R.array.container_type_array,
-                android.R.layout.simple_spinner_item
-            ).also { adapter ->
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                fleetBinding.spinnerType.adapter = adapter
-            }
+            adminViewModel.getItemType().observe(viewLifecycleOwner, {
+                it?.let { resource ->
+                    when (resource.status) {
+                        Status.SUCCESS -> {
+                            resource.data?.let { itemData ->
+                                // prepare list for items type spinner
+                                val itemsType = mutableListOf<String>()
+                                for (item in itemData.items)
+                                    itemsType.add(item.name)
+                                Timber.d("Item Type Api Response: ${itemData.message}")
+                                // set spinner adapter from types coming from cloud.
+                                ArrayAdapter(
+                                    view.context,
+                                    android.R.layout.simple_spinner_item,
+                                    itemsType
+                                ).also { adapter ->
+                                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                                    fleetBinding.spinnerType.adapter = adapter
+                                }
+                                fleetBinding.btnScan.isEnabled = true
+                            }
+                        }
+                        Status.ERROR -> {
+                            Timber.d("Item Type Api Response ${resource.message}")
+                        }
+                        Status.LOADING -> {
+                            Timber.d("Item Type Response You didn't implement it.")
+                        }
+                    }
+                }
+            })
 
             // add click listener to spinner type
             fleetBinding.spinnerType.onItemSelectedListener =
@@ -108,8 +166,8 @@ class FleetFragment : Fragment() {
                         id: Long
                     ) {
                         // here we will get container type.
-                        containerType = parent?.getItemAtPosition(position) as? String ?: "Food"
-                        Timber.d("Container Size Sending : $containerType")
+                        containerType = parent?.getItemAtPosition(position) as? String ?: "Beverage"
+                        Timber.d("Container Type Sending : $containerType")
                     }
 
                     override fun onNothingSelected(parent: AdapterView<*>?) {
