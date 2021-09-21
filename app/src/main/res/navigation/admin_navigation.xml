@@ -77,11 +77,11 @@
         <argument
             android:name="arg_container_type"
             app:argType="string"
-            android:defaultValue="Food" />
+            android:defaultValue="cont_steel" />
         <argument
             android:name="arg_container_size"
             app:argType="string"
-            android:defaultValue="Large" />
+            android:defaultValue="Medium" />
         <argument
             android:name="arg_partner_name"
             app:argType="string"
