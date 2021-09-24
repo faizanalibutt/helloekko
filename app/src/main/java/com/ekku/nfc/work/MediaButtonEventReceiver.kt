@@ -34,9 +34,6 @@ class MediaButtonEventReceiver : BroadcastReceiver() {
             }
 
         }
-        try{
-            abortBroadcast()
-        } catch (ignore: Exception) {}
     }
 
 }

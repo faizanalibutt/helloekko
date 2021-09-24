@@ -83,6 +83,24 @@ class TAGViewModel(private val tagRepository: TagRepository, context: Context) :
         }
     }
 
+    fun postDropBoxSession() = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
+        try {
+            emit(
+                Resource.success(
+                    data = apiService.dropBoxSessionStatus()
+                )
+            )
+        } catch (exception: Exception) {
+            emit(
+                Resource.error(
+                    data = null,
+                    message = NetworkUtils.getError(exception as HttpException)
+                )
+            )
+        }
+    }
+
     fun getConsumersData() = liveData(Dispatchers.IO) {
         emit(Resource.loading(data = null))
         try {

@@ -36,6 +36,7 @@ import com.ekku.nfc.util.NfcUtils.isNFCOnline
 import com.ekku.nfc.util.NfcUtils.removeNfcCallback
 import com.ekku.nfc.util.NfcUtils.showNFCSettings
 import com.ekku.nfc.util.NotifyUtils.playNotification
+import com.google.android.material.snackbar.Snackbar
 import com.google.common.io.BaseEncoding
 import timber.log.Timber
 import com.ekku.nfc.model.Tag as TagEntity
@@ -44,7 +45,7 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
 
     private var scanBinding: FragmentScanBinding? = null
     private val adminMode by lazy {
-        activity?.getDefaultPreferences()?.getString(ADMIN_MODE, "Fleet")
+        activity?.getDefaultPreferences()?.getString(ADMIN_MODE, getString(R.string.text_assign))
     }
     private val scanFragmentArgs: ScanFragmentArgs by navArgs()
     private val adminViewModel: AdminViewModel by viewModels {
@@ -82,14 +83,16 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
         // pop it with action button at run time.
         // I'm coming from admin mode, lets go back to specific admin mode on action;
         scanBinding?.let { scanBinding ->
-
             _context = view.context ?: null
             scanBinding.btnSubmit.setOnClickListener {
+                if (!NetworkUtils.isOnline(view.context)) {
+                    Snackbar.make(view, getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG).show()
+                    return@setOnClickListener
+                }
                 // call multiple api based on admin mode.
                 postAdminData(adminMode)
             }
             scanBinding.clearContainers.setOnClickListener { navigateToAdminMode(adminMode) }
-
             nfcTagScanList = mutableListOf()
         }
 

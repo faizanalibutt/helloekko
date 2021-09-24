@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import androidx.navigation.Navigation
 import com.ekku.nfc.R
 import com.ekku.nfc.databinding.FragmentRetiredBinding
+import com.ekku.nfc.util.NetworkUtils
+import com.google.android.material.snackbar.Snackbar
 
 class RetiredFragment : Fragment() {
 
@@ -27,6 +29,9 @@ class RetiredFragment : Fragment() {
         retiredBinding?.btnScan?.setOnClickListener(
             Navigation.createNavigateOnClickListener(R.id.action_retiredFragment_to_scanFragment)
         )
+        if (!NetworkUtils.isOnline(view.context))
+            Snackbar.make(view, getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG).show()
+
     }
 
 }

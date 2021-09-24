@@ -19,7 +19,9 @@ import com.ekku.nfc.databinding.FragmentFleetBinding
 import com.ekku.nfc.model.Item
 import com.ekku.nfc.model.Partner
 import com.ekku.nfc.ui.viewmodel.AdminViewModel
+import com.ekku.nfc.util.NetworkUtils
 import com.ekku.nfc.util.Status
+import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 
 
@@ -72,37 +74,7 @@ class FleetFragment : Fragment() {
             // fleetBinding.btnScan.setOnClickListener(Navigation.createNavigateOnClickListener(actionScan))
 
             // add items to size spinner
-            adminViewModel.getItemSize().observe(viewLifecycleOwner, {
-                it?.let { resource ->
-                    when (resource.status) {
-                        Status.SUCCESS -> {
-                            resource.data?.let { itemData ->
-                                // prepare list for items type spinner
-                                val itemsSize = mutableListOf<String>()
-                                for (item in itemData.items)
-                                    itemsSize.add(item.name)
-                                Timber.d("Item Size Api Response: ${itemData.message}")
-                                // set spinner adapter from types coming from cloud.
-                                ArrayAdapter(
-                                    view.context,
-                                    android.R.layout.simple_spinner_item,
-                                    itemsSize
-                                ).also { adapter ->
-                                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                                    fleetBinding.spinnerSize.adapter = adapter
-                                }
-                                fleetBinding.btnScan.isEnabled = true
-                            }
-                        }
-                        Status.ERROR -> {
-                            Timber.d("Item Size Api Response ${resource.message}")
-                        }
-                        Status.LOADING -> {
-                            Timber.d("Item Size Response You didn't implement it.")
-                        }
-                    }
-                }
-            })
+            getItemsSize(view, fleetBinding)
 
             // add click listener to spinner size
             fleetBinding.spinnerSize.onItemSelectedListener =
@@ -124,37 +96,7 @@ class FleetFragment : Fragment() {
                 }
 
             // add items to type spinner
-            adminViewModel.getItemType().observe(viewLifecycleOwner, {
-                it?.let { resource ->
-                    when (resource.status) {
-                        Status.SUCCESS -> {
-                            resource.data?.let { itemData ->
-                                // prepare list for items type spinner
-                                val itemsType = mutableListOf<String>()
-                                for (item in itemData.items)
-                                    itemsType.add(item.name)
-                                Timber.d("Item Type Api Response: ${itemData.message}")
-                                // set spinner adapter from types coming from cloud.
-                                ArrayAdapter(
-                                    view.context,
-                                    android.R.layout.simple_spinner_item,
-                                    itemsType
-                                ).also { adapter ->
-                                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                                    fleetBinding.spinnerType.adapter = adapter
-                                }
-                                fleetBinding.btnScan.isEnabled = true
-                            }
-                        }
-                        Status.ERROR -> {
-                            Timber.d("Item Type Api Response ${resource.message}")
-                        }
-                        Status.LOADING -> {
-                            Timber.d("Item Type Response You didn't implement it.")
-                        }
-                    }
-                }
-            })
+            getItemsType(view, fleetBinding)
 
             // add click listener to spinner type
             fleetBinding.spinnerType.onItemSelectedListener =
@@ -175,6 +117,94 @@ class FleetFragment : Fragment() {
                     }
                 }
         }
+    }
+
+    private fun getItemsType(
+        view: View,
+        fleetBinding: FragmentFleetBinding
+    ) {
+        if (!NetworkUtils.isOnline(view.context)) {
+            Snackbar.make(view, getString(R.string.text_no_wifi), Snackbar.LENGTH_INDEFINITE)
+                .setAction(getString(R.string.retry)) {
+                    getItemsType(view, fleetBinding)
+                }.show()
+            return
+        }
+        adminViewModel.getItemType().observe(viewLifecycleOwner, {
+            it?.let { resource ->
+                when (resource.status) {
+                    Status.SUCCESS -> {
+                        resource.data?.let { itemData ->
+                            // prepare list for items type spinner
+                            val itemsType = mutableListOf<String>()
+                            for (item in itemData.items)
+                                itemsType.add(item.name)
+                            Timber.d("Item Type Api Response: ${itemData.message}")
+                            // set spinner adapter from types coming from cloud.
+                            ArrayAdapter(
+                                view.context,
+                                android.R.layout.simple_spinner_item,
+                                itemsType
+                            ).also { adapter ->
+                                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                                fleetBinding.spinnerType.adapter = adapter
+                            }
+                            fleetBinding.btnScan.isEnabled = true
+                        }
+                    }
+                    Status.ERROR -> {
+                        Timber.d("Item Type Api Response ${resource.message}")
+                    }
+                    Status.LOADING -> {
+                        Timber.d("Item Type Response You didn't implement it.")
+                    }
+                }
+            }
+        })
+    }
+
+    private fun getItemsSize(
+        view: View,
+        fleetBinding: FragmentFleetBinding
+    ) {
+        if (!NetworkUtils.isOnline(view.context)) {
+            Snackbar.make(view, getString(R.string.text_no_wifi), Snackbar.LENGTH_INDEFINITE)
+                .setAction(getString(R.string.retry)) {
+                    getItemsSize(view, fleetBinding)
+                }.show()
+            return
+        }
+        adminViewModel.getItemSize().observe(viewLifecycleOwner, {
+            it?.let { resource ->
+                when (resource.status) {
+                    Status.SUCCESS -> {
+                        resource.data?.let { itemData ->
+                            // prepare list for items type spinner
+                            val itemsSize = mutableListOf<String>()
+                            for (item in itemData.items)
+                                itemsSize.add(item.name)
+                            Timber.d("Item Size Api Response: ${itemData.message}")
+                            // set spinner adapter from types coming from cloud.
+                            ArrayAdapter(
+                                view.context,
+                                android.R.layout.simple_spinner_item,
+                                itemsSize
+                            ).also { adapter ->
+                                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                                fleetBinding.spinnerSize.adapter = adapter
+                            }
+                            fleetBinding.btnScan.isEnabled = true
+                        }
+                    }
+                    Status.ERROR -> {
+                        Timber.d("Item Size Api Response ${resource.message}")
+                    }
+                    Status.LOADING -> {
+                        Timber.d("Item Size Response You didn't implement it.")
+                    }
+                }
+            }
+        })
     }
 
 }

@@ -244,6 +244,12 @@ interface ApiService {
     @GET(DOWNLOAD_CONTAINER_SIZE)
     suspend fun getItemSize(): ItemShell
 
+    /**
+     * Dropbox User session
+     */
+    @GET(DROPBOX_SESSION_STATUS)
+    suspend fun dropBoxSessionStatus(): String
+
     companion object {
         const val PARTNER_LOGIN = "partner/signin"
         const val DROPBOX_LOGIN = "dropbox/signin"
@@ -263,5 +269,6 @@ interface ApiService {
         const val DOWNLOAD_CONTAINER_TYPE = "admin/admin/list/containerType"
         const val DOWNLOAD_CONTAINER_SIZE = "admin/admin/list/containerSize"
         const val POST_NEW_CUSTOMER = "partner/EkkoId/unconfirmed"
+        const val DROPBOX_SESSION_STATUS = "dropbox/sessionTerminate"
     }
 }

@@ -9,16 +9,16 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.viewModels
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.ekku.nfc.R
 import com.ekku.nfc.databinding.FragmentCheckInBinding
-import com.ekku.nfc.databinding.FragmentRetiredBinding
 import com.ekku.nfc.model.DropBox
 import com.ekku.nfc.ui.activity.AccountActivity
 import com.ekku.nfc.ui.viewmodel.AdminViewModel
+import com.ekku.nfc.util.NetworkUtils
 import com.ekku.nfc.util.Status
 import com.ekku.nfc.util.getDefaultPreferences
+import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 
 class CheckInFragment : Fragment() {
@@ -69,43 +69,7 @@ class CheckInFragment : Fragment() {
         }
 
         // call api first to get list then set box spinner
-        adminViewModel.collectDropBoxes().observe(viewLifecycleOwner, {
-            it?.let { resource ->
-                when (resource.status) {
-                    Status.SUCCESS -> {
-                        resource.data?.let { dropBoxData ->
-                            Timber.d("Drop Box Api Response: ${dropBoxData.message}")
-
-                            // prepare list for boxes spinner
-                            val dropBoxNames = mutableListOf<String>()
-                            for (box in dropBoxData.dropBoxes)
-                                dropBoxNames.add(box.dropboxName)
-
-                            // set spinner adapter from boxes coming from cloud.
-                            ArrayAdapter(
-                                view.context,
-                                android.R.layout.simple_spinner_item,
-                                dropBoxNames
-                            ).also { adapter ->
-                                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                                checkInBinding?.spinnerDropbox?.adapter = adapter
-                            }
-
-                            // get data to global partners list for id.
-                            boxes = dropBoxData.dropBoxes
-                            checkInBinding?.btnScan?.isEnabled = true
-                        }
-                    }
-                    Status.ERROR -> {
-                        Timber.d("Drop Box Api Response ${resource.message}")
-                        checkInBinding?.btnScan?.isEnabled = true
-                    }
-                    Status.LOADING -> {
-                        Timber.d("Check In Response You didn't implement it.")
-                    }
-                }
-            }
-        })
+        getDropBoxes(view, checkInBinding)
 
         // add click listener to spinner size
         checkInBinding?.spinnerDropbox?.onItemSelectedListener =
@@ -126,6 +90,54 @@ class CheckInFragment : Fragment() {
 
                 }
             }
+    }
+
+    private fun getDropBoxes(view: View, checkInBinding: FragmentCheckInBinding?) {
+        if (!NetworkUtils.isOnline(view.context)) {
+            Snackbar.make(view, getString(R.string.text_no_wifi), Snackbar.LENGTH_INDEFINITE)
+                .setAction(getString(R.string.retry)) {
+                    getDropBoxes(view, checkInBinding)
+                }.show()
+            return
+        }
+        // call api first to get list then set box spinner
+        adminViewModel.collectDropBoxes().observe(viewLifecycleOwner, {
+            it?.let { resource ->
+                when (resource.status) {
+                    Status.SUCCESS -> {
+                        resource.data?.let { dropBoxData ->
+                            Timber.d("Drop Box Api Response: ${dropBoxData.message}")
+
+                            // prepare list for boxes spinner
+                            val dropBoxNames = mutableListOf<String>()
+                            for (box in dropBoxData.dropBoxes)
+                                dropBoxNames.add(box.dropboxName)
+
+                            // set spinner adapter from boxes coming from cloud.
+                            ArrayAdapter(
+                                view.context,
+                                android.R.layout.simple_spinner_item,
+                                dropBoxNames
+                            ).also { adapter ->
+                                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                                this.checkInBinding?.spinnerDropbox?.adapter = adapter
+                            }
+
+                            // get data to global partners list for id.
+                            boxes = dropBoxData.dropBoxes
+                            this.checkInBinding?.btnScan?.isEnabled = true
+                        }
+                    }
+                    Status.ERROR -> {
+                        Timber.d("Drop Box Api Response ${resource.message}")
+                        this.checkInBinding?.btnScan?.isEnabled = true
+                    }
+                    Status.LOADING -> {
+                        Timber.d("Check In Response You didn't implement it.")
+                    }
+                }
+            }
+        })
     }
 
 }

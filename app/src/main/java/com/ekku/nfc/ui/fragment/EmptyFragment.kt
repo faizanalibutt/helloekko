@@ -26,6 +26,7 @@ import com.ekku.nfc.ui.viewmodel.AdminViewModel
 import com.ekku.nfc.util.*
 import com.ekku.nfc.util.AppUtils.createConfirmationAlert
 import com.ekku.nfc.util.NfcUtils.showNFCSettings
+import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 
 class EmptyFragment : Fragment(), CurrentLocation.LocationResultListener {
@@ -72,50 +73,7 @@ class EmptyFragment : Fragment(), CurrentLocation.LocationResultListener {
             _context = view.context ?: null
 
             // call api first to get list then set box spinner
-            adminViewModel.collectDropBoxes().observe(viewLifecycleOwner, {
-                it?.let { resource ->
-                    when (resource.status) {
-                        Status.SUCCESS -> {
-                            resource.data?.let { dropBoxData ->
-                                Timber.d("Drop Box Api Response: ${dropBoxData.message}")
-
-                                // prepare list for boxes spinner
-                                val dropBoxNames = mutableListOf<String>()
-                                for (box in dropBoxData.dropBoxes)
-                                    dropBoxNames.add(box.dropboxName)
-
-                                // set spinner adapter from boxes coming from cloud.
-                                ArrayAdapter(
-                                    view.context,
-                                    android.R.layout.simple_spinner_item,
-                                    dropBoxNames
-                                ).also { adapter ->
-                                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                                    boxBinding.spinnerDropbox.adapter = adapter
-                                }
-
-                                // get data to global partners list for id.
-                                boxes = dropBoxData.dropBoxes
-                                boxBinding.btnClean.isEnabled = true
-                            }
-                        }
-                        Status.ERROR -> {
-                            Timber.d("Drop Box Api Response ${resource.message}")
-                            showDialog(
-                                title = getString(R.string.text_admin_response),
-                                desc = resource.message
-                                    ?: getString(R.string.text_order_detail),
-                                right = getString(R.string.okay),
-                                dialogType = 104,
-                                context = _context
-                            )
-                        }
-                        Status.LOADING -> {
-                            Timber.d("Fleet Api Response You didn't implement it.")
-                        }
-                    }
-                }
-            })
+            getDropBoxes(view, boxBinding)
 
             // add click listener to spinner size
             boxBinding.spinnerDropbox.onItemSelectedListener =
@@ -144,6 +102,11 @@ class EmptyFragment : Fragment(), CurrentLocation.LocationResultListener {
                     if (box.dropboxName == boxName)
                         dropBoxId = box.id
 
+                if (!NetworkUtils.isOnline(view.context)) {
+                    Snackbar.make(view, getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG)
+                        .show()
+                    return@setOnClickListener
+                }
                 // going to make drop box empty.
                 dropBoxApi(dropBoxId)
             }
@@ -170,6 +133,64 @@ class EmptyFragment : Fragment(), CurrentLocation.LocationResultListener {
         }
 
 
+    }
+
+    private fun getDropBoxes(
+        view: View,
+        boxBinding: FragmentEmptyBinding
+    ) {
+        if (!NetworkUtils.isOnline(view.context)) {
+            Snackbar.make(view, getString(R.string.text_no_wifi), Snackbar.LENGTH_INDEFINITE)
+                .setAction(getString(R.string.retry)) {
+                    getDropBoxes(view, boxBinding)
+                }.show()
+            return
+        }
+        // call api first to get list then set box spinner
+        adminViewModel.collectDropBoxes().observe(viewLifecycleOwner, {
+            it?.let { resource ->
+                when (resource.status) {
+                    Status.SUCCESS -> {
+                        resource.data?.let { dropBoxData ->
+                            Timber.d("Drop Box Api Response: ${dropBoxData.message}")
+
+                            // prepare list for boxes spinner
+                            val dropBoxNames = mutableListOf<String>()
+                            for (box in dropBoxData.dropBoxes)
+                                dropBoxNames.add(box.dropboxName)
+
+                            // set spinner adapter from boxes coming from cloud.
+                            ArrayAdapter(
+                                view.context,
+                                android.R.layout.simple_spinner_item,
+                                dropBoxNames
+                            ).also { adapter ->
+                                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                                boxBinding.spinnerDropbox.adapter = adapter
+                            }
+
+                            // get data to global partners list for id.
+                            boxes = dropBoxData.dropBoxes
+                            boxBinding.btnClean.isEnabled = true
+                        }
+                    }
+                    Status.ERROR -> {
+                        Timber.d("Drop Box Api Response ${resource.message}")
+                        showDialog(
+                            title = getString(R.string.text_admin_response),
+                            desc = resource.message
+                                ?: getString(R.string.text_order_detail),
+                            right = getString(R.string.okay),
+                            dialogType = 104,
+                            context = _context
+                        )
+                    }
+                    Status.LOADING -> {
+                        Timber.d("Fleet Api Response You didn't implement it.")
+                    }
+                }
+            }
+        })
     }
 
     override fun onRequestPermissionsResult(

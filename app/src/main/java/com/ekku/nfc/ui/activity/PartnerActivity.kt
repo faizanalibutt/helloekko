@@ -21,8 +21,8 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.core.widget.doOnTextChanged
 import com.ekku.nfc.AppDelegate
 import com.ekku.nfc.R
 import com.ekku.nfc.app.UserActivity
@@ -32,7 +32,6 @@ import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_TOKEN
 import com.ekku.nfc.ui.viewmodel.TAGViewModel
 import com.ekku.nfc.util.*
 import com.ekku.nfc.util.AppUtils.allowWritePermission
-import com.ekku.nfc.util.AppUtils.canWrite
 import com.ekku.nfc.util.AppUtils.createConfirmationAlert
 import com.ekku.nfc.util.AppUtils.isAPI23
 import com.ekku.nfc.util.NetworkUtils.getDeviceIMEI
@@ -181,7 +180,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                 "No Internet Connection Available", Snackbar.LENGTH_LONG
             ).show()
         // verify consumer upon order from partner side
-        showConsumers()
+        showConsumers(view)
     }
 
     override fun onResume() {
@@ -368,7 +367,14 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         }
     }
 
-    private fun showConsumers() {
+    private fun showConsumers(view: ConstraintLayout) {
+        if (!NetworkUtils.isOnline(this)) {
+                Snackbar.make(view, getString(R.string.text_no_wifi), Snackbar.LENGTH_INDEFINITE)
+                    .setAction(getString(R.string.retry)) {
+                        showConsumers(view)
+                    }.show()
+                return
+            }
         tagViewMadel.getConsumersData().observe(this@PartnerActivity, {
             it?.let { resource ->
                 when (resource.status) {

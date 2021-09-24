@@ -60,7 +60,6 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         TAGViewModel.TagViewModelFactory((application as AppDelegate).repository, this)
     }
     private var preventDialogs = false
-
     // token has information about dropbox
     private val dropBoxToken by lazy {
         getDefaultPreferences().getString(
@@ -73,17 +72,27 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
     private lateinit var nfcTagScanList: MutableList<TagEntity>
     private var isIdAvailable = true
     private var isNfcStarted = true
-
     // access location for device
     private var mCurrentLocation: Location? = null
     private var currentLocation: CurrentLocation? = null
-
     // take camera variable for flash
     private var camera: Camera? = null
+    // session handle event
+    private var isSessionEnable = false
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_consumer)
+
+        /**
+         * give some feedbacks to us dropbox becomes empty.
+         */
+        recyclerView = findViewById(R.id.tagListView)
+        val adapter = TagListAdapter()
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        nfcTagScanList = mutableListOf()
 
         if (getDefaultPreferences().getBoolean("HEAD_JACK_RESPONSE", false)) {
             isNfcStarted = true
@@ -91,15 +100,6 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             isNfcStarted = false
             disableScanning()
         }
-
-        /**
-         * give some feedbacks to us dropbox becomes empty.
-         */
-        val recyclerView = findViewById<RecyclerView>(R.id.tagListView)
-        val adapter = TagListAdapter()
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        nfcTagScanList = mutableListOf()
 
         tagViewMadel.allTags.observe(this, { tags ->
             tags?.let { adapter.submitList(it) }
@@ -139,7 +139,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
 
         if (!NetworkUtils.isOnline(this)) {
             Snackbar.make(recyclerView,
-                "No Internet Connection Available, Please connect to network", Snackbar.LENGTH_LONG
+                getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG
             ).show()
         }
     }
@@ -209,6 +209,12 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
 
     override fun onTagDiscovered(tag: Tag?) {
         if (tag != null) {
+            if (!NetworkUtils.isOnline(this)) {
+                Snackbar.make(recyclerView,
+                    getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG
+                ).show()
+                return
+            }
             Timber.d("Tag Id is: ${BaseEncoding.base16().encode(tag.id)}")
             Handler(Looper.getMainLooper()).post {
                 val tagEntity = TagEntity(
@@ -257,6 +263,27 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             playNotification(
                 getString(R.string.notification_desc), AppUtils.NOTIFICATION_ID, "loved_it"
             )
+            Handler(Looper.getMainLooper()).post {
+                if (!getDefaultPreferences().getBoolean(DROPBOX_SESSION, false)) {
+                    // api call here to start the session
+                    tagViewMadel.postDropBoxSession().observe(this, {
+                        it?.let { resource ->
+                            when (resource.status) {
+                                Status.SUCCESS -> {
+                                    resource.data?.let {
+                                        Timber.d("session started successfully")
+                                    }
+                                }
+                                Status.ERROR -> {
+                                    Timber.d("session not started. ${resource.message}")
+                                }
+                                Status.LOADING -> {}
+                            }
+                        }
+                    })
+                    getDefaultPreferences().edit().putBoolean(DROPBOX_SESSION, true).apply()
+                }
+            }
         } else
             playNotification(
                 getString(R.string.notification_desc_unses), AppUtils.NOTIFICATION_ID, "loved_it"
@@ -270,7 +297,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             val long = mCurrentLocation?.longitude
             getDefaultPreferences().edit().putString("GPS_DATA_LAT", "$lat").apply()
             getDefaultPreferences().edit().putString("GPS_DATA_LONG", "$long").apply()
-            Timber.d("Location DropBox: $lat, $long")
+            //Timber.d("Location DropBox: $lat, $long")
         }
     }
 
@@ -309,6 +336,31 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         )
         removeNfcCallback(this@DropBoxActivity)
         getDefaultPreferences().edit()?.putBoolean("HEAD_JACK_RESPONSE", false)?.apply()
+        if (!NetworkUtils.isOnline(this)) {
+            Snackbar.make(recyclerView,
+                getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG
+            ).show()
+            return
+        }
+        Handler(Looper.getMainLooper()).post {
+            if (getDefaultPreferences().getBoolean(DROPBOX_SESSION, false)) {
+                tagViewMadel.postDropBoxSession().observe(this, {
+                    it?.let { resource ->
+                        when (resource.status) {
+                            Status.SUCCESS -> {
+                                resource.data?.let { Timber.d("session ended successfully") }
+                            }
+                            Status.ERROR -> {
+                                Timber.d("session not ended. ${resource.message}")
+                            }
+                            Status.LOADING -> {}
+                        }
+                    }
+                })
+                getDefaultPreferences().edit().putBoolean(DROPBOX_SESSION, false).apply()
+            }
+        }
+
     }
 
     private fun setUpTorch(torchSwitch: Boolean) {
@@ -373,6 +425,10 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             })
         if (!isFinishing)
             dialog?.show()
+    }
+
+    companion object {
+        val DROPBOX_SESSION = "DROPBOX_SESSION"
     }
 
 }

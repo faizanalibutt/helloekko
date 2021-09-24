@@ -18,12 +18,9 @@ import com.ekku.nfc.databinding.FragmentAssignBinding
 import com.ekku.nfc.model.Partner
 import com.ekku.nfc.ui.activity.AccountActivity
 import com.ekku.nfc.ui.viewmodel.AdminViewModel
-import com.ekku.nfc.util.AlertButtonListener
+import com.ekku.nfc.util.*
 import com.ekku.nfc.util.AppUtils.createConfirmationAlert
-import com.ekku.nfc.util.ButtonType
 import com.ekku.nfc.util.NfcUtils.showNFCSettings
-import com.ekku.nfc.util.Status
-import com.ekku.nfc.util.getDefaultPreferences
 import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 
@@ -61,49 +58,7 @@ class AssignFragment : Fragment() {
             _context = view.context ?: null
 
             // call api first to get list then set partner spinner
-            adminViewModel.fetchPartners().observe(viewLifecycleOwner, {
-                it?.let { resource ->
-                    when (resource.status) {
-                        Status.SUCCESS -> {
-                            resource.data?.let { partnerData ->
-                                // prepare list for partners spinner
-                                val partnersName = mutableListOf<String>()
-                                for (partner in partnerData.partners)
-                                    partnersName.add(partner.partnerName)
-                                Timber.d("Assign Partner Api Response: ${partnerData.message}")
-
-                                // set spinner adapter from partners coming from cloud.
-                                ArrayAdapter(
-                                    view.context,
-                                    android.R.layout.simple_spinner_item,
-                                    partnersName
-                                ).also { adapter ->
-                                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                                    assignBinding.spinnerPartner.adapter = adapter
-                                }
-
-                                // get data to global partners list for id.
-                                partners = partnerData.partners
-                                assignBinding.btnScan.isEnabled = true
-                            }
-                        }
-                        Status.ERROR -> {
-                            Timber.d("Assign Partner Api Response ${resource.message}")
-                            showDialog(
-                                title = getString(R.string.text_admin_response),
-                                desc = resource.message
-                                    ?: getString(R.string.text_order_detail),
-                                right = getString(R.string.okay),
-                                dialogType = 104,
-                                context = _context
-                            )
-                        }
-                        Status.LOADING -> {
-                            Timber.d("Fleet Api Response You didn't implement it.")
-                        }
-                    }
-                }
-            })
+            getPartners(view, assignBinding)
 
             // add click listener to spinner size
             assignBinding.spinnerPartner.onItemSelectedListener =
@@ -140,6 +95,60 @@ class AssignFragment : Fragment() {
                 findNavController().navigate(actionScan)
             }
         }
+    }
+
+    private fun getPartners(view: View, assignBinding: FragmentAssignBinding) {
+        if (!NetworkUtils.isOnline(view.context)) {
+            Snackbar.make(view, getString(R.string.text_no_wifi), Snackbar.LENGTH_INDEFINITE)
+                .setAction(getString(R.string.retry)) {
+                    getPartners(view, assignBinding)
+                }.show()
+            return
+        }
+        // call api first to get list then set partner spinner
+        adminViewModel.fetchPartners().observe(viewLifecycleOwner, {
+            it?.let { resource ->
+                when (resource.status) {
+                    Status.SUCCESS -> {
+                        resource.data?.let { partnerData ->
+                            // prepare list for partners spinner
+                            val partnersName = mutableListOf<String>()
+                            for (partner in partnerData.partners)
+                                partnersName.add(partner.partnerName)
+                            Timber.d("Assign Partner Api Response: ${partnerData.message}")
+
+                            // set spinner adapter from partners coming from cloud.
+                            ArrayAdapter(
+                                view.context,
+                                android.R.layout.simple_spinner_item,
+                                partnersName
+                            ).also { adapter ->
+                                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                                assignBinding.spinnerPartner.adapter = adapter
+                            }
+
+                            // get data to global partners list for id.
+                            partners = partnerData.partners
+                            assignBinding.btnScan.isEnabled = true
+                        }
+                    }
+                    Status.ERROR -> {
+                        Timber.d("Assign Partner Api Response ${resource.message}")
+                        showDialog(
+                            title = getString(R.string.text_admin_response),
+                            desc = resource.message
+                                ?: getString(R.string.text_order_detail),
+                            right = getString(R.string.okay),
+                            dialogType = 104,
+                            context = _context
+                        )
+                    }
+                    Status.LOADING -> {
+                        Timber.d("Fleet Api Response You didn't implement it.")
+                    }
+                }
+            }
+        })
     }
 
     private fun showDialog(
