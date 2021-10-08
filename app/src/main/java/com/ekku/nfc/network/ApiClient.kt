@@ -5,6 +5,7 @@ import com.ekku.nfc.ui.activity.AccountActivity
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_PREF
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_TOKEN
 import com.ekku.nfc.util.getDefaultPreferences
+import com.google.firebase.BuildConfig
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
@@ -21,7 +22,8 @@ object ApiClient {
 
     //please use your own url
     private var BASE_URL: String = /*"https://docs.google.com/forms/d/e/"*/
-        "https://ekkocommunity.uc.r.appspot.com/api/user/"
+        if (BuildConfig.DEBUG) "https://ekkocommunity.uc.r.appspot.com/api/user/" else
+            "https://ekkoreuse.uc.r.appspot.com/api/user/"
 
     val gson: Gson = GsonBuilder().setLenient().create()
 

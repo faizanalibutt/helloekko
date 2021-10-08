@@ -184,7 +184,8 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                 }
                 Handler(Looper.getMainLooper()).postDelayed({
                     // halt the scanning operation manually
-                    disableScanning()
+                    if (!isFinishing)
+                        disableScanning()
                 }, CONSUMER_TIME_OUT)
             } else
                 getNfcAdapter()?.let {

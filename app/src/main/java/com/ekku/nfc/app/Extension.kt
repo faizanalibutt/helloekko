@@ -86,7 +86,10 @@ fun Context.myToast(message: String) {
 
 fun Context.getDataFromToken(tokenName: String, authToken: String?): Claim? {
     // get information from token.
-    val jwtTokenDecoder = authToken?.let { JWT(it) }
+    var jwtTokenDecoder: JWT? = null
+    try {
+        jwtTokenDecoder = authToken?.let { JWT(it) }
+    } catch (ignored: Exception) {}
     return jwtTokenDecoder?.getClaim(tokenName)
 }
 

@@ -187,6 +187,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         super.onResume()
         if (scanBtnClicked)
             setUpNfc()
+        showConsumers(restaurantBinding.root)
     }
 
     override fun onRequestPermissionsResult(
@@ -285,6 +286,7 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         // give focus to text field, blink cursor and show keyboard
         reset(isValidating = true)
         restaurantBinding.orderField.focusAndShowKeyboard()
+        showConsumers(restaurantBinding.root)
     }
 
     private fun reset(isValidating: Boolean = false) {
