@@ -587,20 +587,22 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
         phoneNo.replace(Regex("[()\\-\\s]"), "")
 
     private fun uploadNewCustomer() {
-        tagViewMadel.postNewCustomer(restaurantBinding.orderField.text.toString()).observe(
-            this, {
-                it?.let { resource ->
-                    when (resource.status) {
-                        Status.SUCCESS -> {
-                            Timber.d("New Customer Successfully Captured.")
+        Handler(Looper.getMainLooper()).post {
+            tagViewMadel.postNewCustomer(restaurantBinding.orderField.text.toString()).observe(
+                this, {
+                    it?.let { resource ->
+                        when (resource.status) {
+                            Status.SUCCESS -> {
+                                Timber.d("New Customer Successfully Captured.")
+                            }
+                            Status.ERROR -> {
+                                Timber.d("new customer not uploaded. ${resource.message}")
+                            }
+                            Status.LOADING -> {}
                         }
-                        Status.ERROR -> {
-                            Timber.d("new customer not uploaded. ${resource.message}")
-                        }
-                        Status.LOADING -> {}
                     }
                 }
-            }
-        )
+            )
+        }
     }
 }
