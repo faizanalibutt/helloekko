@@ -95,7 +95,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         nfcTagScanList = mutableListOf()
 
         if (getDefaultPreferences().getBoolean("HEAD_JACK_RESPONSE", false)) {
-            isNfcStarted = true
+            isNfcStarted = NetworkUtils.isOnline(this)
         } else {
             isNfcStarted = false
             disableScanning()

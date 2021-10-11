@@ -145,10 +145,10 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                     return@setOnClickListener
                 }
                 !NetworkUtils.isOnline(this) -> {
-                    Snackbar.make(
-                        restaurantBinding.root,
-                        "No Internet Connection Available", Snackbar.LENGTH_LONG
-                    ).show()
+                    showDialog(
+                        desc = getString(R.string.text_no_wifi),
+                        right = getString(R.string.okay)
+                    )
                     return@setOnClickListener
                 }
                 containerNo != nfcTagScanList.size -> {

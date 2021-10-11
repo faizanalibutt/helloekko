@@ -86,7 +86,11 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
             _context = view.context ?: null
             scanBinding.btnSubmit.setOnClickListener {
                 if (!NetworkUtils.isOnline(view.context)) {
-                    Snackbar.make(view, getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG).show()
+                    showDialog(
+                        desc = getString(R.string.text_no_wifi),
+                        right = getString(R.string.okay),
+                        context = _context
+                    )
                     return@setOnClickListener
                 }
                 // call multiple api based on admin mode.
@@ -95,7 +99,6 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
             scanBinding.clearContainers.setOnClickListener { navigateToAdminMode(adminMode) }
             nfcTagScanList = mutableListOf()
         }
-
     }
 
     override fun onResume() {
@@ -458,11 +461,11 @@ class ScanFragment : Fragment(), NfcAdapter.ReaderCallback {
     }
 
     private fun showDialog(
-        title: String,
+        title: String = "",
         desc: String,
         right: String = "",
         left: String = "",
-        dialogType: Int,
+        dialogType: Int = -1,
         context: Context? = null
     ) {
         val isShowing = dialog?.isShowing ?: false
