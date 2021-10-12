@@ -110,10 +110,10 @@ class PartnerActivity : UserActivity(), NfcAdapter.ReaderCallback,
                 ).show()
                 return@setOnClickListener
             } else if (!NetworkUtils.isOnline(this)) {
-                Snackbar.make(
-                    restaurantBinding.root,
-                    "No Internet Connection Available", Snackbar.LENGTH_LONG
-                ).show()
+                showDialog(
+                    desc = getString(R.string.text_no_wifi),
+                    right = getString(R.string.okay)
+                )
                 return@setOnClickListener
             }
             scanBtnClicked = true
