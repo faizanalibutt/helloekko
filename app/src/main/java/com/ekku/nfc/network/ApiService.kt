@@ -135,7 +135,7 @@ interface ApiService {
     suspend fun dropBoxData(
         @Field("containerId") container_id: String,
         @Field("dropboxId") dropBox_id: String,
-    ): String
+    ): GenericResponse
 
     /**
      * device logs are sending using thig api to specific location in firestore LOGS

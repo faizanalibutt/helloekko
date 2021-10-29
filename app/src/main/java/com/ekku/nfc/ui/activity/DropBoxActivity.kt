@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ekku.nfc.AppDelegate
 import com.ekku.nfc.R
 import com.ekku.nfc.app.UserActivity
+import com.ekku.nfc.model.GenericResponse
 import com.ekku.nfc.ui.adapter.TagListAdapter
 import com.ekku.nfc.ui.viewmodel.TAGViewModel
 import com.ekku.nfc.util.*
@@ -48,6 +49,7 @@ import com.ekku.nfc.work.MediaButtonEventReceiver
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.io.BaseEncoding
 import kotlinx.coroutines.*
+import org.json.JSONObject
 import timber.log.Timber
 import java.util.*
 import com.ekku.nfc.model.Tag as TagEntity
@@ -60,23 +62,28 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         TAGViewModel.TagViewModelFactory((application as AppDelegate).repository, this)
     }
     private var preventDialogs = false
+
     // token has information about dropbox
     private val dropBoxToken by lazy {
         getDefaultPreferences().getString(
             AccountActivity.LOGIN_TOKEN, "put-your-login-token-here"
         )
     }
+
     /**
      * check no duplication happened tags must be unique.
      * */
     private lateinit var nfcTagScanList: MutableList<TagEntity>
     private var isIdAvailable = true
     private var isNfcStarted = true
+
     // access location for device
     private var mCurrentLocation: Location? = null
     private var currentLocation: CurrentLocation? = null
+
     // take camera variable for flash
     private var camera: Camera? = null
+
     // session handle event
     private var isSessionEnable = false
     private lateinit var recyclerView: RecyclerView
@@ -138,7 +145,8 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         }
 
         if (!NetworkUtils.isOnline(this)) {
-            Snackbar.make(recyclerView,
+            Snackbar.make(
+                recyclerView,
                 getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG
             ).show()
         }
@@ -211,7 +219,8 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
     override fun onTagDiscovered(tag: Tag?) {
         if (tag != null) {
             if (!NetworkUtils.isOnline(this)) {
-                Snackbar.make(recyclerView,
+                Snackbar.make(
+                    recyclerView,
                     getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG
                 ).show()
                 return
@@ -242,30 +251,31 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                 // api call here
                 tagViewMadel.postDropBoxData(
                     BaseEncoding.base16().encode(tag.id),
-                    dropBoxId = getDataFromToken(tokenName = "id", dropBoxToken)?.asString() ?: "error"
-                ).observe(this, { it ->
-                    it?.let { resource ->
-                        when (resource.status) {
-                            Status.SUCCESS -> {
-                                resource.data?.let { Timber.d("tag data uploaded successfully $it") }
+                    dropBoxId = getDataFromToken(tokenName = "id", dropBoxToken)?.asString()
+                        ?: "error"
+                ).observe(this, { resource ->
+                    when (resource.status) {
+                        Status.SUCCESS -> {
+                            resource.data?.let { response ->
+                                Timber.d("tag data uploaded successfully $response")
                                 showDialog(
                                     title = "Container Status",
-                                    desc = "${it.message}",
-                                    right = getString(R.string.okay)
-                                )
-                                tagViewMadel.insert(tagEntity)
-                            }
-                            Status.ERROR -> {
-                                Timber.d("tag data not uploaded. ${resource.message}")
-                                tagViewMadel.insert(tagEntity)
-                                showDialog(
-                                    title = "Container Status",
-                                    desc = "${resource.message}",
+                                    desc = "" + response.message,
                                     right = getString(R.string.okay)
                                 )
                             }
-                            Status.LOADING -> {
-                            }
+                            tagViewMadel.insert(tagEntity)
+                        }
+                        Status.ERROR -> {
+                            Timber.d("tag data not uploaded. ${resource.message}")
+                            tagViewMadel.insert(tagEntity)
+                            showDialog(
+                                title = "Container Status",
+                                desc = "${resource.message}",
+                                right = getString(R.string.okay)
+                            )
+                        }
+                        Status.LOADING -> {
                         }
                     }
                 })
@@ -299,7 +309,8 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                                         right = getString(R.string.text_close)
                                     )
                                 }
-                                Status.LOADING -> {}
+                                Status.LOADING -> {
+                                }
                             }
                         }
                     })
@@ -359,7 +370,8 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         removeNfcCallback(this@DropBoxActivity)
         getDefaultPreferences().edit()?.putBoolean("HEAD_JACK_RESPONSE", false)?.apply()
         if (!NetworkUtils.isOnline(this)) {
-            Snackbar.make(recyclerView,
+            Snackbar.make(
+                recyclerView,
                 getString(R.string.text_no_wifi), Snackbar.LENGTH_LONG
             ).show()
             return
@@ -385,7 +397,8 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                                     right = getString(R.string.text_close)
                                 )
                             }
-                            Status.LOADING -> {}
+                            Status.LOADING -> {
+                            }
                         }
                     }
                 })
