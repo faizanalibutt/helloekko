@@ -238,6 +238,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                 }
                 if (!isIdAvailable)
                     return@post
+                nfcTagScanList.add(tagEntity)
                 // api call here
                 tagViewMadel.postDropBoxData(
                     BaseEncoding.base16().encode(tag.id),
@@ -247,11 +248,21 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                         when (resource.status) {
                             Status.SUCCESS -> {
                                 resource.data?.let { Timber.d("tag data uploaded successfully $it") }
+                                showDialog(
+                                    title = "Container Status",
+                                    desc = "${it.message}",
+                                    right = getString(R.string.okay)
+                                )
                                 tagViewMadel.insert(tagEntity)
                             }
                             Status.ERROR -> {
                                 Timber.d("tag data not uploaded. ${resource.message}")
                                 tagViewMadel.insert(tagEntity)
+                                showDialog(
+                                    title = "Container Status",
+                                    desc = "${resource.message}",
+                                    right = getString(R.string.okay)
+                                )
                             }
                             Status.LOADING -> {
                             }
@@ -273,10 +284,20 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                                 Status.SUCCESS -> {
                                     resource.data?.let {
                                         Timber.d("session started successfully")
+                                        showDialog(
+                                            title = "Session Status",
+                                            desc = "session started successfully.",
+                                            right = getString(R.string.text_close)
+                                        )
                                     }
                                 }
                                 Status.ERROR -> {
                                     Timber.d("session not started. ${resource.message}")
+                                    showDialog(
+                                        title = "Session Status",
+                                        desc = "session not started.",
+                                        right = getString(R.string.text_close)
+                                    )
                                 }
                                 Status.LOADING -> {}
                             }
@@ -350,9 +371,19 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                         when (resource.status) {
                             Status.SUCCESS -> {
                                 resource.data?.let { Timber.d("session ended successfully") }
+                                showDialog(
+                                    title = "Session Status",
+                                    desc = "session ended successfully",
+                                    right = getString(R.string.text_close)
+                                )
                             }
                             Status.ERROR -> {
                                 Timber.d("session not ended. ${resource.message}")
+                                showDialog(
+                                    title = "Session Status",
+                                    desc = "session not ended.",
+                                    right = getString(R.string.text_close)
+                                )
                             }
                             Status.LOADING -> {}
                         }
@@ -361,7 +392,6 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                 getDefaultPreferences().edit().putBoolean(DROPBOX_SESSION, false).apply()
             }
         }
-
     }
 
     private fun setUpTorch(torchSwitch: Boolean) {
@@ -405,7 +435,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
         desc: String,
         right: String = "",
         left: String = "",
-        dialogType: Int
+        dialogType: Int = 100
     ) {
         val isShowing = dialog?.isShowing ?: false
         if (isShowing)
@@ -417,10 +447,10 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             listener = object : AlertButtonListener {
                 override fun onClick(dialog: DialogInterface, type: ButtonType) {
                     when {
+                        type == ButtonType.RIGHT && dialogType == 100 -> dialog.dismiss()
                         type == ButtonType.RIGHT && dialogType == 101 -> showNFCSettings()
                         type == ButtonType.RIGHT && dialogType == 102 -> allowWritePermission()
                         type == ButtonType.RIGHT && dialogType == 103 -> askForPermission()
-                        type == ButtonType.RIGHT && dialogType == 104 -> dialog.dismiss()
                     }
                 }
             })

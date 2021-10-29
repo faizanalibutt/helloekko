@@ -1,11 +1,10 @@
 package com.ekku.nfc.network
 
 import android.content.Context
-import com.ekku.nfc.ui.activity.AccountActivity
+import com.ekku.nfc.BuildConfig
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_PREF
 import com.ekku.nfc.ui.activity.AccountActivity.Companion.LOGIN_TOKEN
 import com.ekku.nfc.util.getDefaultPreferences
-import com.google.firebase.BuildConfig
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
