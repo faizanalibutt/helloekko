@@ -3,4 +3,7 @@
     <item
         android:id="@+id/sign_out"
         android:title="@string/text_sign_out" />
+    <item
+        android:id="@+id/version_name"
+        android:title="@string/version_name" />
 </menu>

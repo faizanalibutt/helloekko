@@ -82,6 +82,7 @@
     <string name="text_confirm">Unable to Confirm</string>
     <string name="text_customer_not_present_desc">Customer has not signed up with Ekko. Do not use Ekko reusables for this order, do not charge customer for Ekko. Ekko will notify customer that they will not get Ekko with their order because they have not signed up.</string>
     <string name="text_close">Close</string>
+    <string name="version_name">v1.0</string>
     <string-array name="admin_modes_array">
         <item>Fleet</item>
         <item>Assign</item>
