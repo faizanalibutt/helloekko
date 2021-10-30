@@ -58,6 +58,7 @@ import com.ekku.nfc.model.Tag as TagEntity
 class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.LocationResultListener {
 
     private var dialog: AlertDialog? = null
+    private var sessionDialog: AlertDialog? = null
     private val tagViewMadel: TAGViewModel by viewModels {
         TAGViewModel.TagViewModelFactory((application as AppDelegate).repository, this)
     }
@@ -293,9 +294,8 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                             when (resource.status) {
                                 Status.SUCCESS -> {
                                     resource.data?.let {
-                                        Timber.d("session started successfully")
-                                        showDialog(
-                                            title = "Session Status",
+                                        Timber.d("session started successfully.")
+                                        showSessionDialog(
                                             desc = "session started successfully.",
                                             right = getString(R.string.text_close)
                                         )
@@ -303,8 +303,7 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                                 }
                                 Status.ERROR -> {
                                     Timber.d("session not started. ${resource.message}")
-                                    showDialog(
-                                        title = "Session Status",
+                                    showSessionDialog(
                                         desc = "session not started.",
                                         right = getString(R.string.text_close)
                                     )
@@ -383,16 +382,14 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
                         when (resource.status) {
                             Status.SUCCESS -> {
                                 resource.data?.let { Timber.d("session ended successfully") }
-                                showDialog(
-                                    title = "Session Status",
-                                    desc = "session ended successfully",
+                                showSessionDialog(
+                                    desc = "session ended successfully.",
                                     right = getString(R.string.text_close)
                                 )
                             }
                             Status.ERROR -> {
                                 Timber.d("session not ended. ${resource.message}")
-                                showDialog(
-                                    title = "Session Status",
+                                showSessionDialog(
                                     desc = "session not ended.",
                                     right = getString(R.string.text_close)
                                 )
@@ -469,6 +466,30 @@ class DropBoxActivity : UserActivity(), ReaderCallback, CurrentLocation.Location
             })
         if (!isFinishing)
             dialog?.show()
+    }
+
+    private fun showSessionDialog(
+        desc: String,
+        right: String = "",
+        left: String = "",
+        dialogType: Int = 100
+    ) {
+        val isShowing = sessionDialog?.isShowing ?: false
+        if (isShowing)
+            return
+        sessionDialog = createConfirmationAlert(
+            "Session Status", desc,
+            right = right,
+            left = left,
+            listener = object : AlertButtonListener {
+                override fun onClick(dialog: DialogInterface, type: ButtonType) {
+                    when {
+                        type == ButtonType.RIGHT && dialogType == 100 -> dialog.dismiss()
+                    }
+                }
+            })
+        if (!isFinishing)
+            sessionDialog?.show()
     }
 
     companion object {
